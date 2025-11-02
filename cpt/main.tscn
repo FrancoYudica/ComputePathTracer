@@ -1,0 +1,87 @@
+[gd_scene load_steps=8 format=3 uid="uid://cnli58scmym3d"]
+
+[ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h2yge"]
+
+[sub_resource type="Sky" id="Sky_h2yge"]
+sky_material = SubResource("ProceduralSkyMaterial_h2yge")
+
+[sub_resource type="Environment" id="Environment_h2yge"]
+background_mode = 2
+sky = SubResource("Sky_h2yge")
+ambient_light_source = 3
+
+[sub_resource type="SphereMesh" id="SphereMesh_h2yge"]
+
+[node name="Node3D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
+script = ExtResource("1_0xm2m")
+camera = NodePath("../HBoxContainer/SubViewportContainer/SubViewport/Node3D/Camera3D")
+render_control = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
+size = Vector2i(574, 648)
+
+[node name="Node3D" type="Node3D" parent="HBoxContainer/SubViewportContainer/SubViewport"]
+
+[node name="Camera3D" type="Camera3D" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.096968114, 0)
+environment = SubResource("Environment_h2yge")
+current = true
+script = ExtResource("3_1bvp3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+mesh = SubResource("SphereMesh_h2yge")
+skeleton = NodePath("../../../../..")
+
+[node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainerPathTracer"]
+handle_input_locally = false
+size = Vector2i(574, 648)
+render_target_update_mode = 4
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureLoader" type="Node" parent="HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
+script = ExtResource("3_h2yge")
+renderer = NodePath("../../../../../Renderer")

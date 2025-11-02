@@ -1,0 +1,163 @@
+class_name Renderer extends Node
+
+@onready var _rd: RenderingDevice = RenderingServer.get_rendering_device()
+@export var camera: Camera3D
+@export var render_control: Control
+
+var _shader: RID
+var _pipeline: RID
+
+var _output_texture_set: RID
+var _output_texture_rid: RID
+var _camera_uniform_set: RID
+var _camera_storage_buffer: RID
+
+var _image_uniform: RDUniform
+var _camera_uniform: RDUniform
+
+func get_texture_rid():
+	return _output_texture_rid
+
+func resize(width: int, height: int):
+	_image_uniform.clear_ids()
+	_rd.free_rid(_output_texture_rid)
+	_output_texture_rid = _create_attachment_texture(width, height)
+	_image_uniform.add_id(_output_texture_rid)
+	if _rd.uniform_set_is_valid(_output_texture_set):
+		_rd.free_rid(_output_texture_set)
+	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
+	print("Viewport resized: [%s, %s]" % [width, height])
+	
+func get_render_width():
+	
+	if render_control.size.x == 0.0:
+		return 1
+	
+	return int(render_control.size.x)
+	
+func get_render_height():
+
+	if render_control.size.y == 0.0:
+		return 1
+
+	return int(render_control.size.y)
+
+func _ready() -> void:
+	_initialize_compute()
+	RenderingServer.connect("frame_pre_draw", _draw)
+	render_control.resized.connect(
+		func():
+			resize(get_render_width(), get_render_height())
+	)
+
+func _load_shader():
+	var shader_file := load("res://shaders/pathtracer.glsl")
+	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
+	_shader = _rd.shader_create_from_spirv(shader_spirv)
+
+func _create_attachment_texture(width, height):
+	var texture_format := RDTextureFormat.new()
+	texture_format.width = width
+	texture_format.height = height
+	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT  | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT
+	texture_format.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	var texture_view := RDTextureView.new()
+	texture_view.format_override = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	return _rd.texture_create(texture_format, texture_view)
+
+func _initialize_compute():
+	_load_shader()
+	_pipeline = _rd.compute_pipeline_create(_shader)
+	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height())
+	
+	# Image uniform set
+	_image_uniform = RDUniform.new()
+	_image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	_image_uniform.binding = 0
+	_image_uniform.add_id(_output_texture_rid)
+	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
+	
+	# Camera uniform set
+	_camera_uniform = RDUniform.new()
+	_camera_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	_camera_uniform.binding = 0
+	
+	var camera_bytes = PackedByteArray()
+	camera_bytes.resize(16 * 2 * 4) # 16f per matrix, 2 matrices, and 4 bytes per float
+	camera_bytes.fill(0)
+	_camera_storage_buffer = _rd.storage_buffer_create(
+		camera_bytes.size(),
+		camera_bytes)
+	_camera_uniform.add_id(_camera_storage_buffer)
+	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 1)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_rd.free_rid(_output_texture_rid)
+		_rd.free_rid(_output_texture_set)
+		_rd.free_rid(_camera_uniform_set)
+		_rd.free_rid(_pipeline)
+		_rd.free_rid(_shader)
+
+# Helper: converts a Transform3D to a 4x4 float array (column-major)
+func transform3d_to_mat4_floats(t: Transform3D) -> PackedFloat32Array:
+	var col0: Vector3 = t.basis.x
+	var col1: Vector3 = t.basis.y
+	var col2: Vector3 = t.basis.z
+	var col3: Vector3 = t.origin   # translation (origin)
+	# Column-major 4x4: columns 0..3, each has 4 components (x,y,z,w).
+	# For the 4th element in each column, use 0 for rotational columns, 1 for translation column.
+	var arr := PackedFloat32Array()
+	# Column 0
+	arr.append(col0.x); arr.append(col0.y); arr.append(col0.z); arr.append(0.0)
+	# Column 1
+	arr.append(col1.x); arr.append(col1.y); arr.append(col1.z); arr.append(0.0)
+	# Column 2
+	arr.append(col2.x); arr.append(col2.y); arr.append(col2.z); arr.append(0.0)
+	# Column 3 (translation)
+	arr.append(col3.x); arr.append(col3.y); arr.append(col3.z); arr.append(1.0)
+	return arr
+
+func _draw():
+	
+	var texture_width = get_render_width()
+	var texture_height = get_render_height()
+	var x_groups = ceili(float(texture_width) / 8)
+	var y_groups = ceili(float(texture_height) / 8)
+	
+	#var view = camera.get_camera_transform().inverse()
+	
+	var push_constant = PackedInt32Array([
+		texture_width,
+		texture_height,
+		0, 0
+	])
+	
+	var push_constant_byte_array = push_constant.to_byte_array()
+	
+	# Build camera matrices
+	var view = camera.get_camera_transform().affine_inverse()
+	var projection = camera.get_camera_projection()
+
+	var view_floats = transform3d_to_mat4_floats(view)
+	var proj_floats = PackedFloat32Array()
+	for c in range(4):
+		for r in range(4):
+			proj_floats.append(projection[c][r])
+
+	# Combine view + projection
+	var camera_data = PackedFloat32Array()
+	camera_data.append_array(view_floats)
+	camera_data.append_array(proj_floats)
+
+	# Update buffer data
+	var camera_bytes = camera_data.to_byte_array()
+	_rd.buffer_update(_camera_storage_buffer, 0, camera_bytes.size(), camera_bytes)
+
+	var compute_list := _rd.compute_list_begin()
+	_rd.compute_list_bind_compute_pipeline(compute_list, _pipeline)
+	_rd.compute_list_bind_uniform_set(compute_list, _output_texture_set, 0)
+	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 1)
+	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
+	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
+	_rd.compute_list_end()
