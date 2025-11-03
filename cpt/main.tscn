@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h2yge"]
@@ -13,8 +14,6 @@ sky_material = SubResource("ProceduralSkyMaterial_h2yge")
 background_mode = 2
 sky = SubResource("Sky_h2yge")
 ambient_light_source = 3
-
-[sub_resource type="SphereMesh" id="SphereMesh_h2yge"]
 
 [node name="Node3D" type="Control"]
 layout_mode = 3
@@ -43,7 +42,9 @@ size_flags_horizontal = 3
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
+handle_input_locally = false
 size = Vector2i(574, 648)
+render_target_update_mode = 4
 
 [node name="Node3D" type="Node3D" parent="HBoxContainer/SubViewportContainer/SubViewport"]
 
@@ -53,10 +54,20 @@ environment = SubResource("Environment_h2yge")
 current = true
 script = ExtResource("3_1bvp3")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
-mesh = SubResource("SphereMesh_h2yge")
-skeleton = NodePath("../../../../..")
+[node name="ProceduralSphere" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.82193756, -2.3823183)
+
+[node name="ProceduralSphere2" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 0, 0.41632354, 0.2329768)
+
+[node name="ProceduralSphere3" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
+
+[node name="ProceduralSphere4" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0.46467423, -1.1992314)
+
+[node name="ProceduralSphere5" parent="HBoxContainer/SubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -50, 0)
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer"]
 layout_mode = 2

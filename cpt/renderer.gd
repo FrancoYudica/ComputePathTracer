@@ -9,11 +9,16 @@ var _pipeline: RID
 
 var _output_texture_set: RID
 var _output_texture_rid: RID
+
 var _camera_uniform_set: RID
 var _camera_storage_buffer: RID
 
+var _scene_uniform_set: RID
+var _scene_spheres_storage_buffer: RID
+
 var _image_uniform: RDUniform
 var _camera_uniform: RDUniform
+var _scene_spheres_uniform: RDUniform
 
 func get_texture_rid():
 	return _output_texture_rid
@@ -90,12 +95,26 @@ func _initialize_compute():
 		camera_bytes)
 	_camera_uniform.add_id(_camera_storage_buffer)
 	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 1)
+	
+	# Scene uniform set
+	_scene_spheres_uniform = RDUniform.new()
+	_scene_spheres_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	_scene_spheres_uniform.binding = 0
+	
+	var spheres_bytes = PackedByteArray()
+	spheres_bytes.resize(1024)
+	_scene_spheres_storage_buffer = _rd.storage_buffer_create(spheres_bytes.size(), spheres_bytes)
+	_scene_spheres_uniform.add_id(_scene_spheres_storage_buffer)
+	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform], _shader, 2)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_rd.free_rid(_output_texture_rid)
+		_rd.free_rid(_camera_storage_buffer)
+		_rd.free_rid(_scene_spheres_storage_buffer)
 		_rd.free_rid(_output_texture_set)
 		_rd.free_rid(_camera_uniform_set)
+		_rd.free_rid(_scene_uniform_set)
 		_rd.free_rid(_pipeline)
 		_rd.free_rid(_shader)
 
@@ -124,9 +143,7 @@ func _draw():
 	var texture_height = get_render_height()
 	var x_groups = ceili(float(texture_width) / 8)
 	var y_groups = ceili(float(texture_height) / 8)
-	
-	#var view = camera.get_camera_transform().inverse()
-	
+		
 	var push_constant = PackedInt32Array([
 		texture_width,
 		texture_height,
@@ -135,6 +152,20 @@ func _draw():
 	
 	var push_constant_byte_array = push_constant.to_byte_array()
 	
+	_update_camera_storage_buffer()
+	_update_scene_storage_buffer()
+
+	var compute_list := _rd.compute_list_begin()
+	_rd.compute_list_bind_compute_pipeline(compute_list, _pipeline)
+	_rd.compute_list_bind_uniform_set(compute_list, _output_texture_set, 0)
+	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 1)
+	_rd.compute_list_bind_uniform_set(compute_list, _scene_uniform_set, 2)
+	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
+	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
+	_rd.compute_list_end()
+
+
+func _update_camera_storage_buffer():
 	# Build camera matrices
 	var view = camera.get_camera_transform().affine_inverse()
 	var projection = camera.get_camera_projection()
@@ -154,10 +185,14 @@ func _draw():
 	var camera_bytes = camera_data.to_byte_array()
 	_rd.buffer_update(_camera_storage_buffer, 0, camera_bytes.size(), camera_bytes)
 
-	var compute_list := _rd.compute_list_begin()
-	_rd.compute_list_bind_compute_pipeline(compute_list, _pipeline)
-	_rd.compute_list_bind_uniform_set(compute_list, _output_texture_set, 0)
-	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 1)
-	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
-	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
-	_rd.compute_list_end()
+func _update_scene_storage_buffer():
+	var SPHERE_FLOATS = 4
+	var spheres = get_tree().get_nodes_in_group("procedural_sphere")
+	var spheres_data = PackedFloat32Array() # Sphere count + 3 bytes pad + Spheres data
+	spheres_data.resize(spheres.size() * SPHERE_FLOATS + 4)
+	spheres_data[0] = spheres.size()
+	for i in range(spheres.size()):
+		spheres[i].load_bytes(spheres_data, i * SPHERE_FLOATS + 4)
+		
+	var sphere_bytes = spheres_data.to_byte_array()
+	_rd.buffer_update(_scene_spheres_storage_buffer, 0, sphere_bytes.size(), sphere_bytes)

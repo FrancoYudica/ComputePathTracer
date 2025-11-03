@@ -1,6 +1,8 @@
 #[compute]
 #version 450
 
+#include "primitives.glsl.inc"
+
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba8, set = 0, binding = 0) uniform image2D out_image;
@@ -11,6 +13,11 @@ layout(std430, set = 1, binding = 0) buffer CameraData {
 }
 camera_data;
 
+layout(std140, set = 2, binding = 0) buffer Spheres {
+  float sphereCount;
+  Sphere spheres[];
+};
+
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
   int width;
@@ -19,10 +26,7 @@ layout(push_constant) uniform PushConstants {
 }
 params;
 
-struct Ray {
-  vec3 origin;
-  vec3 direction;
-};
+#include "common.glsl.inc"
 
 Ray generateRay(ivec2 pixel) {
   // 1. Pixel -> NDC (-1, 1)
@@ -48,38 +52,72 @@ Ray generateRay(ivec2 pixel) {
   return ray;
 }
 
-float sphereIntersection(Ray ray) {
-  // Simple sphere at (0,0,-1) with radius 0.5
-  vec3 sphereCenter = vec3(0.0, 0.0, -1.0);
-  float sphereRadius = 0.5;
+/**
+Iterates through all the scene and finds the closest intersection.
+*/
+float intersectScene(Ray ray, out vec3 normal) {
+  float closestT = -1.0;
+  float t;
+  Sphere sphere;
+  for (int i = 0; i < int(sphereCount); i++) {
+    sphere = spheres[i];
 
-  vec3 oc = ray.origin - sphereCenter;
-  float a = dot(ray.direction, ray.direction);
-  float b = 2.0 * dot(oc, ray.direction);
-  float c = dot(oc, oc) - sphereRadius * sphereRadius;
-  float discriminant = b * b - 4.0 * a * c;
-
-  if (discriminant < 0.0) {
-    return -1.0; // No intersection
-  } else {
-    return (-b - sqrt(discriminant)) / (2.0 * a); // Nearest intersection
+    t = sphereIntersection(ray, sphere);
+    if (t > 0.0 && (t < closestT || closestT < 0.0)) {
+      closestT = t;
+      normal = sphereNormal(ray.origin + t * ray.direction, sphere);
+    }
   }
+  return closestT;
 }
 
-vec3 traceRay(Ray ray) {
-  // Simple gradient based on ray direction
-  //   float t = 0.5 * (ray.direction.y + 1.0);
-  //   return mix(vec3(1.0, 1.0, 1.0), vec3(0.5, 0.7, 1.0), t);
+vec3 sampleSky(Ray ray) {
+  float t = 0.5 * (ray.direction.y + 1.0);
+  return mix(vec3(1.0, 1.0, 1.0), vec3(0.5, 0.7, 1.0), t);
+}
 
-  float t = sphereIntersection(ray);
-  if (t > 0.0) {
+vec3 pathTrace(Ray ray) {
+
+  int maxDepth = 5;
+  vec3 color = vec3(0.0);
+  float t;
+  vec3 normal;
+  float accumulationFactor = 1.0;
+  bool escaped = false;
+
+  while (maxDepth-- > 0) {
+
+    t = intersectScene(ray, normal);
+
+    if (t < 0.0) {
+      // No intersection, sample sky and terminate.
+      // Multiply by accumulationFactor so deeper bounces contribute less.
+      color += sampleSky(ray) * accumulationFactor;
+      escaped = true;
+      break;
+    }
+
     vec3 hitPoint = ray.origin + t * ray.direction;
-    return 0.5 * (ray.direction + vec3(1.0));
-  } else {
-    // Background gradient
-    float t = 0.5 * (ray.direction.y + 1.0);
-    return mix(vec3(1.0, 1.0, 1.0), vec3(0.5, 0.7, 1.0), t);
+    float diffuse = max(dot(normal, normalize(vec3(1.0, 1.0, 1.0))), 0.0);
+    vec3 reflectedDir = reflect(ray.direction, normal);
+    vec3 localColor = diffuse * vec3(1.0, 0.5, 0.3);
+    color += localColor * accumulationFactor;
+
+    // Update ray for next bounce
+    ray = Ray(hitPoint + normal * 0.001, reflectedDir);
+
+    accumulationFactor *= 0.5; // Simple energy loss
   }
+
+  // If we exited the loop because we reached max depth (not because we hit the
+  // sky), we should also account for the remaining un-terminated throughput by
+  // sampling the environment along the current ray with the leftover
+  // accumulationFactor.
+  if (!escaped) {
+    color += sampleSky(ray) * accumulationFactor;
+  }
+
+  return color;
 }
 
 void main() {
@@ -91,7 +129,7 @@ void main() {
 
   // Compute normalized coordinates (0.0-1.0)
   Ray ray = generateRay(pixel);
-  vec4 color = vec4(traceRay(ray), 1.0);
+  vec4 color = vec4(pathTrace(ray), 1.0);
 
   // Write pixel color
   imageStore(out_image, pixel, color);
