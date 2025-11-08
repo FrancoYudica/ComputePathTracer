@@ -20,9 +20,10 @@ layout(std140, set = 2, binding = 0) buffer Spheres {
 
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
-  int width;
-  int height;
-  vec2 pad;
+  float width;
+  float height;
+  float randomFrameSeed1;
+  float randomFrameSeed2;
 }
 params;
 
@@ -55,20 +56,20 @@ Ray generateRay(ivec2 pixel) {
 /**
 Iterates through all the scene and finds the closest intersection.
 */
-float intersectScene(Ray ray, out vec3 normal) {
-  float closestT = -1.0;
-  float t;
+bool intersectScene(Ray ray, out HitRecord nearestHit) {
+  nearestHit.t = -1.0;
   Sphere sphere;
+  bool didHit = false;
   for (int i = 0; i < int(sphereCount); i++) {
     sphere = spheres[i];
-
-    t = sphereIntersection(ray, sphere);
-    if (t > 0.0 && (t < closestT || closestT < 0.0)) {
-      closestT = t;
-      normal = sphereNormal(ray.origin + t * ray.direction, sphere);
+    HitRecord record;
+    bool h = sphereIntersection(ray, sphere, record);
+    if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
+      nearestHit = record;
+      didHit = true;
     }
   }
-  return closestT;
+  return didHit;
 }
 
 vec3 sampleSky(Ray ray) {
@@ -76,48 +77,32 @@ vec3 sampleSky(Ray ray) {
   return mix(vec3(1.0, 1.0, 1.0), vec3(0.5, 0.7, 1.0), t);
 }
 
-vec3 pathTrace(Ray ray) {
+// Non recursive version
+vec3 pathTrace(Ray ray, float seed) {
 
-  int maxDepth = 5;
-  vec3 color = vec3(0.0);
-  float t;
-  vec3 normal;
-  float accumulationFactor = 1.0;
-  bool escaped = false;
+  HitRecord hitRecord;
+  int depth = 5;
+  vec3 accumulatedColor = vec3(1.0);
+  while (depth-- > 0) {
 
-  while (maxDepth-- > 0) {
+    // Better seed variation: use pixel ID, frame seed, AND depth
+    seed += float(depth);
 
-    t = intersectScene(ray, normal);
+    bool didHit = intersectScene(ray, hitRecord);
 
-    if (t < 0.0) {
-      // No intersection, sample sky and terminate.
-      // Multiply by accumulationFactor so deeper bounces contribute less.
-      color += sampleSky(ray) * accumulationFactor;
-      escaped = true;
+    if (!didHit) {
+      accumulatedColor *= sampleSky(ray);
       break;
     }
 
-    vec3 hitPoint = ray.origin + t * ray.direction;
-    float diffuse = max(dot(normal, normalize(vec3(1.0, 1.0, 1.0))), 0.0);
-    vec3 reflectedDir = reflect(ray.direction, normal);
-    vec3 localColor = diffuse * vec3(1.0, 0.5, 0.3);
-    color += localColor * accumulationFactor;
-
-    // Update ray for next bounce
-    ray = Ray(hitPoint + normal * 0.001, reflectedDir);
-
-    accumulationFactor *= 0.5; // Simple energy loss
+    vec3 hitPoint = rayAt(ray, hitRecord.t);
+    vec3 reflectedDir = normalize(randomInHemisphereVec3(hitRecord.n, seed));
+    ray = Ray(hitPoint + hitRecord.n * EPSILON, reflectedDir);
+    vec3 localColor = vec3(1.0, 1.0, 1.0);
+    accumulatedColor *= localColor * 0.5;
   }
 
-  // If we exited the loop because we reached max depth (not because we hit the
-  // sky), we should also account for the remaining un-terminated throughput by
-  // sampling the environment along the current ray with the leftover
-  // accumulationFactor.
-  if (!escaped) {
-    color += sampleSky(ray) * accumulationFactor;
-  }
-
-  return color;
+  return accumulatedColor;
 }
 
 void main() {
@@ -129,7 +114,18 @@ void main() {
 
   // Compute normalized coordinates (0.0-1.0)
   Ray ray = generateRay(pixel);
-  vec4 color = vec4(pathTrace(ray), 1.0);
+  float seed = mod(float(pixel.x) + float(pixel.y) * params.width +
+                       float(params.randomFrameSeed1),
+                   params.randomFrameSeed2);
+
+  int samples = 1;
+  vec3 colorSum = vec3(0.0);
+  for (int i = 0; i < samples; i++) {
+    seed += float(i);
+    colorSum += pathTrace(ray, seed);
+  }
+
+  vec4 color = vec4(colorSum / float(samples), 1.0);
 
   // Write pixel color
   imageStore(out_image, pixel, color);

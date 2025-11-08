@@ -143,11 +143,12 @@ func _draw():
 	var texture_height = get_render_height()
 	var x_groups = ceili(float(texture_width) / 8)
 	var y_groups = ceili(float(texture_height) / 8)
-		
-	var push_constant = PackedInt32Array([
+	
+	var push_constant = PackedFloat32Array([
 		texture_width,
 		texture_height,
-		0, 0
+		randf(),
+		randf()
 	])
 	
 	var push_constant_byte_array = push_constant.to_byte_array()
@@ -168,14 +169,22 @@ func _draw():
 func _update_camera_storage_buffer():
 	# Build camera matrices
 	var view = camera.get_camera_transform().affine_inverse()
-	var projection = camera.get_camera_projection()
+	var projection = camera.get_camera_projection() # Scene camera projection. Viewport dependent fov
+	
+	# Re-calculates projection with scene aspect ratio
+	var corrected_projection = Projection.create_perspective(
+		camera.fov,
+		float(get_render_width()) / float(get_render_height()),
+		projection.get_z_near(),
+		projection.get_z_far()
+	)
 
 	var view_floats = transform3d_to_mat4_floats(view)
 	var proj_floats = PackedFloat32Array()
 	for c in range(4):
 		for r in range(4):
-			proj_floats.append(projection[c][r])
-
+			proj_floats.append(corrected_projection[c][r])
+			
 	# Combine view + projection
 	var camera_data = PackedFloat32Array()
 	camera_data.append_array(view_floats)
