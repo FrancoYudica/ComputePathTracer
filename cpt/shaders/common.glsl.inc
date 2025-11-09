@@ -5,6 +5,7 @@ struct HitRecord {
 	vec3 p;
 	vec3 n;
 	bool frontFace;
+	float materialIndex;
 };
 
 vec3 rayAt(Ray ray, float t) { return ray.origin + ray.direction * t; }
@@ -33,6 +34,7 @@ bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
 	record.t = root;
 	record.p = rayAt(ray, root);
 	record.n = (record.p - sphere.center) / sphere.radius;
+	record.materialIndex = sphere.materialIndex;
 	// set frontFace so the normal always points against the incoming ray
 	record.frontFace = dot(ray.direction, record.n) < 0.0;
 	if (!record.frontFace) {
@@ -40,6 +42,12 @@ bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
 	}
 
 	return true;
+}
+
+vec2 randomVec2(float seed) {
+	float rand1 = fract(sin(seed * 12.9898) * 43758.5453);
+	float rand2 = fract(sin((seed + 1.0) * 78.233) * 43758.5453);
+	return vec2(rand1, rand2);
 }
 
 vec3 randomVec3(float seed) {
@@ -52,6 +60,10 @@ vec3 randomVec3(float seed) {
 
 vec3 randomVec3(float min, float max, float seed) {
     return min + (max - min) * randomVec3(seed);
+}
+
+vec2 randomVec2(float min, float max, float seed) {
+    return min + (max - min) * randomVec2(seed);
 }
 
 // Use the spherical coordinate method - more reliable

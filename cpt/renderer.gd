@@ -4,6 +4,8 @@ class_name Renderer extends Node
 @export var camera: Camera3D
 @export var render_control: Control
 
+var samples: int = 1
+
 var _shader: RID
 var _pipeline: RID
 
@@ -15,10 +17,13 @@ var _camera_storage_buffer: RID
 
 var _scene_uniform_set: RID
 var _scene_spheres_storage_buffer: RID
+var _scene_materials_storage_buffer: RID
+
 
 var _image_uniform: RDUniform
 var _camera_uniform: RDUniform
 var _scene_spheres_uniform: RDUniform
+var _scene_materials_uniform: RDUniform
 
 func get_texture_rid():
 	return _output_texture_rid
@@ -96,22 +101,32 @@ func _initialize_compute():
 	_camera_uniform.add_id(_camera_storage_buffer)
 	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 1)
 	
-	# Scene uniform set
+	# Sphere uniform set binding
 	_scene_spheres_uniform = RDUniform.new()
 	_scene_spheres_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	_scene_spheres_uniform.binding = 0
-	
 	var spheres_bytes = PackedByteArray()
 	spheres_bytes.resize(1024)
 	_scene_spheres_storage_buffer = _rd.storage_buffer_create(spheres_bytes.size(), spheres_bytes)
 	_scene_spheres_uniform.add_id(_scene_spheres_storage_buffer)
-	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform], _shader, 2)
+	
+	# Material uniform set binding
+	_scene_materials_uniform = RDUniform.new()
+	_scene_materials_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	_scene_materials_uniform.binding = 1
+	var materials_bytes = PackedByteArray()
+	materials_bytes.resize(1024)
+	_scene_materials_storage_buffer = _rd.storage_buffer_create(materials_bytes.size(), materials_bytes)
+	_scene_materials_uniform.add_id(_scene_materials_storage_buffer)
+	
+	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform, _scene_materials_uniform], _shader, 2)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_rd.free_rid(_output_texture_rid)
 		_rd.free_rid(_camera_storage_buffer)
 		_rd.free_rid(_scene_spheres_storage_buffer)
+		_rd.free_rid(_scene_materials_storage_buffer)
 		_rd.free_rid(_output_texture_set)
 		_rd.free_rid(_camera_uniform_set)
 		_rd.free_rid(_scene_uniform_set)
@@ -148,7 +163,11 @@ func _draw():
 		texture_width,
 		texture_height,
 		randf(),
-		randf()
+		randf(),
+		samples,
+		0.0,
+		0.0,
+		0.0
 	])
 	
 	var push_constant_byte_array = push_constant.to_byte_array()
@@ -195,13 +214,32 @@ func _update_camera_storage_buffer():
 	_rd.buffer_update(_camera_storage_buffer, 0, camera_bytes.size(), camera_bytes)
 
 func _update_scene_storage_buffer():
-	var SPHERE_FLOATS = 4
+	var SPHERE_FLOATS = 8
 	var spheres = get_tree().get_nodes_in_group("procedural_sphere")
+	
 	var spheres_data = PackedFloat32Array() # Sphere count + 3 bytes pad + Spheres data
+	var materials_data = PackedFloat32Array()
+	var materials_count = 0
 	spheres_data.resize(spheres.size() * SPHERE_FLOATS + 4)
 	spheres_data[0] = spheres.size()
 	for i in range(spheres.size()):
-		spheres[i].load_bytes(spheres_data, i * SPHERE_FLOATS + 4)
+		var sphere: ProceduralSphere = spheres[i] as ProceduralSphere
+		var base_offset = i * SPHERE_FLOATS + 4
+		var material_offset = 4 # x, y, z, r, mtl
+		sphere.load_bytes(spheres_data, base_offset)
+		spheres_data[base_offset + material_offset] = materials_count # Material index
+		materials_data.push_back(sphere.color.r)
+		materials_data.push_back(sphere.color.g)
+		materials_data.push_back(sphere.color.b)
+		materials_data.push_back(sphere.material_type)
+		materials_data.push_back(sphere.fuzz)
+		materials_data.push_back(0.0)
+		materials_data.push_back(0.0)
+		materials_data.push_back(0.0)
+		materials_count += 1
 		
 	var sphere_bytes = spheres_data.to_byte_array()
 	_rd.buffer_update(_scene_spheres_storage_buffer, 0, sphere_bytes.size(), sphere_bytes)
+
+	var materials_bytes = materials_data.to_byte_array()
+	_rd.buffer_update(_scene_materials_storage_buffer, 0, materials_bytes.size(), materials_bytes)

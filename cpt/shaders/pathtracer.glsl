@@ -18,20 +18,24 @@ layout(std140, set = 2, binding = 0) buffer Spheres {
   Sphere spheres[];
 };
 
+layout(std140, set = 2, binding = 1) buffer Materials { Material materials[]; };
+
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
   float width;
   float height;
   float randomFrameSeed1;
   float randomFrameSeed2;
+  float samples;
+  float pad;
 }
 params;
 
 #include "common.glsl.inc"
 
-Ray generateRay(ivec2 pixel) {
+Ray generateRay(vec2 pixel) {
   // 1. Pixel -> NDC (-1, 1)
-  vec2 uv = (vec2(pixel) + 0.5) / vec2(params.width, params.height);
+  vec2 uv = (pixel + 0.5) / vec2(params.width, params.height);
   uv.y = 1.0 - uv.y;
   uv = uv * 2.0 - 1.0;
 
@@ -96,9 +100,27 @@ vec3 pathTrace(Ray ray, float seed) {
     }
 
     vec3 hitPoint = rayAt(ray, hitRecord.t);
-    vec3 reflectedDir = normalize(randomInHemisphereVec3(hitRecord.n, seed));
+    vec3 reflectedDir;
+
+    // Fetch material
+    Material hitMaterial = materials[int(hitRecord.materialIndex)];
+
+    // Metallic
+    if (hitMaterial.type == 1.0) {
+
+      // Perfect reflection + some fuzziness. If fuzziness is 0, it's a perfect
+      // mirror.
+      reflectedDir = normalize(reflect(ray.direction, hitRecord.n)) +
+                     hitMaterial.fuzz * randomVec3(-1.0, 1.0, seed);
+
+    }
+    // Diffuse
+    else {
+      reflectedDir = hitRecord.n + randomVec3(-1.0, 1.0, seed);
+    }
     ray = Ray(hitPoint + hitRecord.n * EPSILON, reflectedDir);
-    vec3 localColor = vec3(1.0, 1.0, 1.0);
+
+    vec3 localColor = hitMaterial.albedo;
     accumulatedColor *= localColor * 0.5;
   }
 
@@ -113,19 +135,19 @@ void main() {
     return;
 
   // Compute normalized coordinates (0.0-1.0)
-  Ray ray = generateRay(pixel);
   float seed = mod(float(pixel.x) + float(pixel.y) * params.width +
                        float(params.randomFrameSeed1),
                    params.randomFrameSeed2);
 
-  int samples = 1;
   vec3 colorSum = vec3(0.0);
-  for (int i = 0; i < samples; i++) {
+  for (int i = 0; i < int(params.samples); i++) {
     seed += float(i);
+    vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, seed);
+    Ray ray = generateRay(jitteredPixel);
     colorSum += pathTrace(ray, seed);
   }
 
-  vec4 color = vec4(colorSum / float(samples), 1.0);
+  vec4 color = sqrt(vec4(colorSum / params.samples, 1.0)); // Gamma correction
 
   // Write pixel color
   imageStore(out_image, pixel, color);
