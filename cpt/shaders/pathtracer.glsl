@@ -87,6 +87,7 @@ vec3 pathTrace(Ray ray, float seed) {
   HitRecord hitRecord;
   int depth = 5;
   vec3 accumulatedColor = vec3(1.0);
+
   while (depth-- > 0) {
 
     // Better seed variation: use pixel ID, frame seed, AND depth
@@ -105,8 +106,12 @@ vec3 pathTrace(Ray ray, float seed) {
     // Fetch material
     Material hitMaterial = materials[int(hitRecord.materialIndex)];
 
+    float energyLoss = 0.5;
+    if (hitMaterial.type == 0.0) {
+      reflectedDir = hitRecord.n + randomVec3(-1.0, 1.0, seed);
+    }
     // Metallic
-    if (hitMaterial.type == 1.0) {
+    else if (hitMaterial.type == 1.0) {
 
       // Perfect reflection + some fuzziness. If fuzziness is 0, it's a perfect
       // mirror.
@@ -114,14 +119,41 @@ vec3 pathTrace(Ray ray, float seed) {
                      hitMaterial.fuzz * randomVec3(-1.0, 1.0, seed);
 
     }
-    // Diffuse
-    else {
-      reflectedDir = hitRecord.n + randomVec3(-1.0, 1.0, seed);
+    // Dielectric
+    else if (hitMaterial.type == 2.0) {
+      // Refraction ratio
+      float ri = hitRecord.frontFace ? (1.0 / hitMaterial.refractionIndex)
+                                     : hitMaterial.refractionIndex;
+
+      vec3 unitDirection = normalize(ray.direction);
+
+      float cosTheta = min(dot(-unitDirection, hitRecord.n), 1.0);
+      float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+      bool cannotRefract = ri * sinTheta > 1.0;
+      vec3 direction;
+
+      // Schlick approximation for reflectance
+      float reflectProb = reflectance(cosTheta, ri);
+
+      if (cannotRefract || reflectProb > randomFloat(0.0, 1.0, seed)) {
+        direction = reflect(unitDirection, hitRecord.n);
+      } else {
+        direction = refract(unitDirection, hitRecord.n, ri);
+      }
+      reflectedDir =
+          normalize(direction + hitMaterial.fuzz * randomVec3(-1.0, 1.0, seed));
+
+      energyLoss = 1.0; // No energy loss for dielectrics
     }
-    ray = Ray(hitPoint + hitRecord.n * EPSILON, reflectedDir);
+
+    else {
+      return vec3(0.0, 0.0, 0.0); // Black for error
+    }
+    ray = Ray(hitPoint + reflectedDir * EPSILON, reflectedDir);
 
     vec3 localColor = hitMaterial.albedo;
-    accumulatedColor *= localColor * 0.5;
+    accumulatedColor *= localColor * energyLoss;
   }
 
   return accumulatedColor;

@@ -233,7 +233,7 @@ func _update_scene_storage_buffer():
 		materials_data.push_back(sphere.color.b)
 		materials_data.push_back(sphere.material_type)
 		materials_data.push_back(sphere.fuzz)
-		materials_data.push_back(0.0)
+		materials_data.push_back(sphere.refraction_index)
 		materials_data.push_back(0.0)
 		materials_data.push_back(0.0)
 		materials_count += 1

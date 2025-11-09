@@ -44,6 +44,14 @@ bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
 	return true;
 }
 
+float randomFloat(float seed) {
+	return fract(sin(seed * 12.9898) * 43758.5453);
+}
+
+float randomFloat(float min, float max, float seed) {
+	return min + (max - min) * randomFloat(seed);
+}
+
 vec2 randomVec2(float seed) {
 	float rand1 = fract(sin(seed * 12.9898) * 43758.5453);
 	float rand2 = fract(sin((seed + 1.0) * 78.233) * 43758.5453);
@@ -90,4 +98,13 @@ vec3 randomInHemisphereVec3(vec3 normal, float seed) {
     }
 
     return randomDir;
+}
+
+/**
+ * Schlick's approximation for reflectance
+ */
+float reflectance(float cosine, float refIdx) {
+	float r0 = (1.0 - refIdx) / (1.0 + refIdx);
+	r0 = r0 * r0;
+	return r0 + (1.0 - r0) * pow((1.0 - cosine), 5.0);
 }

@@ -124,6 +124,35 @@ transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.9980
 skeleton = NodePath("../../../../../..")
 material_type = 1
 
+[node name="ProceduralSphere10" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 2.03355, -2.1885793)
+skeleton = NodePath("../../../../../..")
+material_type = 2
+refraction_index = 1.407
+
+[node name="ProceduralSphere14" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1.4472146, 0, 0.08983386, 0, 1.45, 0, -0.08983386, 0, 1.4472146, 4.7774625, 1.3213463, 1.2899139)
+skeleton = NodePath("../../../../../..")
+refraction_index = 1.0
+
+[node name="ProceduralSphere13" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 4.7774625, 1.3213463, 1.2899139)
+skeleton = NodePath("../../../../../..")
+material_type = 2
+refraction_index = 1.4
+
+[node name="ProceduralSphere12" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(0.4990395, 0, 0.030977195, 0, 0.5, 0, -0.030977195, 0, 0.4990395, 1.200988, 2.03355, -4.419465)
+skeleton = NodePath("../../../../../..")
+material_type = 1
+refraction_index = 1.74
+
+[node name="ProceduralSphere11" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 1.200988, 2.03355, -4.419465)
+skeleton = NodePath("../../../../../..")
+material_type = 2
+refraction_index = 1.612
+
 [node name="ProceduralSphere3" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
 skeleton = NodePath("../../../../../..")

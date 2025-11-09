@@ -1,7 +1,8 @@
 struct Material {
   vec3 albedo;
-  float type; // 0: diffuse, 1: metal
+  float type; // 0: diffuse, 1: metal, 2: dielectric
   float fuzz; // for metal
+  float refractionIndex; // for dielectric
 };
 
 struct Ray {
