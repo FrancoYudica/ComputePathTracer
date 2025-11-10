@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=10 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://settings_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
@@ -16,7 +17,7 @@ background_mode = 2
 sky = SubResource("Sky_h2yge")
 ambient_light_source = 3
 
-[node name="Node3D" type="Control"]
+[node name="MainScene" type="Control" node_paths=PackedStringArray("renderer")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,6 +25,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("1_7mycd")
+renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
 script = ExtResource("1_0xm2m")
@@ -130,22 +133,27 @@ skeleton = NodePath("../../../../../..")
 material_type = 2
 refraction_index = 1.407
 
-[node name="ProceduralSphere14" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1.4472146, 0, 0.08983386, 0, 1.45, 0, -0.08983386, 0, 1.4472146, 4.7774625, 1.3213463, 1.2899139)
-skeleton = NodePath("../../../../../..")
-refraction_index = 1.0
-
 [node name="ProceduralSphere13" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 4.7774625, 1.3213463, 1.2899139)
+transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 5.082, 1.636, -2.175)
 skeleton = NodePath("../../../../../..")
 material_type = 2
-refraction_index = 1.4
+fuzz = 0.085
+refraction_index = 1.16
 
 [node name="ProceduralSphere12" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.4990395, 0, 0.030977195, 0, 0.5, 0, -0.030977195, 0, 0.4990395, 1.200988, 2.03355, -4.419465)
 skeleton = NodePath("../../../../../..")
-material_type = 1
+color = Color(0.105882354, 1, 0.1764706, 1)
+material_type = 3
 refraction_index = 1.74
+emission = 6.9399999999999995
+
+[node name="ProceduralSphere14" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(0.52898186, 0, 0.032835823, 0, 0.53, 0, -0.032835823, 0, 0.52898186, 4.816, 2.579, -1.739)
+skeleton = NodePath("../../../../../..")
+material_type = 3
+refraction_index = 1.74
+emission = 100.0
 
 [node name="ProceduralSphere11" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 1.200988, 2.03355, -4.419465)
@@ -156,7 +164,8 @@ refraction_index = 1.612
 [node name="ProceduralSphere3" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
 skeleton = NodePath("../../../../../..")
-color = Color(0.8509804, 0.17254902, 0.32941177, 1)
+color = Color(0.41800013, 0, 0.76, 1)
+emission = 8.0
 
 [node name="ProceduralSphere4" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688791)
@@ -212,3 +221,4 @@ camera = NodePath("../VBoxContainer/HBoxContainer/RasterizedSubViewportContainer
 [connection signal="toggled" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/RasterizedCheckBox" to="VBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="value_changed" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/SamplesSpinBox" to="VBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
 [connection signal="value_changed" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/RenderScaleSpinBox" to="VBoxContainer/SettingsPanelContainer" method="_on_render_scale_spin_box_value_changed"]
+[connection signal="moved" from="CameraController" to="." method="_on_camera_controller_moved"]

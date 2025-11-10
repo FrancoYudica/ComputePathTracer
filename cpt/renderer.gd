@@ -25,6 +25,8 @@ var _camera_uniform: RDUniform
 var _scene_spheres_uniform: RDUniform
 var _scene_materials_uniform: RDUniform
 
+var _still_frames_count: int = 1
+
 func get_texture_rid():
 	return _output_texture_rid
 
@@ -37,6 +39,7 @@ func resize(width: int, height: int):
 		_rd.free_rid(_output_texture_set)
 	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
 	print("Viewport resized: [%s, %s]" % [width, height])
+	clear_accumulated_buffer()
 	
 func get_render_width():
 	
@@ -51,6 +54,9 @@ func get_render_height():
 		return 1
 
 	return int(render_control.size.y)
+
+func clear_accumulated_buffer():
+	_still_frames_count = 1
 
 func _ready() -> void:
 	_initialize_compute()
@@ -165,10 +171,12 @@ func _draw():
 		randf(),
 		randf(),
 		samples,
-		0.0,
+		1.0 / float(_still_frames_count),
 		0.0,
 		0.0
 	])
+	
+	_still_frames_count += 1
 	
 	var push_constant_byte_array = push_constant.to_byte_array()
 	
@@ -228,13 +236,13 @@ func _update_scene_storage_buffer():
 		var material_offset = 4 # x, y, z, r, mtl
 		sphere.load_bytes(spheres_data, base_offset)
 		spheres_data[base_offset + material_offset] = materials_count # Material index
+		materials_data.push_back(sphere.material_type)
+		materials_data.push_back(sphere.emission)
+		materials_data.push_back(sphere.fuzz)
+		materials_data.push_back(sphere.refraction_index)
 		materials_data.push_back(sphere.color.r)
 		materials_data.push_back(sphere.color.g)
 		materials_data.push_back(sphere.color.b)
-		materials_data.push_back(sphere.material_type)
-		materials_data.push_back(sphere.fuzz)
-		materials_data.push_back(sphere.refraction_index)
-		materials_data.push_back(0.0)
 		materials_data.push_back(0.0)
 		materials_count += 1
 		

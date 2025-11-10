@@ -27,7 +27,7 @@ layout(push_constant) uniform PushConstants {
   float randomFrameSeed1;
   float randomFrameSeed2;
   float samples;
-  float pad;
+  float frameWeight;
 }
 params;
 
@@ -147,6 +147,12 @@ vec3 pathTrace(Ray ray, float seed) {
       energyLoss = 1.0; // No energy loss for dielectrics
     }
 
+    else if (hitMaterial.type == 3.0) {
+      // Emissive material - stop the path and accumulate emission
+      accumulatedColor *= hitMaterial.albedo * hitMaterial.emission;
+      break;
+    }
+
     else {
       return vec3(0.0, 0.0, 0.0); // Black for error
     }
@@ -182,5 +188,8 @@ void main() {
   vec4 color = sqrt(vec4(colorSum / params.samples, 1.0)); // Gamma correction
 
   // Write pixel color
-  imageStore(out_image, pixel, color);
+  vec4 existingColor = imageLoad(out_image, pixel);
+  imageStore(out_image, pixel,
+             color * params.frameWeight +
+                 existingColor * (1.0 - params.frameWeight));
 }
