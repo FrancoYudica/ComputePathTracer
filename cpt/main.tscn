@@ -30,10 +30,10 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
 script = ExtResource("1_0xm2m")
-camera = NodePath("../VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
-render_control = NodePath("../VBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/ColorRect")
+camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
+render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/ColorRect")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -41,35 +41,36 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="VBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "camera_controller")]
 layout_mode = 2
 script = ExtResource("2_lquwl")
 rasterized_panel = NodePath("../HBoxContainer/RasterizedSubViewportContainer")
 renderer = NodePath("../../Renderer")
 rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
+camera_controller = NodePath("../../CameraController")
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/SettingsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/SettingsPanelContainer/MarginContainer"]
+[node name="SettingsVBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="RasterizedCheckBox" type="CheckBox" parent="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer"]
+[node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
 layout_mode = 2
 button_pressed = true
 text = "View rasterized"
 
-[node name="SamplesSpinBox" type="SpinBox" parent="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer"]
+[node name="SamplesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
 layout_mode = 2
 min_value = 1.0
 value = 1.0
 prefix = "Spp"
 
-[node name="RenderScaleSpinBox" type="SpinBox" parent="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer"]
+[node name="RenderScaleSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 min_value = 25.0
@@ -78,69 +79,87 @@ value = 100.0
 prefix = "Render scale"
 suffix = "%"
 
-[node name="HBoxContainer" type="SplitContainer" parent="VBoxContainer"]
+[node name="FovHBoxContainer" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
 layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer"]
+layout_mode = 2
+text = "fov"
+
+[node name="FovHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+min_value = 10.0
+max_value = 120.0
+value = 75.0
+rounded = true
+ticks_on_borders = true
+
+[node name="HBoxContainer" type="SplitContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="RasterizedSubViewportContainer" type="SubViewportContainer" parent="VBoxContainer/HBoxContainer"]
+[node name="RasterizedSubViewportContainer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(570, 605)
+size = Vector2i(464, 648)
 render_target_update_mode = 4
 
-[node name="Node3D" type="Node3D" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+[node name="Node3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
 
-[node name="Camera3D" type="Camera3D" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D"]
+[node name="Camera3D" type="Camera3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.096968114, 0)
 environment = SubResource("Environment_h2yge")
 current = true
 
-[node name="ProceduralSphere" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.82193756, -2.3823183)
 skeleton = NodePath("../../../../../..")
 color = Color(0.8666667, 0.87058824, 0.67058825, 1)
 
-[node name="ProceduralSphere6" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere6" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 5.861639, -0.8628144, -2.3823183)
 skeleton = NodePath("../../../../../..")
 color = Color(0.8666667, 0.87058824, 0.67058825, 1)
 material_type = 1
 fuzz = 0.8
 
-[node name="ProceduralSphere7" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere7" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 7.3721085, 1.9595413, -8.709521)
 skeleton = NodePath("../../../../../..")
 color = Color(0.5764706, 0.18431373, 0.40392157, 1)
 
-[node name="ProceduralSphere2" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 0.53590345, -1.4769747)
 skeleton = NodePath("../../../../../..")
 material_type = 1
 fuzz = 0.5
 
-[node name="ProceduralSphere8" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere8" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 1.4455242, 0.1367352)
 skeleton = NodePath("../../../../../..")
 material_type = 1
 
-[node name="ProceduralSphere10" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere10" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 2.03355, -2.1885793)
 skeleton = NodePath("../../../../../..")
 material_type = 2
 refraction_index = 1.407
 
-[node name="ProceduralSphere13" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere13" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 5.082, 1.636, -2.175)
 skeleton = NodePath("../../../../../..")
 material_type = 2
 fuzz = 0.085
 refraction_index = 1.16
 
-[node name="ProceduralSphere12" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere12" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.4990395, 0, 0.030977195, 0, 0.5, 0, -0.030977195, 0, 0.4990395, 1.200988, 2.03355, -4.419465)
 skeleton = NodePath("../../../../../..")
 color = Color(0.105882354, 1, 0.1764706, 1)
@@ -148,61 +167,61 @@ material_type = 3
 refraction_index = 1.74
 emission = 6.9399999999999995
 
-[node name="ProceduralSphere14" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere14" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.52898186, 0, 0.032835823, 0, 0.53, 0, -0.032835823, 0, 0.52898186, 4.816, 2.579, -1.739)
 skeleton = NodePath("../../../../../..")
 material_type = 3
 refraction_index = 1.74
 emission = 100.0
 
-[node name="ProceduralSphere11" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere11" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 1.200988, 2.03355, -4.419465)
 skeleton = NodePath("../../../../../..")
 material_type = 2
 refraction_index = 1.612
 
-[node name="ProceduralSphere3" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere3" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
 skeleton = NodePath("../../../../../..")
 color = Color(0.41800013, 0, 0.76, 1)
 emission = 8.0
 
-[node name="ProceduralSphere4" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere4" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688791)
 skeleton = NodePath("../../../../../..")
 color = Color(0.2231029, 0.2231029, 0.22310287, 1)
 material_type = 1
 fuzz = 0.07
 
-[node name="ProceduralSphere5" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere5" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -50, 0)
 skeleton = NodePath("../../../../../..")
 color = Color(0.5411765, 0.73333335, 0.42352942, 1)
 
-[node name="ProceduralSphere9" parent="VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
+[node name="ProceduralSphere9" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 46.48638, -47.40651, 0)
 skeleton = NodePath("../../../../../..")
 color = Color(0.5411765, 0.73333335, 0.42352942, 1)
 material_type = 1
 
-[node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="VBoxContainer/HBoxContainer"]
+[node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
-[node name="SubViewport" type="SubViewport" parent="VBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
 handle_input_locally = false
-size = Vector2i(570, 605)
+size = Vector2i(464, 648)
 render_target_update_mode = 4
 
-[node name="ColorRect" type="ColorRect" parent="VBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
 texture_filter = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -210,15 +229,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureLoader" type="Node" parent="VBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
+[node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
 script = ExtResource("3_h2yge")
 renderer = NodePath("../../../../../../Renderer")
 
 [node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_1bvp3")
-camera = NodePath("../VBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
+camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
 
-[connection signal="toggled" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/RasterizedCheckBox" to="VBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
-[connection signal="value_changed" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/SamplesSpinBox" to="VBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
-[connection signal="value_changed" from="VBoxContainer/SettingsPanelContainer/MarginContainer/HBoxContainer/RenderScaleSpinBox" to="VBoxContainer/SettingsPanelContainer" method="_on_render_scale_spin_box_value_changed"]
+[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/RenderScaleSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_spin_box_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
 [connection signal="moved" from="CameraController" to="." method="_on_camera_controller_moved"]

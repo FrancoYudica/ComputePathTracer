@@ -111,7 +111,7 @@ vec3 pathTrace(Ray ray, uint seed) {
 
     // Lambertian
     if (hitMaterial.type == 0.0) {
-      reflectedDir = hitRecord.n + randomVec3(-1.0, 1.0, seed);
+      reflectedDir = hitRecord.n + randomVec3N(seed);
     }
     // Metallic
     else if (hitMaterial.type == 1.0) {
@@ -197,7 +197,8 @@ void main() {
 
   // Write pixel color
   vec4 existingColor = imageLoad(out_image, pixel);
-  imageStore(out_image, pixel,
-             color * params.frameWeight +
-                 existingColor * (1.0 - params.frameWeight));
+  vec4 averageColor = existingColor * (1.0 - params.frameWeight) +
+                      color * params.frameWeight;
+                      
+  imageStore(out_image, pixel, averageColor);
 }

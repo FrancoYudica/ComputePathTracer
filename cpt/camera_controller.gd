@@ -20,6 +20,17 @@ var velocity := Vector3()
 
 var _tracking_mouse: bool = false
 
+var fov: float:
+	get:
+		return fov
+	set(value):
+		fov = value
+		camera.fov = fov
+		moved.emit()
+
+func _ready() -> void:
+	fov = 75.0
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_released("mouse_down"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
