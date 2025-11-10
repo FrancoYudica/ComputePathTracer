@@ -7,7 +7,7 @@ signal moved
 const MOUSE_SENSITIVITY = 0.002
 
 # The camera movement speed (tweakable using the mouse wheel).
-var move_speed := 0.5
+var move_speed := 75
 
 # Stores where the camera is wanting to go (based on pressed keys and speed modifier).
 var motion := Vector3()
@@ -56,8 +56,8 @@ func _process(delta: float) -> void:
 		.rotated(Vector3(0, 0, 1), -sin(camera.rotation.y) * camera.rotation.x)
 
 	# Add motion, apply friction and velocity.
-	velocity += look_dir * move_speed
-	velocity *= 0.9
+	velocity += look_dir * move_speed * delta
+	velocity *= pow(0.75, delta * 60.0)
 	
 	if velocity.length_squared() < 0.1:
 		velocity = Vector3.ZERO

@@ -165,15 +165,17 @@ func _draw():
 	var x_groups = ceili(float(texture_width) / 8)
 	var y_groups = ceili(float(texture_height) / 8)
 	
+	var seed1 = _still_frames_count
+	var seed2 = _still_frames_count * 109 * randi()
+	
 	var push_constant = PackedFloat32Array([
 		texture_width,
 		texture_height,
-		randf(),
-		randf(),
+		seed1,
+		seed2,
 		samples,
 		1.0 / float(_still_frames_count),
-		0.0,
-		0.0
+		0.0, 0.0
 	])
 	
 	_still_frames_count += 1

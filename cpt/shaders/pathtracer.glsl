@@ -32,6 +32,7 @@ layout(push_constant) uniform PushConstants {
 params;
 
 #include "common.glsl.inc"
+#include "random.glsl.inc"
 
 Ray generateRay(vec2 pixel) {
   // 1. Pixel -> NDC (-1, 1)
@@ -82,16 +83,16 @@ vec3 sampleSky(Ray ray) {
 }
 
 // Non recursive version
-vec3 pathTrace(Ray ray, float seed) {
+vec3 pathTrace(Ray ray, uint seed) {
 
   HitRecord hitRecord;
-  int depth = 5;
+  int depth = 15;
   vec3 accumulatedColor = vec3(1.0);
 
   while (depth-- > 0) {
 
-    // Better seed variation: use pixel ID, frame seed, AND depth
-    seed += float(depth);
+    // Generate new seed for each bounce
+    seed = pcgHash(seed + uint(depth * 17));
 
     bool didHit = intersectScene(ray, hitRecord);
 
@@ -107,6 +108,8 @@ vec3 pathTrace(Ray ray, float seed) {
     Material hitMaterial = materials[int(hitRecord.materialIndex)];
 
     float energyLoss = 0.5;
+
+    // Lambertian
     if (hitMaterial.type == 0.0) {
       reflectedDir = hitRecord.n + randomVec3(-1.0, 1.0, seed);
     }
@@ -172,17 +175,22 @@ void main() {
   if (pixel.x >= params.width || pixel.y >= params.height)
     return;
 
-  // Compute normalized coordinates (0.0-1.0)
-  float seed = mod(float(pixel.x) + float(pixel.y) * params.width +
-                       float(params.randomFrameSeed1),
-                   params.randomFrameSeed2);
+  // Convert frame seeds to uints for better hashing
+  uint frameSeed1 = uint(params.randomFrameSeed1);
+  uint frameSeed2 = uint(params.randomFrameSeed2);
+  uint pixelIndex = uint(pixel.x) + uint(pixel.y) * uint(params.width);
+
+  // Initial seed combining pixel location and frame seeds
+  uint baseSeed = combineSeed(pixelIndex, frameSeed1, frameSeed2);
 
   vec3 colorSum = vec3(0.0);
   for (int i = 0; i < int(params.samples); i++) {
-    seed += float(i);
-    vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, seed);
+
+    uint sampleSeed = combineSeed(baseSeed, uint(i));
+
+    vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, sampleSeed);
     Ray ray = generateRay(jitteredPixel);
-    colorSum += pathTrace(ray, seed);
+    colorSum += pathTrace(ray, sampleSeed);
   }
 
   vec4 color = sqrt(vec4(colorSum / params.samples, 1.0)); // Gamma correction
