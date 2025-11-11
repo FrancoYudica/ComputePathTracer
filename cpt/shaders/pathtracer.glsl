@@ -6,19 +6,20 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba8, set = 0, binding = 0) uniform image2D out_image;
+layout(rgba32f, set = 1, binding = 0) uniform image2D accumulation_image;
 
-layout(std430, set = 1, binding = 0) buffer CameraData {
+layout(std430, set = 2, binding = 0) buffer CameraData {
   mat4 view;
   mat4 projection;
 }
 camera_data;
 
-layout(std140, set = 2, binding = 0) buffer Spheres {
+layout(std140, set = 3, binding = 0) buffer Spheres {
   float sphereCount;
   Sphere spheres[];
 };
 
-layout(std140, set = 2, binding = 1) buffer Materials { Material materials[]; };
+layout(std140, set = 3, binding = 1) buffer Materials { Material materials[]; };
 
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
@@ -193,12 +194,16 @@ void main() {
     colorSum += pathTrace(ray, sampleSeed);
   }
 
-  vec4 color = sqrt(vec4(colorSum / params.samples, 1.0)); // Gamma correction
+  vec4 frameColor = vec4(colorSum / params.samples, 1.0);
+
+  // Gamma correction 2.2
+  frameColor = pow(frameColor, vec4(1.0 / 2.2)); // Gamma correction
 
   // Write pixel color
-  vec4 existingColor = imageLoad(out_image, pixel);
+  vec4 existingColor = imageLoad(accumulation_image, pixel);
   vec4 averageColor = existingColor * (1.0 - params.frameWeight) +
-                      color * params.frameWeight;
-                      
+                      frameColor * params.frameWeight;
+
+  imageStore(accumulation_image, pixel, averageColor);
   imageStore(out_image, pixel, averageColor);
 }

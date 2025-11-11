@@ -31,7 +31,7 @@ renderer = NodePath("Renderer")
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
 script = ExtResource("1_0xm2m")
 camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
-render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/ColorRect")
+render_control = NodePath("../HBoxContainer/HBoxContainer/TextureRect")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
@@ -73,8 +73,8 @@ prefix = "Spp"
 [node name="RenderScaleSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-min_value = 25.0
-step = 25.0
+min_value = 10.0
+step = 10.0
 value = 100.0
 prefix = "Render scale"
 suffix = "%"
@@ -204,7 +204,18 @@ skeleton = NodePath("../../../../../..")
 color = Color(0.5411765, 0.73333335, 0.42352942, 1)
 material_type = 1
 
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer"]
+texture_filter = 1
+layout_mode = 2
+size_flags_horizontal = 3
+expand_mode = 1
+
+[node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/TextureRect" node_paths=PackedStringArray("renderer")]
+script = ExtResource("3_h2yge")
+renderer = NodePath("../../../../Renderer")
+
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
@@ -212,7 +223,7 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
 handle_input_locally = false
 size = Vector2i(464, 648)
-render_target_update_mode = 4
+render_target_update_mode = 0
 
 [node name="ColorRect" type="ColorRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
 anchors_preset = 15
@@ -220,18 +231,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
-texture_filter = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
-script = ExtResource("3_h2yge")
-renderer = NodePath("../../../../../../Renderer")
 
 [node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_1bvp3")

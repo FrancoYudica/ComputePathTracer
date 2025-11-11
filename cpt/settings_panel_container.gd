@@ -15,8 +15,7 @@ func _on_samples_spin_box_value_changed(value: float) -> void:
 
 
 func _on_render_scale_spin_box_value_changed(value: float) -> void:
-	rendered_sub_viewport_container.stretch_shrink = int(1.0 / (value / 100))
-
+	renderer.set_render_scale(value / 100.0)
 
 func _on_fov_h_slider_value_changed(value: float) -> void:
 	camera_controller.fov = value

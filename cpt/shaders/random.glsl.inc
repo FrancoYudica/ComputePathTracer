@@ -38,6 +38,8 @@ vec3 randomVec3N(uint seed) {
   return normalize(vec3(-1.0) + 2.0 * randomVec3(seed));
 }
 
+
+
 vec2 randomVec2(uint seed) {
   uint h1 = pcgHash(seed);
   uint h2 = pcgHash(h1);

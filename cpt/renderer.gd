@@ -10,7 +10,10 @@ var _shader: RID
 var _pipeline: RID
 
 var _output_texture_set: RID
-var _output_texture_rid: RID
+var _output_texture_rid: RID # Low precision texture
+
+var _accumulation_texture_set: RID
+var _accumulation_texture_rid: RID # High precision texture
 
 var _camera_uniform_set: RID
 var _camera_storage_buffer: RID
@@ -21,39 +24,51 @@ var _scene_materials_storage_buffer: RID
 
 
 var _image_uniform: RDUniform
+var _accumulation_uniform: RDUniform
 var _camera_uniform: RDUniform
 var _scene_spheres_uniform: RDUniform
 var _scene_materials_uniform: RDUniform
 
 var _still_frames_count: int = 1
+var _render_scale: float = 1.0
 
 func get_texture_rid():
 	return _output_texture_rid
 
 func resize(width: int, height: int):
 	_image_uniform.clear_ids()
+	_accumulation_uniform.clear_ids()
 	_rd.free_rid(_output_texture_rid)
-	_output_texture_rid = _create_attachment_texture(width, height)
+	_rd.free_rid(_accumulation_texture_rid)
+	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
+	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT)
 	_image_uniform.add_id(_output_texture_rid)
+	_accumulation_uniform.add_id(_accumulation_texture_rid)
 	if _rd.uniform_set_is_valid(_output_texture_set):
 		_rd.free_rid(_output_texture_set)
 	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
+	_accumulation_texture_set = _rd.uniform_set_create([_accumulation_uniform], _shader, 0)
 	print("Viewport resized: [%s, %s]" % [width, height])
 	clear_accumulated_buffer()
+
+func set_render_scale(scale: float):
+	_render_scale = scale
+	resize(get_render_width(), get_render_height())
 	
+
 func get_render_width():
 	
 	if render_control.size.x == 0.0:
 		return 1
 	
-	return int(render_control.size.x)
+	return int(render_control.size.x * _render_scale) 
 	
 func get_render_height():
 
 	if render_control.size.y == 0.0:
 		return 1
 
-	return int(render_control.size.y)
+	return int(render_control.size.y * _render_scale)
 
 func clear_accumulated_buffer():
 	_still_frames_count = 1
@@ -71,20 +86,21 @@ func _load_shader():
 	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
 	_shader = _rd.shader_create_from_spirv(shader_spirv)
 
-func _create_attachment_texture(width, height):
+func _create_attachment_texture(width, height, format):
 	var texture_format := RDTextureFormat.new()
 	texture_format.width = width
 	texture_format.height = height
 	texture_format.usage_bits = RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT | RenderingDevice.TEXTURE_USAGE_STORAGE_BIT  | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT
-	texture_format.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	texture_format.format = format
 	var texture_view := RDTextureView.new()
-	texture_view.format_override = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	texture_view.format_override = format
 	return _rd.texture_create(texture_format, texture_view)
 
 func _initialize_compute():
 	_load_shader()
 	_pipeline = _rd.compute_pipeline_create(_shader)
-	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height())
+	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
+	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT)
 	
 	# Image uniform set
 	_image_uniform = RDUniform.new()
@@ -92,7 +108,15 @@ func _initialize_compute():
 	_image_uniform.binding = 0
 	_image_uniform.add_id(_output_texture_rid)
 	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
-	
+
+	# Accumulation uniform set
+	_accumulation_uniform = RDUniform.new()
+	_accumulation_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	_accumulation_uniform.binding = 0
+	_accumulation_uniform.add_id(_accumulation_texture_rid)
+	_accumulation_texture_set = _rd.uniform_set_create([_accumulation_uniform], _shader, 1)
+
+
 	# Camera uniform set
 	_camera_uniform = RDUniform.new()
 	_camera_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
@@ -105,7 +129,7 @@ func _initialize_compute():
 		camera_bytes.size(),
 		camera_bytes)
 	_camera_uniform.add_id(_camera_storage_buffer)
-	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 1)
+	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 2)
 	
 	# Sphere uniform set binding
 	_scene_spheres_uniform = RDUniform.new()
@@ -125,7 +149,7 @@ func _initialize_compute():
 	_scene_materials_storage_buffer = _rd.storage_buffer_create(materials_bytes.size(), materials_bytes)
 	_scene_materials_uniform.add_id(_scene_materials_storage_buffer)
 	
-	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform, _scene_materials_uniform], _shader, 2)
+	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform, _scene_materials_uniform], _shader, 3)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
@@ -165,8 +189,8 @@ func _draw():
 	var x_groups = ceili(float(texture_width) / 8)
 	var y_groups = ceili(float(texture_height) / 8)
 	
-	var seed1 = _still_frames_count
-	var seed2 = _still_frames_count * 109 * randi()
+	var seed1 = randi()
+	var seed2 = _still_frames_count * 1664525 + 1013904223
 	
 	var push_constant = PackedFloat32Array([
 		texture_width,
@@ -188,8 +212,9 @@ func _draw():
 	var compute_list := _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(compute_list, _pipeline)
 	_rd.compute_list_bind_uniform_set(compute_list, _output_texture_set, 0)
-	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 1)
-	_rd.compute_list_bind_uniform_set(compute_list, _scene_uniform_set, 2)
+	_rd.compute_list_bind_uniform_set(compute_list, _accumulation_texture_set, 1)
+	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 2)
+	_rd.compute_list_bind_uniform_set(compute_list, _scene_uniform_set, 3)
 	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
 	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
 	_rd.compute_list_end()
