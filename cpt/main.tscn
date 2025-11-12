@@ -222,7 +222,7 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
 handle_input_locally = false
-size = Vector2i(464, 648)
+size = Vector2i(2, 2)
 render_target_update_mode = 0
 
 [node name="ColorRect" type="ColorRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]

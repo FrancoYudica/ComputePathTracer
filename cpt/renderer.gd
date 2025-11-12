@@ -41,7 +41,7 @@ func resize(width: int, height: int):
 	_rd.free_rid(_output_texture_rid)
 	_rd.free_rid(_accumulation_texture_rid)
 	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
-	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT)
+	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_UINT)
 	_image_uniform.add_id(_output_texture_rid)
 	_accumulation_uniform.add_id(_accumulation_texture_rid)
 	if _rd.uniform_set_is_valid(_output_texture_set):
@@ -100,7 +100,7 @@ func _initialize_compute():
 	_load_shader()
 	_pipeline = _rd.compute_pipeline_create(_shader)
 	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
-	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_SFLOAT)
+	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_UINT)
 	
 	# Image uniform set
 	_image_uniform = RDUniform.new()
@@ -189,16 +189,13 @@ func _draw():
 	var x_groups = ceili(float(texture_width) / 8)
 	var y_groups = ceili(float(texture_height) / 8)
 	
-	var seed1 = randi()
-	var seed2 = _still_frames_count * 1664525 + 1013904223
-	
 	var push_constant = PackedFloat32Array([
 		texture_width,
 		texture_height,
-		seed1,
-		seed2,
+		_still_frames_count, # Frame number
+		_still_frames_count * 1664525 + 1013904223, # Frame-based random seed
 		samples,
-		1.0 / float(_still_frames_count),
+		1.0 / float(_still_frames_count), # Frame accumulation weight
 		0.0, 0.0
 	])
 	

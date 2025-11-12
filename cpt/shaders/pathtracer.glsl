@@ -25,7 +25,7 @@ layout(std140, set = 3, binding = 1) buffer Materials { Material materials[]; };
 layout(push_constant) uniform PushConstants {
   float width;
   float height;
-  float randomFrameSeed1;
+  float frameNumber; // Ranges in [1, inf)
   float randomFrameSeed2;
   float samples;
   float frameWeight;
@@ -177,7 +177,7 @@ void main() {
     return;
 
   // Convert frame seeds to uints for better hashing
-  uint frameSeed1 = uint(params.randomFrameSeed1);
+  uint frameSeed1 = uint(params.frameNumber);
   uint frameSeed2 = uint(params.randomFrameSeed2);
   uint pixelIndex = uint(pixel.x) + uint(pixel.y) * uint(params.width);
 
@@ -194,16 +194,21 @@ void main() {
     colorSum += pathTrace(ray, sampleSeed);
   }
 
-  vec4 frameColor = vec4(colorSum / params.samples, 1.0);
+  vec3 frameColor = colorSum / params.samples;
 
   // Gamma correction 2.2
-  frameColor = pow(frameColor, vec4(1.0 / 2.2)); // Gamma correction
+  frameColor = pow(frameColor, vec3(1.0 / 2.2)); // Gamma correction
 
   // Write pixel color
-  vec4 existingColor = imageLoad(accumulation_image, pixel);
-  vec4 averageColor = existingColor * (1.0 - params.frameWeight) +
-                      frameColor * params.frameWeight;
+  vec3 writeColor = frameColor;
 
-  imageStore(accumulation_image, pixel, averageColor);
-  imageStore(out_image, pixel, averageColor);
+  if (params.frameNumber > 1.0) {
+    vec3 existingColor = imageLoad(accumulation_image, pixel).rgb;
+    writeColor = existingColor * (1.0 - params.frameWeight) +
+                 frameColor * params.frameWeight;
+  }
+
+  // Write to accumulation buffer and output image
+  imageStore(accumulation_image, pixel, vec4(writeColor, 1.0));
+  imageStore(out_image, pixel, vec4(writeColor, 1.0));
 }
