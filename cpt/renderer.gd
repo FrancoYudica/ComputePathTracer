@@ -136,7 +136,7 @@ func _initialize_compute():
 	_scene_spheres_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	_scene_spheres_uniform.binding = 0
 	var spheres_bytes = PackedByteArray()
-	spheres_bytes.resize(1024)
+	spheres_bytes.resize(1024 * 1024)
 	_scene_spheres_storage_buffer = _rd.storage_buffer_create(spheres_bytes.size(), spheres_bytes)
 	_scene_spheres_uniform.add_id(_scene_spheres_storage_buffer)
 	
@@ -145,7 +145,7 @@ func _initialize_compute():
 	_scene_materials_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	_scene_materials_uniform.binding = 1
 	var materials_bytes = PackedByteArray()
-	materials_bytes.resize(1024)
+	materials_bytes.resize(1024 * 1024)
 	_scene_materials_storage_buffer = _rd.storage_buffer_create(materials_bytes.size(), materials_bytes)
 	_scene_materials_uniform.add_id(_scene_materials_storage_buffer)
 	
@@ -247,7 +247,10 @@ func _update_camera_storage_buffer():
 
 func _update_scene_storage_buffer():
 	var SPHERE_FLOATS = 8
-	var spheres = get_tree().get_nodes_in_group("procedural_sphere")
+	var spheres = get_tree().get_nodes_in_group("procedural_sphere").filter(
+		func(node: Node3D):
+			return node.is_visible_in_tree()
+	)
 	
 	var spheres_data = PackedFloat32Array() # Sphere count + 3 bytes pad + Spheres data
 	var materials_data = PackedFloat32Array()
@@ -261,13 +264,13 @@ func _update_scene_storage_buffer():
 		sphere.load_bytes(spheres_data, base_offset)
 		spheres_data[base_offset + material_offset] = materials_count # Material index
 		materials_data.push_back(sphere.material_type)
-		materials_data.push_back(sphere.emission)
-		materials_data.push_back(sphere.fuzz)
+		materials_data.push_back(sphere.metal)
+		materials_data.push_back(sphere.roughness)
 		materials_data.push_back(sphere.refraction_index)
 		materials_data.push_back(sphere.color.r)
 		materials_data.push_back(sphere.color.g)
 		materials_data.push_back(sphere.color.b)
-		materials_data.push_back(0.0)
+		materials_data.push_back(sphere.emission)
 		materials_count += 1
 		
 	var sphere_bytes = spheres_data.to_byte_array()

@@ -98,7 +98,7 @@ vec3 pathTrace(Ray ray, uint seed) {
     bool didHit = intersectScene(ray, hitRecord);
 
     if (!didHit) {
-      accumulatedColor *= sampleSky(ray);
+      accumulatedColor *= sampleSky(ray) * 0.25;
       break;
     }
 
@@ -112,15 +112,39 @@ vec3 pathTrace(Ray ray, uint seed) {
 
     // Lambertian
     if (hitMaterial.type == 0.0) {
-      reflectedDir = hitRecord.n + randomVec3N(seed);
+
+      float metalness = hitMaterial.metal;
+      float roughness = hitMaterial.roughness;
+
+      if (randomFloat(seed) > metalness) {
+        // Diffuse reflection with roughness
+        reflectedDir = normalize(hitRecord.n + randomVec3N(seed));
+        accumulatedColor *= hitMaterial.albedo * energyLoss;
+
+      } else {
+        // Specular reflection with roughness
+        vec3 perfectReflection = reflect(ray.direction, hitRecord.n);
+
+        // Roughness perturbs the reflection direction
+        // roughness = 0: perfect mirror
+        // roughness = 1: very rough/blurry reflection
+        reflectedDir =
+            normalize(perfectReflection +
+                      roughness * randomVec3(-1.0, 1.0, pcgHash(seed)));
+
+        // Metals tint their reflections
+        vec3 specularTint = mix(vec3(1.0), hitMaterial.albedo, metalness);
+        accumulatedColor *= specularTint;
+      }
     }
     // Metallic
     else if (hitMaterial.type == 1.0) {
 
-      // Perfect reflection + some fuzziness. If fuzziness is 0, it's a perfect
+      // Perfect reflection + some roughness. If roughness is 0, it's a perfect
       // mirror.
       reflectedDir = normalize(reflect(ray.direction, hitRecord.n)) +
-                     hitMaterial.fuzz * randomVec3(-1.0, 1.0, seed);
+                     hitMaterial.roughness * randomVec3(-1.0, 1.0, seed);
+      accumulatedColor *= hitMaterial.albedo * energyLoss;
 
     }
     // Dielectric
@@ -145,10 +169,10 @@ vec3 pathTrace(Ray ray, uint seed) {
       } else {
         direction = refract(unitDirection, hitRecord.n, ri);
       }
-      reflectedDir =
-          normalize(direction + hitMaterial.fuzz * randomVec3(-1.0, 1.0, seed));
+      reflectedDir = normalize(direction + hitMaterial.roughness *
+                                               randomVec3(-1.0, 1.0, seed));
 
-      energyLoss = 1.0; // No energy loss for dielectrics
+      accumulatedColor *= hitMaterial.albedo;
     }
 
     else if (hitMaterial.type == 3.0) {
@@ -161,9 +185,6 @@ vec3 pathTrace(Ray ray, uint seed) {
       return vec3(0.0, 0.0, 0.0); // Black for error
     }
     ray = Ray(hitPoint + reflectedDir * EPSILON, reflectedDir);
-
-    vec3 localColor = hitMaterial.albedo;
-    accumulatedColor *= localColor * energyLoss;
   }
 
   return accumulatedColor;

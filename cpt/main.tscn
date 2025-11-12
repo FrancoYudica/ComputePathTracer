@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=11 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
+[ext_resource type="Script" uid="uid://jcr6tp7xdl3c" path="res://metallic_roughness_spheres_node_3d.gd" id="5_272bh"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h2yge"]
 
@@ -30,7 +31,7 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
 script = ExtResource("1_0xm2m")
-camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
+camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
 render_control = NodePath("../HBoxContainer/HBoxContainer/TextureRect")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -111,12 +112,13 @@ handle_input_locally = false
 size = Vector2i(464, 648)
 render_target_update_mode = 4
 
-[node name="Node3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
-
-[node name="Camera3D" type="Camera3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D"]
+[node name="Camera3D" type="Camera3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.096968114, 0)
 environment = SubResource("Environment_h2yge")
 current = true
+
+[node name="Node3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+visible = false
 
 [node name="ProceduralSphere" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.82193756, -2.3823183)
@@ -128,7 +130,6 @@ transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 5.861639, -0.8628144
 skeleton = NodePath("../../../../../..")
 color = Color(0.8666667, 0.87058824, 0.67058825, 1)
 material_type = 1
-fuzz = 0.8
 
 [node name="ProceduralSphere7" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 7.3721085, 1.9595413, -8.709521)
@@ -139,7 +140,6 @@ color = Color(0.5764706, 0.18431373, 0.40392157, 1)
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 0.53590345, -1.4769747)
 skeleton = NodePath("../../../../../..")
 material_type = 1
-fuzz = 0.5
 
 [node name="ProceduralSphere8" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 1.4455242, 0.1367352)
@@ -156,7 +156,7 @@ refraction_index = 1.407
 transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 5.082, 1.636, -2.175)
 skeleton = NodePath("../../../../../..")
 material_type = 2
-fuzz = 0.085
+roughness = 0.135
 refraction_index = 1.16
 
 [node name="ProceduralSphere12" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
@@ -191,7 +191,6 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688
 skeleton = NodePath("../../../../../..")
 color = Color(0.2231029, 0.2231029, 0.22310287, 1)
 material_type = 1
-fuzz = 0.07
 
 [node name="ProceduralSphere5" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -50, 0)
@@ -203,6 +202,55 @@ transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 46.48638, -47.40651, 0)
 skeleton = NodePath("../../../../../..")
 color = Color(0.5411765, 0.73333335, 0.42352942, 1)
 material_type = 1
+
+[node name="MetallicRoughnessSpheresNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+script = ExtResource("5_272bh")
+size = 6
+
+[node name="Ground" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -51, 0)
+visible = false
+skeleton = NodePath("../../../../../..")
+metal = 0.1
+roughness = 1.0
+
+[node name="LightsNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1716537, 0)
+
+[node name="LightSphere0" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, -2)
+skeleton = NodePath("../../../../../../..")
+material_type = 3
+roughness = 1.0
+emission = 13.355
+
+[node name="LightSphere1" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -2)
+skeleton = NodePath("../../../../../../..")
+material_type = 3
+roughness = 1.0
+emission = 13.355
+
+[node name="LightSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2)
+skeleton = NodePath("../../../../../../..")
+material_type = 3
+roughness = 1.0
+emission = 13.355
+
+[node name="LightSphere4" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8030615, -0.53227806, 0.7539215)
+skeleton = NodePath("../../../../../../..")
+material_type = 1
+roughness = 0.555
+emission = 13.355
+
+[node name="LightSphere3" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2)
+skeleton = NodePath("../../../../../../..")
+material_type = 3
+roughness = 1.0
+emission = 13.355
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer"]
 texture_filter = 1
@@ -234,7 +282,7 @@ grow_vertical = 2
 
 [node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_1bvp3")
-camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D/Camera3D")
+camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
 
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
