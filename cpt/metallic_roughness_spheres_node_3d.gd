@@ -13,6 +13,7 @@ func _ready() -> void:
 			var sphere = sphere_scene.instantiate()
 			sphere.position.x = x
 			sphere.position.z = z
-			sphere.metal = float(i) / (size - 1)
-			sphere.roughness = float(j) / (size - 1)
+			sphere.object_material = ObjectMaterial.new()
+			sphere.object_material.metal = float(i) / (size - 1)
+			sphere.object_material.roughness = float(j) / (size - 1)
 			add_child(sphere)

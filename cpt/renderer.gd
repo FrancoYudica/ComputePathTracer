@@ -20,6 +20,8 @@ var _camera_storage_buffer: RID
 
 var _scene_uniform_set: RID
 var _scene_spheres_storage_buffer: RID
+var _scene_triangles_storage_buffer: RID
+var _scene_vertex_storage_buffer: RID
 var _scene_materials_storage_buffer: RID
 
 
@@ -27,10 +29,15 @@ var _image_uniform: RDUniform
 var _accumulation_uniform: RDUniform
 var _camera_uniform: RDUniform
 var _scene_spheres_uniform: RDUniform
+var _scene_triangles_uniform: RDUniform
+var _scene_vertex_uniform: RDUniform
 var _scene_materials_uniform: RDUniform
 
 var _still_frames_count: int = 1
 var _render_scale: float = 1.0
+
+## Updated every frame, holds all the scene materials
+var _frame_materials: Dictionary[ObjectMaterial, int]
 
 func get_texture_rid():
 	return _output_texture_rid
@@ -139,23 +146,49 @@ func _initialize_compute():
 	spheres_bytes.resize(1024 * 1024)
 	_scene_spheres_storage_buffer = _rd.storage_buffer_create(spheres_bytes.size(), spheres_bytes)
 	_scene_spheres_uniform.add_id(_scene_spheres_storage_buffer)
-	
+
+	# Triangles uniform set binding
+	_scene_triangles_uniform = RDUniform.new()
+	_scene_triangles_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	_scene_triangles_uniform.binding = 1
+	var triangle_bytes = PackedByteArray()
+	triangle_bytes.resize(1024 * 1024)
+	_scene_triangles_storage_buffer = _rd.storage_buffer_create(triangle_bytes.size(), triangle_bytes)
+	_scene_triangles_uniform.add_id(_scene_triangles_storage_buffer)
+
+	# Vertex uniform set binding
+	_scene_vertex_uniform = RDUniform.new()
+	_scene_vertex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	_scene_vertex_uniform.binding = 2
+	var vertex_bytes = PackedByteArray()
+	vertex_bytes.resize(1024 * 1024)
+	_scene_vertex_storage_buffer = _rd.storage_buffer_create(vertex_bytes.size(), vertex_bytes)
+	_scene_vertex_uniform.add_id(_scene_vertex_storage_buffer)
+
 	# Material uniform set binding
 	_scene_materials_uniform = RDUniform.new()
 	_scene_materials_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	_scene_materials_uniform.binding = 1
+	_scene_materials_uniform.binding = 3
 	var materials_bytes = PackedByteArray()
 	materials_bytes.resize(1024 * 1024)
 	_scene_materials_storage_buffer = _rd.storage_buffer_create(materials_bytes.size(), materials_bytes)
 	_scene_materials_uniform.add_id(_scene_materials_storage_buffer)
 	
-	_scene_uniform_set = _rd.uniform_set_create([_scene_spheres_uniform, _scene_materials_uniform], _shader, 3)
+	_scene_uniform_set = _rd.uniform_set_create(
+		[
+			_scene_spheres_uniform, 
+			_scene_triangles_uniform, 
+			_scene_vertex_uniform, 
+			_scene_materials_uniform
+		], _shader, 3)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_rd.free_rid(_output_texture_rid)
 		_rd.free_rid(_camera_storage_buffer)
 		_rd.free_rid(_scene_spheres_storage_buffer)
+		_rd.free_rid(_scene_triangles_storage_buffer)
+		_rd.free_rid(_scene_vertex_storage_buffer)
 		_rd.free_rid(_scene_materials_storage_buffer)
 		_rd.free_rid(_output_texture_set)
 		_rd.free_rid(_camera_uniform_set)
@@ -246,15 +279,26 @@ func _update_camera_storage_buffer():
 	_rd.buffer_update(_camera_storage_buffer, 0, camera_bytes.size(), camera_bytes)
 
 func _update_scene_storage_buffer():
+	_frame_materials.clear()
+
+	_update_spheres_buffers()
+	_update_triangle_buffers()
+	_update_material_buffer()
+
+func _push_material(material: ObjectMaterial) -> int:
+	if not _frame_materials.has(material):
+		_frame_materials[material] = _frame_materials.size()
+		
+	return _frame_materials[material]
+
+func _update_spheres_buffers():
 	var SPHERE_FLOATS = 8
 	var spheres = get_tree().get_nodes_in_group("procedural_sphere").filter(
 		func(node: Node3D):
 			return node.is_visible_in_tree()
 	)
-	
+
 	var spheres_data = PackedFloat32Array() # Sphere count + 3 bytes pad + Spheres data
-	var materials_data = PackedFloat32Array()
-	var materials_count = 0
 	spheres_data.resize(spheres.size() * SPHERE_FLOATS + 4)
 	spheres_data[0] = spheres.size()
 	for i in range(spheres.size()):
@@ -262,19 +306,79 @@ func _update_scene_storage_buffer():
 		var base_offset = i * SPHERE_FLOATS + 4
 		var material_offset = 4 # x, y, z, r, mtl
 		sphere.load_bytes(spheres_data, base_offset)
-		spheres_data[base_offset + material_offset] = materials_count # Material index
-		materials_data.push_back(sphere.material_type)
-		materials_data.push_back(sphere.metal)
-		materials_data.push_back(sphere.roughness)
-		materials_data.push_back(sphere.refraction_index)
-		materials_data.push_back(sphere.color.r)
-		materials_data.push_back(sphere.color.g)
-		materials_data.push_back(sphere.color.b)
-		materials_data.push_back(sphere.emission)
-		materials_count += 1
+		var material_index = _push_material(sphere.object_material)
+		spheres_data[base_offset + material_offset] = material_index # Material index
 		
 	var sphere_bytes = spheres_data.to_byte_array()
 	_rd.buffer_update(_scene_spheres_storage_buffer, 0, sphere_bytes.size(), sphere_bytes)
 
+func _update_triangle_buffers():
+
+	var meshes = get_tree().get_nodes_in_group("mesh").filter(
+		func(node: Node3D):
+			return node.is_visible_in_tree()
+	)
+
+	var triangles_data = PackedFloat32Array() # Triangles count + 3 bytes pad + Triangles data
+	var vertices_data = PackedVector4Array() # vec3 vertices + 1 byte for pad
+	
+	triangles_data.push_back(0) # Triangle count set later
+	triangles_data.push_back(0)
+	triangles_data.push_back(0)
+	triangles_data.push_back(0)
+
+	for i in range(meshes.size()):
+		var mesh_instance: MeshInstance3D = meshes[i] as MeshInstance3D
+		var mesh = mesh_instance.mesh
+		var mesh_material_index = _push_material(mesh_instance.object_material)
+		
+		for surface_index in mesh.get_surface_count():
+			var surface_array = mesh.surface_get_arrays(surface_index)
+			var vertices = surface_array[Mesh.ARRAY_VERTEX]
+			
+			var base_index_offset = vertices_data.size()
+			for vertex_index in vertices.size():
+				var v = mesh_instance.global_transform * vertices[vertex_index]
+				vertices_data.push_back(Vector4(v.x, v.y, v.z, 0.0))
+			# The triangle is made with the vertices indices and the material
+			var indices = surface_array[Mesh.ARRAY_INDEX]
+			var triangle_count = indices.size() / 3
+			
+			print("Surface: (vertices:%s, indices%s), Triangles: %s" % [vertices.size(), indices.size(), triangle_count])
+			for triangle_index in triangle_count:
+				var i0 = base_index_offset + indices[triangle_index * 3]
+				var i1 = base_index_offset + indices[triangle_index * 3 + 1]
+				var i2 = base_index_offset + indices[triangle_index * 3 + 2]
+				triangles_data.push_back(i0) # Vertex index 0
+				triangles_data.push_back(i1) # Vertex index 1
+				triangles_data.push_back(i2) # Vertex index 2
+				triangles_data.push_back(mesh_material_index) # Material index
+	
+	triangles_data[0] = triangles_data.size()
+	
+	var triangles_bytes = triangles_data.to_byte_array()
+	_rd.buffer_update(_scene_triangles_storage_buffer, 0, triangles_bytes.size(), triangles_bytes)
+
+	var vertices_bytes = vertices_data.to_byte_array()
+	_rd.buffer_update(_scene_vertex_storage_buffer, 0, vertices_bytes.size(), vertices_bytes)
+
+func _update_material_buffer():
+	# Updates material storage buffer
+	var materials_data = PackedFloat32Array()
+	materials_data.resize(8 * _frame_materials.size())
+	var materials := _frame_materials.keys()
+	for material: ObjectMaterial in materials:
+		var material_index = _frame_materials[material]
+		var base = material_index * 8
+		materials_data[base] = material.material_type
+		materials_data[base + 1] = material.metal
+		materials_data[base + 2] = material.roughness
+		materials_data[base + 3] = material.refraction_index
+		materials_data[base + 4] = material.color.r
+		materials_data[base + 5] = material.color.g
+		materials_data[base + 6] = material.color.b
+		materials_data[base + 7] = material.emission
+		
 	var materials_bytes = materials_data.to_byte_array()
 	_rd.buffer_update(_scene_materials_storage_buffer, 0, materials_bytes.size(), materials_bytes)
+	print("Material count: %s" % [_frame_materials.size()])

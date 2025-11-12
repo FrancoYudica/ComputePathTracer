@@ -17,3 +17,8 @@ struct Sphere {
   float radius;
   float materialIndex;
 };
+
+struct Triangle {
+  vec3 indices; // vertices indices
+  float materialIndex;
+};

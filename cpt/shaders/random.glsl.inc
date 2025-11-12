@@ -35,10 +35,13 @@ vec3 randomVec3(float min, float max, uint seed) {
 }
 
 vec3 randomVec3N(uint seed) {
-  return normalize(vec3(-1.0) + 2.0 * randomVec3(seed));
+  float u = hashToFloat(pcgHash(seed));
+  float v = hashToFloat(pcgHash(pcgHash(seed)));
+  float theta = 2.0 * 3.14159265359 * u;
+  float phi = acos(2.0 * v - 1.0);
+  float sinPhi = sin(phi);
+  return vec3(sinPhi * cos(theta), sinPhi * sin(theta), cos(phi));
 }
-
-
 
 vec2 randomVec2(uint seed) {
   uint h1 = pcgHash(seed);

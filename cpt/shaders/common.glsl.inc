@@ -44,6 +44,50 @@ bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
   return true;
 }
 
+bool triangleIntersection(
+  Ray ray, 
+  vec3 v0,
+  vec3 v1,
+  vec3 v2,
+  float materialIndex,
+  out HitRecord record) {
+  vec3 edge1 = v1 - v0;
+  vec3 edge2 = v2 - v0;
+  vec3 h = cross(ray.direction, edge2);
+  float a = dot(edge1, h);
+  if (abs(a) < EPSILON) {
+    return false; // Ray is parallel to triangle
+  }
+  float f = 1.0 / a;
+  vec3 s = ray.origin - v0;
+  float u = f * dot(s, h);
+  if (u < 0.0 || u > 1.0) {
+    return false;
+  }
+  vec3 q = cross(s, edge1);
+  float v = f * dot(ray.direction, q);
+  if (v < 0.0 || u + v > 1.0) {
+    return false;
+  }
+  float t = f * dot(edge2, q);
+  if (t < EPSILON) {
+    return false; // Intersection behind ray origin
+  }
+  
+  record.t = t;
+  record.p = rayAt(ray, t);
+  record.n = normalize(cross(edge1, edge2));
+  record.materialIndex = materialIndex;
+  
+  // set frontFace so the normal always points against the incoming ray
+  record.frontFace = dot(ray.direction, record.n) < 0.0;
+  if (!record.frontFace) {
+    record.n = -record.n;
+  }
+
+  return true;
+}
+
 /**
  * Schlick's approximation for reflectance
  */

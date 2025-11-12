@@ -19,7 +19,14 @@ layout(std140, set = 3, binding = 0) buffer Spheres {
   Sphere spheres[];
 };
 
-layout(std140, set = 3, binding = 1) buffer Materials { Material materials[]; };
+layout(std140, set = 3, binding = 1) buffer Triangles {
+  float triangleCount;
+  Triangle triangles[];
+};
+
+layout(std140, set = 3, binding = 2) buffer Vertices { vec3 vertices[]; };
+
+layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
 
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
@@ -65,16 +72,32 @@ Iterates through all the scene and finds the closest intersection.
 bool intersectScene(Ray ray, out HitRecord nearestHit) {
   nearestHit.t = -1.0;
   Sphere sphere;
+  Triangle triangle;
   bool didHit = false;
+  HitRecord record;
+
   for (int i = 0; i < int(sphereCount); i++) {
     sphere = spheres[i];
-    HitRecord record;
     bool h = sphereIntersection(ray, sphere, record);
     if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
       nearestHit = record;
       didHit = true;
     }
   }
+
+  for (int i = 0; i < int(triangleCount); i++) {
+    triangle = triangles[i];
+    vec3 v0 = vertices[int(triangle.indices.x)];
+    vec3 v1 = vertices[int(triangle.indices.y)];
+    vec3 v2 = vertices[int(triangle.indices.z)];
+    bool h =
+        triangleIntersection(ray, v0, v1, v2, triangle.materialIndex, record);
+    if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
+      nearestHit = record;
+      didHit = true;
+    }
+  }
+
   return didHit;
 }
 
@@ -98,7 +121,7 @@ vec3 pathTrace(Ray ray, uint seed) {
     bool didHit = intersectScene(ray, hitRecord);
 
     if (!didHit) {
-      accumulatedColor *= sampleSky(ray) * 0.25;
+      accumulatedColor *= sampleSky(ray);
       break;
     }
 
@@ -128,9 +151,8 @@ vec3 pathTrace(Ray ray, uint seed) {
         // Roughness perturbs the reflection direction
         // roughness = 0: perfect mirror
         // roughness = 1: very rough/blurry reflection
-        reflectedDir =
-            normalize(perfectReflection +
-                      roughness * randomVec3(-1.0, 1.0, pcgHash(seed)));
+        reflectedDir = normalize(perfectReflection +
+                                 roughness * randomVec3N(pcgHash(seed)));
 
         // Metals tint their reflections
         vec3 specularTint = mix(vec3(1.0), hitMaterial.albedo, metalness);
@@ -143,8 +165,8 @@ vec3 pathTrace(Ray ray, uint seed) {
       // Perfect reflection + some roughness. If roughness is 0, it's a perfect
       // mirror.
       reflectedDir = normalize(reflect(ray.direction, hitRecord.n)) +
-                     hitMaterial.roughness * randomVec3(-1.0, 1.0, seed);
-      accumulatedColor *= hitMaterial.albedo * energyLoss;
+                     hitMaterial.roughness * randomVec3N(seed);
+      accumulatedColor *= hitMaterial.albedo;
 
     }
     // Dielectric

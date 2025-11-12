@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ObjectMaterial" load_steps=2 format=3 uid="uid://bcw4cqty36wjx"]
+
+[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="1_eiwob"]
+
+[resource]
+script = ExtResource("1_eiwob")
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
