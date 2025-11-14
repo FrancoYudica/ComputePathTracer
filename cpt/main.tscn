@@ -1,15 +1,23 @@
-[gd_scene load_steps=25 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=34 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://settings_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
+[ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
 [ext_resource type="Script" uid="uid://jcr6tp7xdl3c" path="res://metallic_roughness_spheres_node_3d.gd" id="5_272bh"]
+[ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="6_5vw27"]
 [ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="7_kek77"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="8_4c57u"]
+
+[sub_resource type="Resource" id="Resource_d13ii"]
+script = ExtResource("3_efxa6")
+camera_aperture = 0.005
+camera_focal_distance = 5.0
+metadata/_custom_type_script = "uid://bb3p5d8pcpo0d"
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h2yge"]
 
@@ -75,15 +83,43 @@ script = ExtResource("7_kek77")
 color = Color(0.9384497, 0.9384497, 0.9384497, 1)
 material_type = 2
 metal = 0.645
-roughness = 0.481
-refraction_index = 1.2530000000000001
+roughness = 0.11
+refraction_index = 1.253
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
 [sub_resource type="Resource" id="Resource_2cqfq"]
 script = ExtResource("7_kek77")
 color = Color(1, 1, 0.6334544, 1)
 material_type = 3
-emission = 100.0
+emission = 48.168
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_074og"]
+script = ExtResource("7_kek77")
+color = Color(0.71128005, 0.2939169, 0.3404039, 1)
+emission = 48.168
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="QuadMesh" id="QuadMesh_4c57u"]
+
+[sub_resource type="Resource" id="Resource_cegan"]
+script = ExtResource("7_kek77")
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_82xsv"]
+script = ExtResource("7_kek77")
+color = Color(1, 0, 0, 1)
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_getpj"]
+script = ExtResource("7_kek77")
+color = Color(0, 1, 0, 1)
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_ryguw"]
+script = ExtResource("7_kek77")
+material_type = 3
+emission = 324.906
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
 [node name="MainScene" type="Control" node_paths=PackedStringArray("renderer")]
@@ -100,9 +136,10 @@ renderer = NodePath("Renderer")
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
 script = ExtResource("1_0xm2m")
 camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
-render_control = NodePath("../HBoxContainer/HBoxContainer/TextureRect")
+render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
+render_settings = SubResource("Resource_d13ii")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="SplitContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -110,13 +147,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "camera_controller")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "aperture_slider", "focal_distance_slider")]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 script = ExtResource("2_lquwl")
 rasterized_panel = NodePath("../HBoxContainer/RasterizedSubViewportContainer")
 renderer = NodePath("../../Renderer")
 rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
+sub_viewport = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport")
 camera_controller = NodePath("../../CameraController")
+save_file_dialog = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/SaveFileDialog")
+aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
+focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer"]
 layout_mode = 2
@@ -125,37 +167,85 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="SettingsVBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer"]
 layout_mode = 2
-button_pressed = true
-text = "View rasterized"
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="SamplesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="SaveFileDialog" type="FileDialog" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+filters = PackedStringArray(".png")
+use_native_dialog = true
+
+[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "RENDERER SETTINGS"
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="SamplesPerPixelLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Samples"
+
+[node name="SamplesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 min_value = 1.0
 value = 1.0
-prefix = "Spp"
+suffix = "spp"
 
-[node name="RenderScaleSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
-custom_minimum_size = Vector2(200, 0)
+[node name="RenderScaleLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+text = "Render scale"
+
+[node name="RenderScaleControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RenderScaleSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
 min_value = 10.0
 step = 10.0
 value = 100.0
-prefix = "Render scale"
+rounded = true
+
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl" node_paths=PackedStringArray("slider")]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+script = ExtResource("5_dg77c")
+slider = NodePath("../RenderScaleSlider")
 suffix = "%"
 
-[node name="FovHBoxContainer" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer"]
+[node name="FovLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+text = "FOV"
 
-[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer"]
+[node name="FovHBoxContainer" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-text = "fov"
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
-[node name="FovHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer"]
+[node name="FovHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -165,23 +255,82 @@ value = 75.0
 rounded = true
 ticks_on_borders = true
 
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer" node_paths=PackedStringArray("slider")]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+script = ExtResource("5_dg77c")
+slider = NodePath("../FovHSlider")
+
+[node name="ApertureLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Aperture"
+
+[node name="ApertureControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ApertureHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+max_value = 1.0
+step = 0.001
+
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl" node_paths=PackedStringArray("slider")]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+script = ExtResource("5_dg77c")
+slider = NodePath("../ApertureHSlider")
+
+[node name="FocalDistanceLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Focal length"
+
+[node name="FocalLengthControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FocalLengthHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+step = 0.001
+
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl" node_paths=PackedStringArray("slider")]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+script = ExtResource("5_dg77c")
+slider = NodePath("../FocalLengthHSlider")
+
+[node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "View rasterized"
+
+[node name="ScreenshotButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 10
+text = "Screenshot"
+
 [node name="HBoxContainer" type="SplitContainer" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="RasterizedSubViewportContainer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(464, 648)
-render_target_update_mode = 4
+size = Vector2i(2, 2)
+render_target_update_mode = 0
 
 [node name="Camera3D" type="Camera3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 0.9738928, 0.22700827, 0, -0.22700827, 0.9738928, 0.3226604, 1.3093321, 0.47137868)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1)
 environment = SubResource("Environment_h2yge")
 current = true
 
@@ -282,6 +431,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2)
 skeleton = NodePath("../../../../../../..")
 
 [node name="TriangleTesNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+visible = false
 
 [node name="MeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("6_5vw27")]
 transform = Transform3D(0.9555153, 0.2329513, 0.1808975, -0.294941, 0.7546883, 0.58605057, 2.9802319e-08, -0.6133345, 0.7898233, -1.073, 0.494, -1.6931942)
@@ -307,40 +457,84 @@ object_material = SubResource("Resource_yaehf")
 transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, 0, 1.6054106, -1.3988836)
 object_material = SubResource("Resource_2cqfq")
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer"]
-texture_filter = 1
-layout_mode = 2
-size_flags_horizontal = 3
-expand_mode = 1
+[node name="ProceduralSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("3_7mycd")]
+transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 1.1813781, -3.0980055)
+object_material = SubResource("Resource_074og")
 
-[node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/TextureRect" node_paths=PackedStringArray("renderer")]
-script = ExtResource("3_h2yge")
-renderer = NodePath("../../../../Renderer")
+[node name="BoxNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+
+[node name="CornellNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D"]
+
+[node name="FrontMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(0.9999999, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+mesh = SubResource("QuadMesh_4c57u")
+skeleton = NodePath("../..")
+object_material = SubResource("Resource_cegan")
+
+[node name="LeftMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(-4.371138e-08, 0, 0.9999999, 0, 1, 0, -0.9999999, 0, -4.371139e-08, -0.49999994, 0.5, -0.5)
+mesh = SubResource("QuadMesh_4c57u")
+object_material = SubResource("Resource_82xsv")
+
+[node name="RightMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(-4.3711385e-08, 0, -0.9999999, 0, 1, 0, 0.9999999, 0, -4.3711385e-08, 0.50000006, 0.5, -0.5)
+mesh = SubResource("QuadMesh_4c57u")
+object_material = SubResource("Resource_getpj")
+
+[node name="TopMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, -0.9999999, 0, 1, -4.3711385e-08, 0, 1, -0.5)
+mesh = SubResource("QuadMesh_4c57u")
+object_material = SubResource("Resource_cegan")
+
+[node name="BottomMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, 0.9999999, 0, -1, -4.3711385e-08, 0, 0, -0.5)
+mesh = SubResource("QuadMesh_4c57u")
+object_material = SubResource("Resource_cegan")
+
+[node name="LightMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(0.405, 0, 0, 0, -1.7703112e-08, -0.405, 0, 0.405, -1.7703112e-08, 0, 0.999, -0.5)
+mesh = SubResource("QuadMesh_4c57u")
+object_material = SubResource("Resource_ryguw")
+
+[node name="RookMeshInstance3D2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(0.49223077, 0, -0.11284439, 0, 0.505, 0, 0.11284439, 0, 0.49223077, 0, 0, -0.48835897)
+mesh = ExtResource("8_4c57u")
+object_material = SubResource("Resource_yaehf")
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
 handle_input_locally = false
-size = Vector2i(2, 2)
-render_target_update_mode = 0
+size = Vector2i(890, 648)
+render_target_update_mode = 4
 
-[node name="ColorRect" type="ColorRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
+texture_filter = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+expand_mode = 1
+
+[node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
+script = ExtResource("3_h2yge")
+renderer = NodePath("../../../../../../Renderer")
 
 [node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("camera")]
 script = ExtResource("3_1bvp3")
 camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
 
-[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/RenderScaleSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/SettingsVBoxContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl/RenderScaleSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_slider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_aperture_h_slider_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
+[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
+[connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]
 [connection signal="moved" from="CameraController" to="." method="_on_camera_controller_moved"]

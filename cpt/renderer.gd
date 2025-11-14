@@ -4,7 +4,7 @@ class_name Renderer extends Node
 @export var camera: Camera3D
 @export var render_control: Control
 
-var samples: int = 1
+@export var render_settings: RenderSettings
 
 var _shader: RID
 var _pipeline: RID
@@ -23,7 +23,6 @@ var _scene_spheres_storage_buffer: RID
 var _scene_triangles_storage_buffer: RID
 var _scene_vertex_storage_buffer: RID
 var _scene_materials_storage_buffer: RID
-
 
 var _image_uniform: RDUniform
 var _accumulation_uniform: RDUniform
@@ -130,7 +129,7 @@ func _initialize_compute():
 	_camera_uniform.binding = 0
 	
 	var camera_bytes = PackedByteArray()
-	camera_bytes.resize(16 * 2 * 4) # 16f per matrix, 2 matrices, and 4 bytes per float
+	camera_bytes.resize((16 * 2 + 4) * 4) # 16f per matrix, 2 matrices, 4 floats, and 4 bytes per float
 	camera_bytes.fill(0)
 	_camera_storage_buffer = _rd.storage_buffer_create(
 		camera_bytes.size(),
@@ -227,7 +226,7 @@ func _draw():
 		texture_height,
 		_still_frames_count, # Frame number
 		_still_frames_count * 1664525 + 1013904223, # Frame-based random seed
-		samples,
+		render_settings.samples_per_pixel,
 		1.0 / float(_still_frames_count), # Frame accumulation weight
 		0.0, 0.0
 	])
@@ -273,6 +272,10 @@ func _update_camera_storage_buffer():
 	var camera_data = PackedFloat32Array()
 	camera_data.append_array(view_floats)
 	camera_data.append_array(proj_floats)
+	camera_data.append(render_settings.camera_aperture)
+	camera_data.append(render_settings.camera_focal_distance)
+	camera_data.append(0.0)
+	camera_data.append(0.0)
 
 	# Update buffer data
 	var camera_bytes = camera_data.to_byte_array()
@@ -344,7 +347,7 @@ func _update_triangle_buffers():
 			var indices = surface_array[Mesh.ARRAY_INDEX]
 			var triangle_count = indices.size() / 3
 			
-			print("Surface: (vertices:%s, indices%s), Triangles: %s" % [vertices.size(), indices.size(), triangle_count])
+			#print("Surface: (vertices:%s, indices%s), Triangles: %s" % [vertices.size(), indices.size(), triangle_count])
 			for triangle_index in triangle_count:
 				var i0 = base_index_offset + indices[triangle_index * 3]
 				var i1 = base_index_offset + indices[triangle_index * 3 + 1]
@@ -381,4 +384,3 @@ func _update_material_buffer():
 		
 	var materials_bytes = materials_data.to_byte_array()
 	_rd.buffer_update(_scene_materials_storage_buffer, 0, materials_bytes.size(), materials_bytes)
-	print("Material count: %s" % [_frame_materials.size()])

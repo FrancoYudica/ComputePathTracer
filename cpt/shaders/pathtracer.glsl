@@ -5,14 +5,16 @@
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
-layout(rgba8, set = 0, binding = 0) uniform image2D out_image;
-layout(rgba32f, set = 1, binding = 0) uniform image2D accumulation_image;
+layout(rgba8, set = 0, binding = 0) uniform image2D outImage;
+layout(rgba32f, set = 1, binding = 0) uniform image2D accumulationImage;
 
 layout(std430, set = 2, binding = 0) buffer CameraData {
   mat4 view;
   mat4 projection;
+  float aperture;
+  float focalDistance;
 }
-camera_data;
+cameraData;
 
 layout(std140, set = 3, binding = 0) buffer Spheres {
   float sphereCount;
@@ -42,26 +44,48 @@ params;
 #include "common.glsl.inc"
 #include "random.glsl.inc"
 
-Ray generateRay(vec2 pixel) {
+Ray generateRay(vec2 pixel, uint seed) {
   // 1. Pixel -> NDC (-1, 1)
   vec2 uv = (pixel + 0.5) / vec2(params.width, params.height);
   uv.y = 1.0 - uv.y;
   uv = uv * 2.0 - 1.0;
 
   // 2. Reconstruct world-space point on near plane
-  mat4 invViewProj = inverse(camera_data.projection * camera_data.view);
+  mat4 invViewProj = inverse(cameraData.projection * cameraData.view);
   vec4 ndc = vec4(uv, -1.0, 1.0); // z = -1 = near plane in Vulkan
   vec4 worldPos = invViewProj * ndc;
   worldPos /= worldPos.w;
 
   // 3. Get camera position in world space
-  vec3 origin = inverse(camera_data.view)[3].xyz;
+  vec3 cameraPosition = inverse(cameraData.view)[3].xyz;
 
   // 4. Direction from camera to the reconstructed world position
-  vec3 direction = normalize(worldPos.xyz - origin);
+  vec3 pinholeDir = normalize(worldPos.xyz - cameraPosition);
+
+  // 5. Depth of field
+  // Compute the focal point in world space
+  vec3 focalPoint = cameraPosition + pinholeDir * cameraData.focalDistance;
+
+  // Sample random point on a unit disk
+  vec2 xi = vec2(randomFloat(seed), randomFloat(seed + 19283));
+  float r = sqrt(xi.x);
+  float theta = 2.0 * 3.14159265 * xi.y;
+  vec2 disk = vec2(r * cos(theta), r * sin(theta));
+
+  // Convert disk sample to world space lens position
+  // Extract camera basis from inverse(view)
+  mat3 camRot = mat3(inverse(cameraData.view));
+
+  vec3 lensOffset = camRot[0] * disk.x * cameraData.aperture +
+                    camRot[1] * disk.y * cameraData.aperture;
+
+  vec3 lensPos = cameraPosition + lensOffset;
+
+  // Recompute ray direction toward focal point
+  vec3 direction = normalize(focalPoint - lensPos);
 
   Ray ray;
-  ray.origin = origin;
+  ray.origin = lensPos;
   ray.direction = direction;
   return ray;
 }
@@ -110,10 +134,11 @@ vec3 sampleSky(Ray ray) {
 vec3 pathTrace(Ray ray, uint seed) {
 
   HitRecord hitRecord;
-  int depth = 15;
-  vec3 accumulatedColor = vec3(1.0);
+  int maxDepth = 15;
+  vec3 radiance = vec3(0.0);
+  vec3 throughput = vec3(1.0);
 
-  while (depth-- > 0) {
+  for (int depth = 0; depth < maxDepth; depth++) {
 
     // Generate new seed for each bounce
     seed = pcgHash(seed + uint(depth * 17));
@@ -121,7 +146,7 @@ vec3 pathTrace(Ray ray, uint seed) {
     bool didHit = intersectScene(ray, hitRecord);
 
     if (!didHit) {
-      accumulatedColor *= sampleSky(ray);
+      radiance += sampleSky(ray) * throughput;
       break;
     }
 
@@ -130,8 +155,6 @@ vec3 pathTrace(Ray ray, uint seed) {
 
     // Fetch material
     Material hitMaterial = materials[int(hitRecord.materialIndex)];
-
-    float energyLoss = 0.5;
 
     // Lambertian
     if (hitMaterial.type == 0.0) {
@@ -142,7 +165,7 @@ vec3 pathTrace(Ray ray, uint seed) {
       if (randomFloat(seed) > metalness) {
         // Diffuse reflection with roughness
         reflectedDir = normalize(hitRecord.n + randomVec3N(seed));
-        accumulatedColor *= hitMaterial.albedo * energyLoss;
+        throughput *= hitMaterial.albedo * 0.5;
 
       } else {
         // Specular reflection with roughness
@@ -156,7 +179,7 @@ vec3 pathTrace(Ray ray, uint seed) {
 
         // Metals tint their reflections
         vec3 specularTint = mix(vec3(1.0), hitMaterial.albedo, metalness);
-        accumulatedColor *= specularTint;
+        throughput *= specularTint;
       }
     }
     // Metallic
@@ -166,7 +189,7 @@ vec3 pathTrace(Ray ray, uint seed) {
       // mirror.
       reflectedDir = normalize(reflect(ray.direction, hitRecord.n)) +
                      hitMaterial.roughness * randomVec3N(seed);
-      accumulatedColor *= hitMaterial.albedo;
+      throughput *= hitMaterial.albedo;
 
     }
     // Dielectric
@@ -193,13 +216,12 @@ vec3 pathTrace(Ray ray, uint seed) {
       }
       reflectedDir = normalize(direction + hitMaterial.roughness *
                                                randomVec3(-1.0, 1.0, seed));
-
-      accumulatedColor *= hitMaterial.albedo;
+      throughput *= hitMaterial.albedo;
     }
 
     else if (hitMaterial.type == 3.0) {
       // Emissive material - stop the path and accumulate emission
-      accumulatedColor *= hitMaterial.albedo * hitMaterial.emission;
+      radiance += throughput * hitMaterial.albedo * hitMaterial.emission;
       break;
     }
 
@@ -209,7 +231,7 @@ vec3 pathTrace(Ray ray, uint seed) {
     ray = Ray(hitPoint + reflectedDir * EPSILON, reflectedDir);
   }
 
-  return accumulatedColor;
+  return radiance;
 }
 
 void main() {
@@ -233,7 +255,7 @@ void main() {
     uint sampleSeed = combineSeed(baseSeed, uint(i));
 
     vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, sampleSeed);
-    Ray ray = generateRay(jitteredPixel);
+    Ray ray = generateRay(jitteredPixel, sampleSeed);
     colorSum += pathTrace(ray, sampleSeed);
   }
 
@@ -246,12 +268,12 @@ void main() {
   vec3 writeColor = frameColor;
 
   if (params.frameNumber > 1.0) {
-    vec3 existingColor = imageLoad(accumulation_image, pixel).rgb;
+    vec3 existingColor = imageLoad(accumulationImage, pixel).rgb;
     writeColor = existingColor * (1.0 - params.frameWeight) +
                  frameColor * params.frameWeight;
   }
 
   // Write to accumulation buffer and output image
-  imageStore(accumulation_image, pixel, vec4(writeColor, 1.0));
-  imageStore(out_image, pixel, vec4(writeColor, 1.0));
+  imageStore(accumulationImage, pixel, vec4(writeColor, 1.0));
+  imageStore(outImage, pixel, vec4(writeColor, 1.0));
 }
