@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://bebv6dlx2oomf"]
+
+[ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_ge8mg"]
+[ext_resource type="Script" uid="uid://2tu85pmmq26l" path="res://scenes/metal_roughness_test_scene.gd" id="2_6n7px"]
+[ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_0ep18"]
+[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="4_2rqqq"]
+
+[sub_resource type="Resource" id="Resource_o5abj"]
+script = ExtResource("4_2rqqq")
+material_type = 3
+roughness = 0.525
+emission = 3.326
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[node name="MetalRoughnessTestScene" instance=ExtResource("1_ge8mg")]
+script = ExtResource("2_6n7px")
+size = 5
+radius = 1.0
+
+[node name="LightsNode3D" type="Node3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1716537, 0)
+
+[node name="LightSphere0" parent="LightsNode3D" index="0" instance=ExtResource("3_0ep18")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, -2)
+skeleton = NodePath("../../../../../../..")
+object_material = SubResource("Resource_o5abj")
+
+[node name="LightSphere1" parent="LightsNode3D" index="1" instance=ExtResource("3_0ep18")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -2)
+skeleton = NodePath("../../../../../../..")
+object_material = SubResource("Resource_o5abj")
+
+[node name="LightSphere2" parent="LightsNode3D" index="2" instance=ExtResource("3_0ep18")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2)
+skeleton = NodePath("../../../../../../..")
+object_material = SubResource("Resource_o5abj")
+
+[node name="LightSphere3" parent="LightsNode3D" index="3" instance=ExtResource("3_0ep18")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2)
+skeleton = NodePath("../../../../../../..")
+object_material = SubResource("Resource_o5abj")

@@ -2,7 +2,6 @@ extends Node
 
 signal moved
 
-@export var camera: Camera3D
 
 const MOUSE_SENSITIVITY = 0.002
 
@@ -15,8 +14,11 @@ var motion := Vector3()
 # Stores the effective camera velocity.
 var velocity := Vector3()
 
-# The initial camera node rotation.
-@onready var initial_rotation := camera.rotation.y
+@export var renderer: Renderer
+
+var camera: Camera3D:
+	get:
+		return renderer.scene.camera
 
 var _tracking_mouse: bool = false
 
@@ -29,12 +31,17 @@ var fov: float:
 		moved.emit()
 
 func _ready() -> void:
-	fov = 75.0
+	fov = camera.fov
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_released("mouse_down"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		_tracking_mouse = false
+		
+func _unhandled_input(event: InputEvent) -> void: 
+	if event.is_action_pressed("mouse_down"):
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		_tracking_mouse = true
 
 	if event is InputEventMouseMotion and _tracking_mouse:
 		# Horizontal mouse look.
@@ -42,11 +49,6 @@ func _input(event: InputEvent) -> void:
 		# Vertical mouse look, clamped to -90..90 degrees.
 		camera.rotation.x = clamp(camera.rotation.x - event.relative.y * MOUSE_SENSITIVITY, deg_to_rad(-90), deg_to_rad(90))
 		moved.emit()
-		
-func _unhandled_input(event: InputEvent) -> void: 
-	if event.is_action_pressed("mouse_down"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		_tracking_mouse = true
 
 func _process(delta: float) -> void:
 	motion.x = Input.get_action_strength("move_right") -  Input.get_action_strength("move_left")
@@ -61,10 +63,12 @@ func _process(delta: float) -> void:
 		motion *= 2
 
 	# Rotate the motion based on the camera angle.
+	var yaw := camera.rotation.y
+	var pitch := camera.rotation.x
 	var look_dir = motion \
-		.rotated(Vector3(0, 1, 0), camera.rotation.y - initial_rotation) \
-		.rotated(Vector3(1, 0, 0), cos(camera.rotation.y) * camera.rotation.x) \
-		.rotated(Vector3(0, 0, 1), -sin(camera.rotation.y) * camera.rotation.x)
+		.rotated(Vector3(0, 1, 0), yaw) \
+		.rotated(Vector3(1, 0, 0), cos(yaw) * pitch) \
+		.rotated(Vector3(0, 0, 1), -sin(yaw) * pitch)
 
 	# Add motion, apply friction and velocity.
 	velocity += look_dir * move_speed * delta

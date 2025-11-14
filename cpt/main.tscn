@@ -1,189 +1,21 @@
-[gd_scene load_steps=44 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=13 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://settings_panel_container.gd" id="2_lquwl"]
-[ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://camera_controller.gd" id="3_1bvp3"]
-[ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
+[ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
 [ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
-[ext_resource type="Texture2D" uid="uid://don7t6cg36jkh" path="res://sky/811-hdri-skies-com.hdr" id="4_ycdy4"]
-[ext_resource type="Script" uid="uid://jcr6tp7xdl3c" path="res://metallic_roughness_spheres_node_3d.gd" id="5_272bh"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://slider_value_label.gd" id="5_dg77c"]
-[ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="6_5vw27"]
-[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="7_kek77"]
-[ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="8_4c57u"]
+[ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
+[ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
+[ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
+[ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
 
 [sub_resource type="Resource" id="Resource_d13ii"]
 script = ExtResource("3_efxa6")
-camera_aperture = 0.005
 camera_focal_distance = 5.0
 metadata/_custom_type_script = "uid://bb3p5d8pcpo0d"
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ycdy4"]
-panorama = ExtResource("4_ycdy4")
-energy_multiplier = 0.25
-
-[sub_resource type="Sky" id="Sky_w48qg"]
-sky_material = SubResource("PanoramaSkyMaterial_ycdy4")
-
-[sub_resource type="Environment" id="Environment_h2yge"]
-background_mode = 2
-sky = SubResource("Sky_w48qg")
-ambient_light_source = 3
-
-[sub_resource type="Resource" id="Resource_kek77"]
-script = ExtResource("7_kek77")
-color = Color(0.5691564, 0.7588022, 0.62576675, 1)
-metal = 0.2
-roughness = 1.0
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_dg77c"]
-script = ExtResource("7_kek77")
-color = Color(0.18431373, 0.69803923, 0.43529412, 1)
-roughness = 0.43
-emission = 2.555
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_efxa6"]
-script = ExtResource("7_kek77")
-material_type = 2
-metal = 0.075
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_seu75"]
-script = ExtResource("7_kek77")
-metal = 0.119
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_ycdy4"]
-script = ExtResource("7_kek77")
-color = Color(1, 0.5468543, 1, 1)
-metal = 1.0
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_jq2sk"]
-script = ExtResource("7_kek77")
-color = Color(0.24115604, 0.24115604, 0.24115604, 1)
-metal = 1.0
-roughness = 0.368
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_lswn8"]
-script = ExtResource("7_kek77")
-material_type = 2
-roughness = 0.095
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_xuqvo"]
-script = ExtResource("7_kek77")
-material_type = 3
-roughness = 0.095
-emission = 3.0
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_0odxb"]
-script = ExtResource("7_kek77")
-color = Color(1, 0.5917481, 1, 1)
-material_type = 3
-roughness = 0.275
-emission = 4.86
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_a6jrf"]
-script = ExtResource("7_kek77")
-material_type = 2
-roughness = 0.045
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_htxhm"]
-script = ExtResource("7_kek77")
-metal = 0.11
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_kq58d"]
-script = ExtResource("7_kek77")
-color = Color(0.4627451, 0.5686275, 1, 1)
-metal = 1.0
-roughness = 0.172
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_kek77"]
-
-[sub_resource type="Resource" id="Resource_w48qg"]
-script = ExtResource("7_kek77")
-color = Color(0.17188287, 0.439847, 0.2767264, 1)
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_1u8w0"]
-script = ExtResource("7_kek77")
-material_type = 3
-roughness = 0.525
-emission = 18.0
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="SphereMesh" id="SphereMesh_5vw27"]
-radial_segments = 5
-rings = 5
-
-[sub_resource type="Resource" id="Resource_4c57u"]
-script = ExtResource("7_kek77")
-metal = 0.131
-roughness = 0.22
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_vivmo"]
-script = ExtResource("7_kek77")
-color = Color(0.9384497, 0.9384497, 0.9384497, 1)
-metal = 0.184
-roughness = 0.094
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_yaehf"]
-script = ExtResource("7_kek77")
-color = Color(0.9384497, 0.9384497, 0.9384497, 1)
-material_type = 2
-metal = 0.645
-roughness = 0.11
-refraction_index = 1.253
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_2cqfq"]
-script = ExtResource("7_kek77")
-color = Color(1, 1, 0.6334544, 1)
-material_type = 3
-emission = 1.876
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_074og"]
-script = ExtResource("7_kek77")
-color = Color(0.71128005, 0.2939169, 0.3404039, 1)
-emission = 48.168
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="QuadMesh" id="QuadMesh_4c57u"]
-
-[sub_resource type="Resource" id="Resource_cegan"]
-script = ExtResource("7_kek77")
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_82xsv"]
-script = ExtResource("7_kek77")
-color = Color(1, 0, 0, 1)
-metal = 0.48
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_getpj"]
-script = ExtResource("7_kek77")
-color = Color(0, 1, 0, 1)
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_ryguw"]
-script = ExtResource("7_kek77")
-material_type = 3
-emission = 10.0
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
 [node name="MainScene" type="Control" node_paths=PackedStringArray("renderer")]
 layout_mode = 3
@@ -196,9 +28,9 @@ mouse_filter = 2
 script = ExtResource("1_7mycd")
 renderer = NodePath("Renderer")
 
-[node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("camera", "render_control")]
+[node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
+scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 render_settings = SubResource("Resource_d13ii")
 
@@ -218,7 +50,7 @@ rasterized_panel = NodePath("../HBoxContainer/RasterizedSubViewportContainer")
 renderer = NodePath("../../Renderer")
 rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
 sub_viewport = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport")
-camera_controller = NodePath("../../CameraController")
+camera_controller = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
 save_file_dialog = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/SaveFileDialog")
 aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
 focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
@@ -392,192 +224,17 @@ handle_input_locally = false
 size = Vector2i(2, 2)
 render_target_update_mode = 0
 
-[node name="Camera3D" type="Camera3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1)
-environment = SubResource("Environment_h2yge")
-current = true
-
-[node name="Node3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+[node name="CornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_w48qg")]
 visible = false
 
-[node name="ProceduralSphere" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.82193756, -2.3823183)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_kek77")
-
-[node name="ProceduralSphere6" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 5.861639, -0.8628144, -2.3823183)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_dg77c")
-
-[node name="ProceduralSphere7" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 7.3721085, 1.9595413, -8.709521)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_efxa6")
-
-[node name="ProceduralSphere15" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2.035, 0, 0, 0, 2.035, 0, 0, 0, 2.035, 7.3721085, 1.9595413, -7.6056533)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_seu75")
-
-[node name="ProceduralSphere16" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2.035, 0, 0, 0, 2.035, 0, 0, 0, 2.035, 7.3721085, 3.1647902, -9.530914)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_seu75")
-
-[node name="ProceduralSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 0.53590345, -1.4769747)
-skeleton = NodePath("../../../../../..")
-
-[node name="ProceduralSphere8" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 1.4455242, 0.1367352)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_ycdy4")
-
-[node name="ProceduralSphere10" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 2.03355, -2.1885793)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_jq2sk")
-
-[node name="ProceduralSphere13" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 5.082, 1.636, -2.175)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_lswn8")
-
-[node name="ProceduralSphere12" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.4990395, 0, 0.030977195, 0, 0.5, 0, -0.030977195, 0, 0.4990395, 1.200988, 2.03355, -4.419465)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_xuqvo")
-
-[node name="ProceduralSphere14" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.52898186, 0, 0.032835823, 0, 0.53, 0, -0.032835823, 0, 0.52898186, 4.816, 2.579, -1.739)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_0odxb")
-
-[node name="ProceduralSphere11" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 1.200988, 2.03355, -4.419465)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_a6jrf")
-
-[node name="ProceduralSphere3" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_htxhm")
-
-[node name="ProceduralSphere4" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688791)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_kq58d")
-
-[node name="GroundMeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
-mesh = SubResource("PlaneMesh_kek77")
-object_material = SubResource("Resource_w48qg")
-
-[node name="MetallicRoughnessSpheresNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
-transform = Transform3D(0.99987966, -0.015515354, 0, 0.015515354, 0.99987966, 0, 0, 0, 1, 0, 0, 0)
-visible = false
-script = ExtResource("5_272bh")
-size = 6
-
-[node name="Ground" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -51, 0)
-visible = false
-skeleton = NodePath("../../../../../..")
-
-[node name="LightsNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1716537, 0)
-
-[node name="LightSphere0" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, -2)
-skeleton = NodePath("../../../../../../..")
-object_material = SubResource("Resource_1u8w0")
-
-[node name="LightSphere1" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, -2)
-skeleton = NodePath("../../../../../../..")
-object_material = SubResource("Resource_1u8w0")
-
-[node name="LightSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2)
-skeleton = NodePath("../../../../../../..")
-object_material = SubResource("Resource_1u8w0")
-
-[node name="LightSphere3" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetallicRoughnessSpheresNode3D/LightsNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 2, 2)
-skeleton = NodePath("../../../../../../..")
-object_material = SubResource("Resource_1u8w0")
-
-[node name="TriangleTesNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
-
-[node name="MeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.9555153, 0.2329513, 0.1808975, -0.294941, 0.7546883, 0.58605057, 2.9802319e-08, -0.6133345, 0.7898233, -1.073, 0.494, -1.6931942)
-mesh = SubResource("SphereMesh_5vw27")
-object_material = SubResource("Resource_4c57u")
-
-[node name="GroundMeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(20.145, 0, 0, 0, 20.145, 0, 0, 0, 20.145, 0, 0, 0)
-mesh = SubResource("PlaneMesh_kek77")
-object_material = SubResource("Resource_w48qg")
-
-[node name="RookMeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0640347, 0, -1.5191143)
-mesh = ExtResource("8_4c57u")
-object_material = SubResource("Resource_vivmo")
-
-[node name="RookMeshInstance3D2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -1.375)
-mesh = ExtResource("8_4c57u")
-object_material = SubResource("Resource_yaehf")
-
-[node name="LightProceduralSphere" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(0.42, 0, 0, 0, 0.42, 0, 0, 0, 0.42, 0, 1.6054106, -1.3988836)
-object_material = SubResource("Resource_2cqfq")
-
-[node name="ProceduralSphere2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangleTesNode3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(1.15, 0, 0, 0, 1.15, 0, 0, 0, 1.15, 0, 1.1813781, -3.0980055)
-object_material = SubResource("Resource_074og")
-
-[node name="BoxNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
+[node name="SpheresScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("10_w48qg")]
 visible = false
 
-[node name="CornellNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D"]
+[node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
+visible = false
 
-[node name="FrontMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.9999999, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
-mesh = SubResource("QuadMesh_4c57u")
-skeleton = NodePath("../..")
-object_material = SubResource("Resource_cegan")
-
-[node name="LeftMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(-4.371138e-08, 0, 0.9999999, 0, 1, 0, -0.9999999, 0, -4.371139e-08, -0.49999994, 0.5, -0.5)
-mesh = SubResource("QuadMesh_4c57u")
-object_material = SubResource("Resource_82xsv")
-
-[node name="RightMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(-4.3711385e-08, 0, -0.9999999, 0, 1, 0, 0.9999999, 0, -4.3711385e-08, 0.50000006, 0.5, -0.5)
-mesh = SubResource("QuadMesh_4c57u")
-object_material = SubResource("Resource_getpj")
-
-[node name="TopMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, -0.9999999, 0, 1, -4.3711385e-08, 0, 1, -0.5)
-mesh = SubResource("QuadMesh_4c57u")
-object_material = SubResource("Resource_cegan")
-
-[node name="BottomMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D/CornellNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, 0.9999999, 0, -1, -4.3711385e-08, 0, 0, -0.5)
-mesh = SubResource("QuadMesh_4c57u")
-object_material = SubResource("Resource_cegan")
-
-[node name="LightMeshGeometricObject" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.405, 0, 0, 0, -1.7703112e-08, -0.405, 0, 0.405, -1.7703112e-08, 0, 0.999, -0.5)
-mesh = SubResource("QuadMesh_4c57u")
-object_material = SubResource("Resource_ryguw")
-
-[node name="RookMeshInstance3D2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/BoxNode3D" instance=ExtResource("6_5vw27")]
-transform = Transform3D(0.49223077, 0, -0.11284439, 0, 0.505, 0, 0.11284439, 0, 0.49223077, 0, 0, -0.48835897)
-mesh = ExtResource("8_4c57u")
-object_material = SubResource("Resource_yaehf")
+[node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
+transform = Transform3D(0.9999894, 0.0043330723, -0.0016035534, -0.0043368903, 0.9999877, -0.0023848694, 0.0015931965, 0.0023918008, 0.9999958, 0, 0, 0)
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -604,9 +261,9 @@ expand_mode = 1
 script = ExtResource("3_h2yge")
 renderer = NodePath("../../../../../../Renderer")
 
-[node name="CameraController" type="Node" parent="." node_paths=PackedStringArray("camera")]
+[node name="CameraController" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport" node_paths=PackedStringArray("renderer")]
 script = ExtResource("3_1bvp3")
-camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Camera3D")
+renderer = NodePath("../../../../../Renderer")
 
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl/RenderScaleSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_slider_value_changed"]
@@ -615,4 +272,4 @@ camera = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]
-[connection signal="moved" from="CameraController" to="." method="_on_camera_controller_moved"]
+[connection signal="moved" from="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController" to="." method="_on_camera_controller_moved"]

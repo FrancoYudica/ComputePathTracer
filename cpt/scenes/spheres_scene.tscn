@@ -1,0 +1,169 @@
+[gd_scene load_steps=19 format=3 uid="uid://de64eirl73tqm"]
+
+[ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_x68u7"]
+[ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="2_g84b5"]
+[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="3_s0x6j"]
+[ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="4_w4ljo"]
+
+[sub_resource type="Resource" id="Resource_l73fo"]
+script = ExtResource("3_s0x6j")
+color = Color(0.5691564, 0.7588022, 0.62576675, 1)
+metal = 0.2
+roughness = 1.0
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_0fx4a"]
+script = ExtResource("3_s0x6j")
+color = Color(0.18431373, 0.69803923, 0.43529412, 1)
+roughness = 0.43
+emission = 2.555
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_r50h8"]
+script = ExtResource("3_s0x6j")
+material_type = 2
+metal = 0.075
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_qfsde"]
+script = ExtResource("3_s0x6j")
+metal = 0.119
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_f2r1y"]
+script = ExtResource("3_s0x6j")
+color = Color(1, 0.5468543, 1, 1)
+metal = 1.0
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_6n551"]
+script = ExtResource("3_s0x6j")
+color = Color(0.24115604, 0.24115604, 0.24115604, 1)
+metal = 1.0
+roughness = 0.368
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_mn0st"]
+script = ExtResource("3_s0x6j")
+material_type = 2
+roughness = 0.095
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_1tyvx"]
+script = ExtResource("3_s0x6j")
+material_type = 3
+roughness = 0.095
+emission = 3.0
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_0rxd0"]
+script = ExtResource("3_s0x6j")
+color = Color(1, 0.5917481, 1, 1)
+material_type = 3
+roughness = 0.275
+emission = 4.86
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_5lmeh"]
+script = ExtResource("3_s0x6j")
+material_type = 2
+roughness = 0.045
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_a75ao"]
+script = ExtResource("3_s0x6j")
+metal = 0.11
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_kdxnw"]
+script = ExtResource("3_s0x6j")
+color = Color(0.4627451, 0.5686275, 1, 1)
+metal = 1.0
+roughness = 0.172
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_dty58"]
+
+[sub_resource type="Resource" id="Resource_ijkda"]
+script = ExtResource("3_s0x6j")
+color = Color(0.17188287, 0.439847, 0.2767264, 1)
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[node name="SpheresScene" instance=ExtResource("1_x68u7")]
+
+[node name="Camera3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1968923, 2.5029418, -3.1504686)
+
+[node name="ProceduralSphere" parent="." index="1" instance=ExtResource("2_g84b5")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0.82193756, -2.3823183)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_l73fo")
+
+[node name="ProceduralSphere6" parent="." index="2" instance=ExtResource("2_g84b5")]
+transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 5.861639, -0.8628144, -2.3823183)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_0fx4a")
+
+[node name="ProceduralSphere7" parent="." index="3" instance=ExtResource("2_g84b5")]
+transform = Transform3D(5.67, 0, 0, 0, 5.67, 0, 0, 0, 5.67, 7.3721085, 1.9595413, -8.709521)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_r50h8")
+
+[node name="ProceduralSphere15" parent="." index="4" instance=ExtResource("2_g84b5")]
+transform = Transform3D(2.035, 0, 0, 0, 2.035, 0, 0, 0, 2.035, 7.3721085, 1.9595413, -7.6056533)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_qfsde")
+
+[node name="ProceduralSphere16" parent="." index="5" instance=ExtResource("2_g84b5")]
+transform = Transform3D(2.035, 0, 0, 0, 2.035, 0, 0, 0, 2.035, 7.3721085, 3.1647902, -9.530914)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_qfsde")
+
+[node name="ProceduralSphere2" parent="." index="6" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 0.53590345, -1.4769747)
+skeleton = NodePath("../../../../../..")
+
+[node name="ProceduralSphere8" parent="." index="7" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 1.4455242, 0.1367352)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_f2r1y")
+
+[node name="ProceduralSphere10" parent="." index="8" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, -1.490622, 2.03355, -2.1885793)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_6n551")
+
+[node name="ProceduralSphere13" parent="." index="9" instance=ExtResource("2_g84b5")]
+transform = Transform3D(2.3305144, 0, 0.1446635, 0, 2.335, 0, -0.1446635, 0, 2.3305144, 5.082, 1.636, -2.175)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_mn0st")
+
+[node name="ProceduralSphere12" parent="." index="10" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.4990395, 0, 0.030977195, 0, 0.5, 0, -0.030977195, 0, 0.4990395, 1.200988, 2.03355, -4.419465)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_1tyvx")
+
+[node name="ProceduralSphere14" parent="." index="11" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.52898186, 0, 0.032835823, 0, 0.53, 0, -0.032835823, 0, 0.52898186, 4.816, 2.579, -1.739)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_0rxd0")
+
+[node name="ProceduralSphere11" parent="." index="12" instance=ExtResource("2_g84b5")]
+transform = Transform3D(0.998079, 0, 0.06195439, 0, 1, 0, -0.06195439, 0, 0.998079, 1.200988, 2.03355, -4.419465)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_5lmeh")
+
+[node name="ProceduralSphere3" parent="." index="13" instance=ExtResource("2_g84b5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2524259, 0, 0)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_a75ao")
+
+[node name="ProceduralSphere4" parent="." index="14" instance=ExtResource("2_g84b5")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688791)
+skeleton = NodePath("../../../../../..")
+object_material = SubResource("Resource_kdxnw")
+
+[node name="GroundMeshInstance3D" parent="." index="15" instance=ExtResource("4_w4ljo")]
+transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
+mesh = SubResource("PlaneMesh_dty58")
+object_material = SubResource("Resource_ijkda")

@@ -1,4 +1,4 @@
-extends Node3D
+extends PathTraceScene
 
 @export var size: int = 5
 @export var radius: float = 1.0

@@ -1,0 +1,98 @@
+[gd_scene load_steps=15 format=3 uid="uid://dtntoyphirbth"]
+
+[ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_hblub"]
+[ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="2_53siw"]
+[ext_resource type="Texture2D" uid="uid://yb1mjsl6mrdk" path="res://sky/black.png" id="2_jodhc"]
+[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="3_jodhc"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_m33i1"]
+panorama = ExtResource("2_jodhc")
+energy_multiplier = 0.25
+
+[sub_resource type="Sky" id="Sky_jnsp1"]
+sky_material = SubResource("PanoramaSkyMaterial_m33i1")
+
+[sub_resource type="Environment" id="Environment_c2ufa"]
+background_mode = 2
+sky = SubResource("Sky_jnsp1")
+
+[sub_resource type="QuadMesh" id="QuadMesh_jnsp1"]
+
+[sub_resource type="Resource" id="Resource_c2ufa"]
+script = ExtResource("3_jodhc")
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_jodhc"]
+script = ExtResource("3_jodhc")
+color = Color(1, 0, 0, 1)
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_gnv8p"]
+script = ExtResource("3_jodhc")
+color = Color(0, 1, 0, 1)
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="Resource" id="Resource_wfw7y"]
+script = ExtResource("3_jodhc")
+color = Color(1, 0.8509804, 0.7607843, 1)
+material_type = 3
+emission = 10.0
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[sub_resource type="BoxMesh" id="BoxMesh_53siw"]
+
+[sub_resource type="Resource" id="Resource_53siw"]
+script = ExtResource("3_jodhc")
+color = Color(0.9384497, 0.9384497, 0.9384497, 1)
+refraction_index = 1.253
+metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+
+[node name="CornellBoxScene" instance=ExtResource("1_hblub")]
+
+[node name="Camera3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 1)
+environment = SubResource("Environment_c2ufa")
+fov = 53.72488
+
+[node name="CornellNode3D" type="Node3D" parent="." index="1"]
+
+[node name="FrontMeshGeometricObject" parent="CornellNode3D" index="0" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.9999999, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -1)
+mesh = SubResource("QuadMesh_jnsp1")
+skeleton = NodePath("../..")
+object_material = SubResource("Resource_c2ufa")
+
+[node name="LeftMeshGeometricObject" parent="CornellNode3D" index="1" instance=ExtResource("2_53siw")]
+transform = Transform3D(-4.371138e-08, 0, 0.9999999, 0, 1, 0, -0.9999999, 0, -4.371139e-08, -0.49999994, 0.5, -0.5)
+mesh = SubResource("QuadMesh_jnsp1")
+object_material = SubResource("Resource_jodhc")
+
+[node name="RightMeshGeometricObject" parent="CornellNode3D" index="2" instance=ExtResource("2_53siw")]
+transform = Transform3D(-4.3711385e-08, 0, -0.9999999, 0, 1, 0, 0.9999999, 0, -4.3711385e-08, 0.50000006, 0.5, -0.5)
+mesh = SubResource("QuadMesh_jnsp1")
+object_material = SubResource("Resource_gnv8p")
+
+[node name="TopMeshGeometricObject" parent="CornellNode3D" index="3" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, -0.9999999, 0, 1, -4.3711385e-08, 0, 1, -0.5)
+mesh = SubResource("QuadMesh_jnsp1")
+object_material = SubResource("Resource_c2ufa")
+
+[node name="BottomMeshGeometricObject" parent="CornellNode3D" index="4" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.9999999, 0, 0, 0, -4.371139e-08, 0.9999999, 0, -1, -4.3711385e-08, 0, 0, -0.5)
+mesh = SubResource("QuadMesh_jnsp1")
+object_material = SubResource("Resource_c2ufa")
+
+[node name="LightMeshGeometricObject" parent="." index="2" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.25, 0, 0, 0, -1.0927847e-08, -0.25, 0, 0.25, -1.0927847e-08, 0, 0.999, -0.5)
+mesh = SubResource("QuadMesh_jnsp1")
+object_material = SubResource("Resource_wfw7y")
+
+[node name="BoxMeshInstance3D3" parent="." index="3" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.15735093, 0, -0.23069195, 0, 0.505, 0, 0.15648001, 0, 0.23197591, -0.18266739, 0.25, -0.6568012)
+mesh = SubResource("BoxMesh_53siw")
+object_material = SubResource("Resource_53siw")
+
+[node name="BoxMeshInstance3D4" parent="." index="4" instance=ExtResource("2_53siw")]
+transform = Transform3D(0.29241434, 0, -0.067036286, 0, 0.3, 0, 0.067036286, 0, 0.29241434, 0.251, 0.15, -0.352)
+mesh = SubResource("BoxMesh_53siw")
+object_material = SubResource("Resource_53siw")
