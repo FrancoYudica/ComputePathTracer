@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://ds5ggw20yyvyy"
+path="res://.godot/imported/pathtracer_pbr.glsl-58d3f38d26f863267b91c977b6e55022.res"
+
+[deps]
+
+source_file="res://shaders/pathtracer_pbr.glsl"
+dest_files=["res://.godot/imported/pathtracer_pbr.glsl-58d3f38d26f863267b91c977b6e55022.res"]
+
+[params]
+

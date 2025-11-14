@@ -4,4 +4,5 @@
 
 [resource]
 script = ExtResource("1_eiwob")
+roughness = 0.095
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"

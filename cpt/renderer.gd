@@ -227,8 +227,7 @@ func _draw():
 		_still_frames_count, # Frame number
 		_still_frames_count * 1664525 + 1013904223, # Frame-based random seed
 		render_settings.samples_per_pixel,
-		1.0 / float(_still_frames_count), # Frame accumulation weight
-		0.0, 0.0
+		0.0, 0.0, 0.0
 	])
 	
 	_still_frames_count += 1

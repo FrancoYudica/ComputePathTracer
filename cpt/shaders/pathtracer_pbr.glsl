@@ -2,6 +2,7 @@
 #version 450
 
 #include "primitives.glsl.inc"
+#define PI 3.14159265
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -37,10 +38,12 @@ layout(push_constant) uniform PushConstants {
   float frameNumber; // Ranges in [1, inf)
   float randomFrameSeed2;
   float samples;
+  float frameWeight;
 }
 params;
 
 #include "common.glsl.inc"
+#include "pbr.glsl.inc"
 #include "random.glsl.inc"
 
 Ray generateRay(vec2 pixel, uint seed) {
@@ -125,16 +128,8 @@ bool intersectScene(Ray ray, out HitRecord nearestHit) {
 }
 
 vec3 sampleSky(Ray ray) {
-  float y = clamp(ray.direction.y, -1.0, 1.0);
-
-  vec3 zenith = vec3(0.02, 0.07, 0.15);
-  vec3 mid = vec3(0.15, 0.30, 0.55);
-  vec3 horizon = vec3(0.90, 0.50, 0.20); // orange tint
-
-  float t = smoothstep(-0.3, 1.0, y);
-  float h = smoothstep(-1.0, 0.2, y);
-
-  return mix(mix(horizon, mid, h), zenith, t);
+  float t = 0.5 * (ray.direction.y + 1.0);
+  return mix(vec3(1.0, 1.0, 1.0), vec3(0.5, 0.7, 1.0), t);
 }
 
 // Non recursive version
@@ -165,29 +160,52 @@ vec3 pathTrace(Ray ray, uint seed) {
 
     // Lambertian
     if (hitMaterial.type == 0.0) {
+      vec3 N = hitRecord.n;
+      vec3 V = -normalize(ray.direction);
+      vec3 albedo = hitMaterial.albedo;
+      float metallic = hitMaterial.metal;
+      float roughness = max(hitMaterial.roughness, 0.04);
 
-      float metalness = hitMaterial.metal;
-      float roughness = hitMaterial.roughness;
+      // Sample GGX for the direction
+      vec3 L, H;
+      float pdf;
+      float NdotL, NdotV, HdotV;
 
-      if (randomFloat(seed) > metalness) {
-        // Diffuse reflection with roughness
-        reflectedDir = normalize(hitRecord.n + randomVec3N(seed));
-        throughput *= hitMaterial.albedo * 0.5;
+      for (int i = 0; i < 5; i++) {
+        vec2 xi = vec2(randomFloat(seed + uint(i * 17)),
+                       randomFloat(pcgHash(seed + uint(i * 31))));
+        sampleGGX(N, V, roughness, xi, L, pdf, H);
 
-      } else {
-        // Specular reflection with roughness
-        vec3 perfectReflection = reflect(ray.direction, hitRecord.n);
+        NdotL = max(dot(N, L), 0.0);
+        NdotV = max(dot(N, V), 0.0);
+        HdotV = max(dot(H, V), 0.0);
 
-        // Roughness perturbs the reflection direction
-        // roughness = 0: perfect mirror
-        // roughness = 1: very rough/blurry reflection
-        reflectedDir = normalize(perfectReflection +
-                                 roughness * randomVec3N(pcgHash(seed)));
-
-        // Metals tint their reflections
-        vec3 specularTint = mix(vec3(1.0), hitMaterial.albedo, metalness);
-        throughput *= specularTint;
+        // Validate sample
+        if (NdotL > 0.0 && NdotV > 0.0 && pdf > 1e-6) {
+          break; // Found a valid sample
+        }
       }
+
+      // Evaluate complete PBR BRDF (diffuse + specular)
+      vec3 F0 = mix(vec3(0.04), albedo, metallic);
+      vec3 F = reflectance(HdotV, F0);
+
+      // Specular term
+      float NDF = distributionGGX(N, H, roughness);
+      float G = geometrySmith(N, V, L, roughness);
+      vec3 specular = (NDF * G * F) / max(4.0 * NdotV * NdotL, 1e-6);
+
+      // Diffuse term (Lambertian)
+      vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+      vec3 diffuse = kD * albedo / PI;
+
+      // Combined BRDF
+      vec3 brdf = diffuse + specular;
+
+      // Monte Carlo estimator: BRDF * cos(theta) / pdf
+      throughput *= (brdf * NdotL) / pdf;
+      reflectedDir = L;
+
     }
     // Metallic
     else if (hitMaterial.type == 1.0) {
@@ -268,26 +286,19 @@ void main() {
 
   vec3 frameColor = colorSum / params.samples;
 
+  // Gamma correction 2.2
+  frameColor = pow(frameColor, vec3(1.0 / 2.2)); // Gamma correction
+
   // Write pixel color
-  vec3 writeColor;
+  vec3 writeColor = frameColor;
 
   if (params.frameNumber > 1.0) {
-    // Accumulate with previous frames
-    vec4 accumulated = imageLoad(accumulationImage, pixel);
-    accumulated.rgb += frameColor;
-    accumulated.w += 1.0;
-
-    // Write color is the average
-    writeColor = accumulated.rgb / accumulated.w;
-    imageStore(accumulationImage, pixel, accumulated);
-  } else {
-
-    // First frame, initialize accumulation buffer
-    imageStore(accumulationImage, pixel, vec4(frameColor, 1.0));
-    writeColor = frameColor;
+    vec3 existingColor = imageLoad(accumulationImage, pixel).rgb;
+    writeColor = existingColor * (1.0 - params.frameWeight) +
+                 frameColor * params.frameWeight;
   }
 
-  // Apply gamma only for display
-  vec3 displayColor = pow(writeColor, vec3(1.0 / 2.2));
-  imageStore(outImage, pixel, vec4(displayColor, 1.0));
+  // Write to accumulation buffer and output image
+  imageStore(accumulationImage, pixel, vec4(writeColor, 1.0));
+  imageStore(outImage, pixel, vec4(writeColor, 1.0));
 }
