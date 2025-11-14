@@ -6,9 +6,10 @@
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
 layout(rgba8, set = 0, binding = 0) uniform image2D outImage;
-layout(rgba32f, set = 1, binding = 0) uniform image2D accumulationImage;
+layout(rgba32f, set = 0, binding = 1) uniform image2D accumulationImage;
+layout(set = 0, binding = 2) uniform sampler2D skybox;
 
-layout(std430, set = 2, binding = 0) buffer CameraData {
+layout(std430, set = 1, binding = 0) buffer CameraData {
   mat4 view;
   mat4 projection;
   float aperture;
@@ -16,19 +17,19 @@ layout(std430, set = 2, binding = 0) buffer CameraData {
 }
 cameraData;
 
-layout(std140, set = 3, binding = 0) buffer Spheres {
+layout(std140, set = 2, binding = 0) buffer Spheres {
   float sphereCount;
   Sphere spheres[];
 };
 
-layout(std140, set = 3, binding = 1) buffer Triangles {
+layout(std140, set = 2, binding = 1) buffer Triangles {
   float triangleCount;
   Triangle triangles[];
 };
 
-layout(std140, set = 3, binding = 2) buffer Vertices { vec3 vertices[]; };
+layout(std140, set = 2, binding = 2) buffer Vertices { vec3 vertices[]; };
 
-layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
+layout(std140, set = 2, binding = 3) buffer Materials { Material materials[]; };
 
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
@@ -125,16 +126,10 @@ bool intersectScene(Ray ray, out HitRecord nearestHit) {
 }
 
 vec3 sampleSky(Ray ray) {
-  float y = clamp(ray.direction.y, -1.0, 1.0);
+  vec2 uv = vec2(atan(ray.direction.z, ray.direction.x) / (2.0 * PI) + 0.5,
+                 acos(clamp(ray.direction.y, -1.0, 1.0)) / PI);
 
-  vec3 zenith = vec3(0.02, 0.07, 0.15);
-  vec3 mid = vec3(0.15, 0.30, 0.55);
-  vec3 horizon = vec3(0.90, 0.50, 0.20); // orange tint
-
-  float t = smoothstep(-0.3, 1.0, y);
-  float h = smoothstep(-1.0, 0.2, y);
-
-  return mix(mix(horizon, mid, h), zenith, t);
+  return texture(skybox, uv).rgb * 0.25;
 }
 
 // Non recursive version

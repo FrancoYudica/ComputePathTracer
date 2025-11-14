@@ -9,11 +9,10 @@ class_name Renderer extends Node
 var _shader: RID
 var _pipeline: RID
 
-var _output_texture_set: RID
+var _image_set: RID
 var _output_texture_rid: RID # Low precision texture
-
-var _accumulation_texture_set: RID
 var _accumulation_texture_rid: RID # High precision texture
+var _skybox_texture_rid: RID # High precision texture
 
 var _camera_uniform_set: RID
 var _camera_storage_buffer: RID
@@ -24,8 +23,9 @@ var _scene_triangles_storage_buffer: RID
 var _scene_vertex_storage_buffer: RID
 var _scene_materials_storage_buffer: RID
 
-var _image_uniform: RDUniform
-var _accumulation_uniform: RDUniform
+var _output_image_uniform: RDUniform
+var _accumulation_image_uniform: RDUniform
+var _skybox_image_uniform: RDUniform
 var _camera_uniform: RDUniform
 var _scene_spheres_uniform: RDUniform
 var _scene_triangles_uniform: RDUniform
@@ -42,18 +42,17 @@ func get_texture_rid():
 	return _output_texture_rid
 
 func resize(width: int, height: int):
-	_image_uniform.clear_ids()
-	_accumulation_uniform.clear_ids()
+	_output_image_uniform.clear_ids()
+	_accumulation_image_uniform.clear_ids()
 	_rd.free_rid(_output_texture_rid)
 	_rd.free_rid(_accumulation_texture_rid)
 	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
 	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_UINT)
-	_image_uniform.add_id(_output_texture_rid)
-	_accumulation_uniform.add_id(_accumulation_texture_rid)
-	if _rd.uniform_set_is_valid(_output_texture_set):
-		_rd.free_rid(_output_texture_set)
-	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
-	_accumulation_texture_set = _rd.uniform_set_create([_accumulation_uniform], _shader, 0)
+	_output_image_uniform.add_id(_output_texture_rid)
+	_accumulation_image_uniform.add_id(_accumulation_texture_rid)
+	if _rd.uniform_set_is_valid(_image_set):
+		_rd.free_rid(_image_set)
+	_image_set = _rd.uniform_set_create([_output_image_uniform, _accumulation_image_uniform, _skybox_image_uniform], _shader, 0)
 	print("Viewport resized: [%s, %s]" % [width, height])
 	clear_accumulated_buffer()
 
@@ -102,26 +101,42 @@ func _create_attachment_texture(width, height, format):
 	texture_view.format_override = format
 	return _rd.texture_create(texture_format, texture_view)
 
+func _load_skybox():
+	var env := camera.environment
+	if env and env.sky.sky_material is PanoramaSkyMaterial:
+		var tex: Texture2D = env.sky.sky_material.panorama
+		_skybox_texture_rid = RenderingServer.texture_get_rd_texture(tex.get_rid())
+
 func _initialize_compute():
 	_load_shader()
 	_pipeline = _rd.compute_pipeline_create(_shader)
 	_output_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM)
 	_accumulation_texture_rid = _create_attachment_texture(get_render_width(), get_render_height(), RenderingDevice.DATA_FORMAT_R32G32B32A32_UINT)
-	
-	# Image uniform set
-	_image_uniform = RDUniform.new()
-	_image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	_image_uniform.binding = 0
-	_image_uniform.add_id(_output_texture_rid)
-	_output_texture_set = _rd.uniform_set_create([_image_uniform], _shader, 0)
+	_load_skybox()
+	# Output uniform
+	_output_image_uniform = RDUniform.new()
+	_output_image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	_output_image_uniform.binding = 0
+	_output_image_uniform.add_id(_output_texture_rid)
 
-	# Accumulation uniform set
-	_accumulation_uniform = RDUniform.new()
-	_accumulation_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
-	_accumulation_uniform.binding = 0
-	_accumulation_uniform.add_id(_accumulation_texture_rid)
-	_accumulation_texture_set = _rd.uniform_set_create([_accumulation_uniform], _shader, 1)
+	# Accumulation uniform
+	_accumulation_image_uniform = RDUniform.new()
+	_accumulation_image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	_accumulation_image_uniform.binding = 1
+	_accumulation_image_uniform.add_id(_accumulation_texture_rid)
 
+	# Skybox uniform
+	_skybox_image_uniform = RDUniform.new()
+	_skybox_image_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	_skybox_image_uniform.binding = 2
+	var sampler_state := RDSamplerState.new()
+	sampler_state.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler_state.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	var image_sampler = _rd.sampler_create(sampler_state)
+	_skybox_image_uniform.add_id(image_sampler)
+	_skybox_image_uniform.add_id(_skybox_texture_rid)
+	# Image set
+	_image_set = _rd.uniform_set_create([_output_image_uniform, _accumulation_image_uniform, _skybox_image_uniform], _shader, 0)
 
 	# Camera uniform set
 	_camera_uniform = RDUniform.new()
@@ -135,7 +150,7 @@ func _initialize_compute():
 		camera_bytes.size(),
 		camera_bytes)
 	_camera_uniform.add_id(_camera_storage_buffer)
-	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 2)
+	_camera_uniform_set = _rd.uniform_set_create([_camera_uniform], _shader, 1)
 	
 	# Sphere uniform set binding
 	_scene_spheres_uniform = RDUniform.new()
@@ -179,17 +194,18 @@ func _initialize_compute():
 			_scene_triangles_uniform, 
 			_scene_vertex_uniform, 
 			_scene_materials_uniform
-		], _shader, 3)
+		], _shader, 2)
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_rd.free_rid(_output_texture_rid)
+		_rd.free_rid(_accumulation_texture_rid)
 		_rd.free_rid(_camera_storage_buffer)
 		_rd.free_rid(_scene_spheres_storage_buffer)
 		_rd.free_rid(_scene_triangles_storage_buffer)
 		_rd.free_rid(_scene_vertex_storage_buffer)
 		_rd.free_rid(_scene_materials_storage_buffer)
-		_rd.free_rid(_output_texture_set)
+		_rd.free_rid(_image_set)
 		_rd.free_rid(_camera_uniform_set)
 		_rd.free_rid(_scene_uniform_set)
 		_rd.free_rid(_pipeline)
@@ -239,10 +255,9 @@ func _draw():
 
 	var compute_list := _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(compute_list, _pipeline)
-	_rd.compute_list_bind_uniform_set(compute_list, _output_texture_set, 0)
-	_rd.compute_list_bind_uniform_set(compute_list, _accumulation_texture_set, 1)
-	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 2)
-	_rd.compute_list_bind_uniform_set(compute_list, _scene_uniform_set, 3)
+	_rd.compute_list_bind_uniform_set(compute_list, _image_set, 0)
+	_rd.compute_list_bind_uniform_set(compute_list, _camera_uniform_set, 1)
+	_rd.compute_list_bind_uniform_set(compute_list, _scene_uniform_set, 2)
 	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
 	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
 	_rd.compute_list_end()

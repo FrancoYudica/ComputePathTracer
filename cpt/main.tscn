@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dm8mjnxxqhqps" path="res://geometric_objects/procedural_sphere.tscn" id="3_7mycd"]
 [ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
+[ext_resource type="Texture2D" uid="uid://don7t6cg36jkh" path="res://sky/811-hdri-skies-com.hdr" id="4_ycdy4"]
 [ext_resource type="Script" uid="uid://jcr6tp7xdl3c" path="res://metallic_roughness_spheres_node_3d.gd" id="5_272bh"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="6_5vw27"]
@@ -19,14 +20,16 @@ camera_aperture = 0.005
 camera_focal_distance = 5.0
 metadata/_custom_type_script = "uid://bb3p5d8pcpo0d"
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_h2yge"]
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ycdy4"]
+panorama = ExtResource("4_ycdy4")
+energy_multiplier = 0.25
 
-[sub_resource type="Sky" id="Sky_h2yge"]
-sky_material = SubResource("ProceduralSkyMaterial_h2yge")
+[sub_resource type="Sky" id="Sky_w48qg"]
+sky_material = SubResource("PanoramaSkyMaterial_ycdy4")
 
 [sub_resource type="Environment" id="Environment_h2yge"]
 background_mode = 2
-sky = SubResource("Sky_h2yge")
+sky = SubResource("Sky_w48qg")
 ambient_light_source = 3
 
 [sub_resource type="Resource" id="Resource_kek77"]
@@ -106,10 +109,11 @@ metal = 1.0
 roughness = 0.172
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
-[sub_resource type="Resource" id="Resource_qsp4k"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_kek77"]
+
+[sub_resource type="Resource" id="Resource_w48qg"]
 script = ExtResource("7_kek77")
-color = Color(0.18558142, 0.696913, 0.43568838, 1)
-roughness = 0.095
+color = Color(0.17188287, 0.439847, 0.2767264, 1)
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
 [sub_resource type="Resource" id="Resource_1u8w0"]
@@ -127,13 +131,6 @@ rings = 5
 script = ExtResource("7_kek77")
 metal = 0.131
 roughness = 0.22
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_kek77"]
-
-[sub_resource type="Resource" id="Resource_w48qg"]
-script = ExtResource("7_kek77")
-color = Color(0.17188287, 0.439847, 0.2767264, 1)
 metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
 
 [sub_resource type="Resource" id="Resource_vivmo"]
@@ -472,14 +469,10 @@ transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 1.2524259, 1.4642951, -0.8688
 skeleton = NodePath("../../../../../..")
 object_material = SubResource("Resource_kq58d")
 
-[node name="ProceduralSphere5" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, -50, 0)
-skeleton = NodePath("../../../../../..")
-object_material = SubResource("Resource_qsp4k")
-
-[node name="ProceduralSphere9" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("3_7mycd")]
-transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 46.48638, -47.40651, 0)
-skeleton = NodePath("../../../../../..")
+[node name="GroundMeshInstance3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/Node3D" instance=ExtResource("6_5vw27")]
+transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
+mesh = SubResource("PlaneMesh_kek77")
+object_material = SubResource("Resource_w48qg")
 
 [node name="MetallicRoughnessSpheresNode3D" type="Node3D" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
 transform = Transform3D(0.99987966, -0.015515354, 0, 0.015515354, 0.99987966, 0, 0, 0, 1, 0, 0, 0)

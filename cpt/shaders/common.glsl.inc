@@ -1,5 +1,5 @@
 #define EPSILON 0.0001
-
+#define PI 3.14159265359
 struct HitRecord {
   float t;
   vec3 p;
