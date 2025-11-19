@@ -60,7 +60,6 @@ func _update_triangles_and_vertices():
 		func(node: Node3D):
 			return node.is_visible_in_tree()
 	)
-
 	var triangles_data = PackedFloat32Array()
 	var vertices_data = PackedVector4Array()
 	
