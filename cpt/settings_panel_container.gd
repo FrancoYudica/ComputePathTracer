@@ -6,11 +6,15 @@ extends PanelContainer
 @export var sub_viewport: SubViewport
 @export var camera_controller: Node
 @export var save_file_dialog: FileDialog
+@export var samples_spin: SpinBox
+@export var bounces_spin: SpinBox
 @export var aperture_slider: Slider
 @export var focal_distance_slider: Slider
 
 func _ready() -> void:
 	save_file_dialog.file_selected.connect(_file_saved)
+	samples_spin.value = renderer.render_settings.samples_per_pixel
+	bounces_spin.value = renderer.render_settings.max_bounces
 	aperture_slider.value = renderer.render_settings.camera_aperture
 	focal_distance_slider.value = renderer.render_settings.camera_focal_distance
 
@@ -43,3 +47,6 @@ func _on_aperture_h_slider_value_changed(value: float) -> void:
 
 func _on_focal_length_h_slider_value_changed(value: float) -> void:
 	renderer.render_settings.camera_focal_distance = value
+
+func _on_bounces_spin_box_value_changed(value: float) -> void:
+	renderer.render_settings.max_bounces = int(value)

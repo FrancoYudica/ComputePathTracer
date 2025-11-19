@@ -9,27 +9,35 @@ layout(rgba8, set = 0, binding = 0) uniform image2D outImage;
 layout(rgba32f, set = 0, binding = 1) uniform image2D accumulationImage;
 layout(set = 0, binding = 2) uniform sampler2D skybox;
 
-layout(std430, set = 1, binding = 0) buffer CameraData {
+layout(std430, set = 1, binding = 0) buffer Settings {
+  float samples;
+  float maxBounces;
+  float environmentEnergy;
+  float cameraAperture;
+  float cameraFocalDistance;
+}
+settings;
+
+layout(std430, set = 2, binding = 0) buffer CameraData {
   mat4 view;
   mat4 projection;
-  float aperture;
-  float focalDistance;
 }
 cameraData;
 
-layout(std140, set = 2, binding = 0) buffer Spheres {
+
+layout(std140, set = 3, binding = 0) buffer Spheres {
   float sphereCount;
   Sphere spheres[];
 };
 
-layout(std140, set = 2, binding = 1) buffer Triangles {
+layout(std140, set = 3, binding = 1) buffer Triangles {
   float triangleCount;
   Triangle triangles[];
 };
 
-layout(std140, set = 2, binding = 2) buffer Vertices { vec3 vertices[]; };
+layout(std140, set = 3, binding = 2) buffer Vertices { vec3 vertices[]; };
 
-layout(std140, set = 2, binding = 3) buffer Materials { Material materials[]; };
+layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
 
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
@@ -37,7 +45,6 @@ layout(push_constant) uniform PushConstants {
   float height;
   float frameNumber; // Ranges in [1, inf)
   float randomFrameSeed2;
-  float samples;
 }
 params;
 
@@ -64,7 +71,7 @@ Ray generateRay(vec2 pixel, uint seed) {
 
   // 5. Depth of field
   // Compute the focal point in world space
-  vec3 focalPoint = cameraPosition + pinholeDir * cameraData.focalDistance;
+  vec3 focalPoint = cameraPosition + pinholeDir * settings.cameraFocalDistance;
 
   // Sample random point on a unit disk
   vec2 xi = vec2(randomFloat(seed), randomFloat(seed + 19283));
@@ -76,8 +83,8 @@ Ray generateRay(vec2 pixel, uint seed) {
   // Extract camera basis from inverse(view)
   mat3 camRot = mat3(inverse(cameraData.view));
 
-  vec3 lensOffset = camRot[0] * disk.x * cameraData.aperture +
-                    camRot[1] * disk.y * cameraData.aperture;
+  vec3 lensOffset = camRot[0] * disk.x * settings.cameraAperture +
+                    camRot[1] * disk.y * settings.cameraAperture;
 
   vec3 lensPos = cameraPosition + lensOffset;
 
@@ -129,18 +136,17 @@ vec3 sampleSky(Ray ray) {
   vec2 uv = vec2(atan(ray.direction.z, ray.direction.x) / (2.0 * PI) + 0.5,
                  acos(clamp(ray.direction.y, -1.0, 1.0)) / PI);
 
-  return texture(skybox, uv).rgb * 0.25;
+  return texture(skybox, uv).rgb * settings.environmentEnergy;
 }
 
 // Non recursive version
 vec3 pathTrace(Ray ray, uint seed) {
 
   HitRecord hitRecord;
-  int maxDepth = 15;
   vec3 radiance = vec3(0.0);
   vec3 throughput = vec3(1.0);
 
-  for (int depth = 0; depth < maxDepth; depth++) {
+  for (int depth = 0; depth < int(settings.maxBounces); depth++) {
 
     // Generate new seed for each bounce
     seed = pcgHash(seed + uint(depth * 17));
@@ -252,7 +258,7 @@ void main() {
   uint baseSeed = combineSeed(pixelIndex, frameSeed1, frameSeed2);
 
   vec3 colorSum = vec3(0.0);
-  for (int i = 0; i < int(params.samples); i++) {
+  for (int i = 0; i < int(settings.samples); i++) {
 
     uint sampleSeed = combineSeed(baseSeed, uint(i));
 
@@ -261,7 +267,7 @@ void main() {
     colorSum += pathTrace(ray, sampleSeed);
   }
 
-  vec3 frameColor = colorSum / params.samples;
+  vec3 frameColor = colorSum / settings.samples;
 
   // Write pixel color
   vec3 writeColor;

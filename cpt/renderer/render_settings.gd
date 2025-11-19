@@ -5,6 +5,16 @@ class_name RenderSettings extends Resource
 		samples_per_pixel = value
 		emit_changed()
 
+@export_range(1, 100) var max_bounces: int = 16:
+	set(value):
+		max_bounces = value
+		emit_changed()
+
+@export_range(0.0, 1.0) var environment_energy: float = 0.25:
+	set(value):
+		environment_energy = value
+		emit_changed()
+
 @export_range(0.0, 1.0) var camera_aperture: float = 0.0:
 	set(value):
 		camera_aperture = value

@@ -1,10 +1,10 @@
 [gd_scene load_steps=13 format=3 uid="uid://cnli58scmym3d"]
 
-[ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer/renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://settings_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
-[ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://render_settings.gd" id="3_efxa6"]
+[ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://renderer/render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://texture_loader.gd" id="3_h2yge"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
@@ -42,7 +42,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "aperture_slider", "focal_distance_slider")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 script = ExtResource("2_lquwl")
@@ -52,6 +52,8 @@ rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContaine
 sub_viewport = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport")
 camera_controller = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
 save_file_dialog = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/SaveFileDialog")
+samples_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox")
+bounces_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox")
 aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
 focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
 
@@ -105,6 +107,15 @@ layout_mode = 2
 min_value = 1.0
 value = 1.0
 suffix = "spp"
+
+[node name="BouncesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Bounces"
+
+[node name="BouncesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 1.0
+value = 1.0
 
 [node name="RenderScaleLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
@@ -266,6 +277,7 @@ script = ExtResource("3_1bvp3")
 renderer = NodePath("../../../../../Renderer")
 
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
+[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_bounces_spin_box_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl/RenderScaleSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_slider_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_aperture_h_slider_value_changed"]
