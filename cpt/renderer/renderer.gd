@@ -12,11 +12,12 @@ class_name Renderer extends Node
 
 var _resource_manager: RendererResourceManager
 var _scene_data_manager: SceneDataManager
+
 var _still_frames_count: int = 1
 var _render_scale: float = 1.0
 
 ## Updated every frame, holds all the scene materials
-var _frame_materials: Dictionary[ObjectMaterial, int]
+var _frame_materials: Dictionary[PTMaterial, int]
 
 var _clear_buffer: bool = false
 
@@ -64,8 +65,15 @@ func _initialize_compute():
 	_resource_manager = RendererResourceManager.new(_rd, scene)
 	_resource_manager.initialize(get_render_width(), get_render_height())
 	
-	_scene_data_manager = SceneDataManager.new(_rd, get_tree())
-	_scene_data_manager.initialize(_resource_manager.get_scene_buffers())
+	_scene_data_manager = SceneDataManager.new()
+	_scene_data_manager.initialize(
+		_rd,
+		get_tree(),
+		_resource_manager.get_scene_buffers()["spheres"],
+		_resource_manager.get_scene_buffers()["triangles"],
+		_resource_manager.get_scene_buffers()["vertices"],
+		_resource_manager.get_scene_buffers()["materials"]
+	)
 	
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
@@ -97,6 +105,13 @@ func _draw():
 	_update_settings_storage_buffer()
 	_update_camera_storage_buffer()
 	_scene_data_manager.update_buffers()
+	
+	print("Spheres: %s. Triangles: %s. Vertices %s. Materials %s" % [
+		_scene_data_manager.get_sphere_count(),
+		_scene_data_manager.get_triangle_count(),
+		_scene_data_manager.get_vertex_count(),
+		_scene_data_manager.get_material_count()
+	])
 
 	var compute_list := _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(compute_list, _resource_manager.get_pipeline())
@@ -131,7 +146,7 @@ func _update_camera_storage_buffer():
 	_rd.buffer_update(_resource_manager.get_camera_buffer(), 0, camera_bytes.size(), camera_bytes)
 
 
-func _push_material(material: ObjectMaterial) -> int:
+func _push_material(material: PTMaterial) -> int:
 	if not _frame_materials.has(material):
 		_frame_materials[material] = _frame_materials.size()
 		

@@ -30,7 +30,7 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
+scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetalRoughnessTestScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 render_settings = SubResource("Resource_d13ii")
 
@@ -242,10 +242,10 @@ visible = false
 visible = false
 
 [node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
-visible = false
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(0.9999894, 0.0043330723, -0.0016035534, -0.0043368903, 0.9999877, -0.0023848694, 0.0015931965, 0.0023918008, 0.9999958, 0, 0, 0)
+visible = false
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2

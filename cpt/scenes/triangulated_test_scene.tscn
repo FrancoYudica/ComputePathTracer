@@ -1,64 +1,31 @@
-[gd_scene load_steps=11 format=3 uid="uid://j4h1pyrgc37a"]
+[gd_scene load_steps=5 format=3 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
-[ext_resource type="PackedScene" uid="uid://vlwfxv46tusi" path="res://geometric_objects/MeshGeometricObject.tscn" id="2_ssvt4"]
-[ext_resource type="Script" uid="uid://b2qoht0qqd3jk" path="res://geometric_objects/ObjectMaterial.gd" id="3_kj211"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_6atvq"]
 radial_segments = 5
 rings = 5
 
-[sub_resource type="Resource" id="Resource_rxb0a"]
-script = ExtResource("3_kj211")
-metal = 0.74
-roughness = 0.22
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_ihmam"]
-
-[sub_resource type="Resource" id="Resource_ajk7k"]
-script = ExtResource("3_kj211")
-color = Color(0.17188287, 0.439847, 0.2767264, 1)
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_vljyj"]
-script = ExtResource("3_kj211")
-color = Color(0.9384497, 0.9384497, 0.9384497, 1)
-metal = 0.184
-roughness = 0.094
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
-
-[sub_resource type="Resource" id="Resource_vuxky"]
-script = ExtResource("3_kj211")
-color = Color(0.9384497, 0.9384497, 0.9384497, 1)
-material_type = 2
-metal = 0.645
-roughness = 0.11
-refraction_index = 1.253
-metadata/_custom_type_script = "uid://b2qoht0qqd3jk"
+[sub_resource type="PlaneMesh" id="PlaneMesh_ssvt4"]
 
 [node name="TriangulatedTestScene" instance=ExtResource("1_218p2")]
 
 [node name="Camera3D" parent="." index="0"]
 transform = Transform3D(-0.58453286, 0, -0.81137, 0, 1, 0, 0.81137, 0, -0.58453286, -1.9659795, 0.56565464, -2.3887377)
 
-[node name="MeshInstance3D" parent="." index="1" instance=ExtResource("2_ssvt4")]
-transform = Transform3D(0.403259, -0.45772398, 0.79238325, -0.29494104, 0.75468844, 0.5860506, -0.8662516, -0.47003645, 0.1693333, -0.6033305, 0.49399996, -0.6283032)
+[node name="PTNode" type="PTNode" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1)
 mesh = SubResource("SphereMesh_6atvq")
-object_material = SubResource("Resource_rxb0a")
 
-[node name="GroundMeshInstance3D" parent="." index="2" instance=ExtResource("2_ssvt4")]
-transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
-mesh = SubResource("PlaneMesh_ihmam")
-object_material = SubResource("Resource_ajk7k")
-
-[node name="RookMeshInstance3D" parent="." index="3" instance=ExtResource("2_ssvt4")]
-transform = Transform3D(0.42203292, 0, 0.9065805, 0, 1, 0, -0.9065805, 0, 0.42203292, 0.4563859, 0, -2.4922297)
+[node name="PTNode2" type="PTNode" parent="." index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.28166747)
 mesh = ExtResource("4_ajtdg")
-object_material = SubResource("Resource_vljyj")
 
-[node name="RookMeshInstance3D2" parent="." index="4" instance=ExtResource("2_ssvt4")]
-transform = Transform3D(0.42203292, 0, 0.9065805, 0, 1, 0, -0.9065805, 0, 0.42203292, 0.13797939, 0.010000005, -1.4667755)
+[node name="PTNode3" type="PTNode" parent="." index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.2816675)
 mesh = ExtResource("4_ajtdg")
-object_material = SubResource("Resource_vuxky")
+
+[node name="PTNodeGround" type="PTNode" parent="." index="4"]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+mesh = SubResource("PlaneMesh_ssvt4")
