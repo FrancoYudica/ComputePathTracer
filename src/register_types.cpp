@@ -3,6 +3,7 @@
 #include "ptmaterial.h"
 #include "scene_data_manager.h"
 #include "ptnode.h"
+#include "pt_resource_manager.hpp"
 
 #include <gdextension_interface.h>
 #include <godot_cpp/core/defs.hpp>
@@ -18,6 +19,7 @@ void initialize_module(ModuleInitializationLevel p_level) {
 	GDREGISTER_RUNTIME_CLASS(SceneDataManager);
 	GDREGISTER_RUNTIME_CLASS(PTMaterial);
 	GDREGISTER_RUNTIME_CLASS(PTNode);
+	GDREGISTER_RUNTIME_CLASS(PTResourceManager);
 }
 
 void uninitialize_module(ModuleInitializationLevel p_level) {

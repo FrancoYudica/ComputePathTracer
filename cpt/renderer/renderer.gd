@@ -10,7 +10,7 @@ class_name Renderer extends Node
 		queue_clear()
 		render_settings.changed.connect(queue_clear)
 
-var _resource_manager: RendererResourceManager
+var _pt_resource_manager: PTResourceManager
 var _scene_data_manager: SceneDataManager
 
 var _still_frames_count: int = 1
@@ -25,10 +25,10 @@ func queue_clear():
 	_clear_buffer = true
 
 func get_texture_rid():
-	return _resource_manager.get_output_texture()
+	return _pt_resource_manager.get_output_texture()
 
 func resize(width: int, height: int):
-	_resource_manager.resize(width, height)
+	_pt_resource_manager.resize(width, height)
 	print("Viewport resized: [%s, %s]" % [width, height])
 	queue_clear()
 
@@ -62,23 +62,24 @@ func _ready() -> void:
 	)
 
 func _initialize_compute():
-	_resource_manager = RendererResourceManager.new(_rd, scene)
-	_resource_manager.initialize(get_render_width(), get_render_height())
+	_pt_resource_manager = PTResourceManager.new()
+	_pt_resource_manager.initialize(
+		_rd, 
+		scene.camera, 
+		"res://shaders/pathtracer.glsl", 
+		get_render_width(), 
+		get_render_height())
 	
 	_scene_data_manager = SceneDataManager.new()
 	_scene_data_manager.initialize(
 		_rd,
 		get_tree(),
-		_resource_manager.get_scene_buffers()["spheres"],
-		_resource_manager.get_scene_buffers()["triangles"],
-		_resource_manager.get_scene_buffers()["vertices"],
-		_resource_manager.get_scene_buffers()["materials"]
+		_pt_resource_manager.get_scene_spheres_storage_buffer(),
+		_pt_resource_manager.get_scene_materials_storage_buffer(),
+		_pt_resource_manager.get_scene_vertex_storage_buffer(),
+		_pt_resource_manager.get_scene_materials_storage_buffer()
 	)
 	
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		_resource_manager.cleanup()
-
 func _get_push_constant_bytes() -> PackedByteArray:
 	var texture_width = get_render_width()
 	var texture_height = get_render_height()
@@ -114,12 +115,11 @@ func _draw():
 	])
 
 	var compute_list := _rd.compute_list_begin()
-	_rd.compute_list_bind_compute_pipeline(compute_list, _resource_manager.get_pipeline())
-	var sets = _resource_manager.get_uniform_sets()
-	_rd.compute_list_bind_uniform_set(compute_list, sets["image"], 0)
-	_rd.compute_list_bind_uniform_set(compute_list, sets["settings"], 1)
-	_rd.compute_list_bind_uniform_set(compute_list, sets["camera"], 2)
-	_rd.compute_list_bind_uniform_set(compute_list, sets["scene"], 3)
+	_rd.compute_list_bind_compute_pipeline(compute_list, _pt_resource_manager.get_pipeline())
+	_rd.compute_list_bind_uniform_set(compute_list, _pt_resource_manager.get_image_uniform_set(), 0)
+	_rd.compute_list_bind_uniform_set(compute_list, _pt_resource_manager.get_settings_uniform_set(), 1)
+	_rd.compute_list_bind_uniform_set(compute_list, _pt_resource_manager.get_camera_uniform_set(), 2)
+	_rd.compute_list_bind_uniform_set(compute_list, _pt_resource_manager.get_scene_uniform_set(), 3)
 	_rd.compute_list_set_push_constant(compute_list, push_constant_byte_array, push_constant_byte_array.size())
 	_rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
 	_rd.compute_list_end()
@@ -138,12 +138,12 @@ func _update_settings_storage_buffer():
 			0.0, 0.0, 0.0
 		]
 	).to_byte_array()
-	_rd.buffer_update(_resource_manager.get_settings_buffer(), 0, data.size(), data)
+	_rd.buffer_update(_pt_resource_manager.get_settings_storage_buffer(), 0, data.size(), data)
 
 func _update_camera_storage_buffer():
 	# Update buffer data
 	var camera_bytes = CameraManager.get_camera_bytes(scene.camera, get_render_width(), get_render_height())
-	_rd.buffer_update(_resource_manager.get_camera_buffer(), 0, camera_bytes.size(), camera_bytes)
+	_rd.buffer_update(_pt_resource_manager.get_camera_storage_buffer(), 0, camera_bytes.size(), camera_bytes)
 
 
 func _push_material(material: PTMaterial) -> int:
