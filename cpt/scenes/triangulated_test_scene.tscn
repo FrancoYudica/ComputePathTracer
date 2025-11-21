@@ -1,15 +1,21 @@
-[gd_scene load_steps=6 format=3 uid="uid://j4h1pyrgc37a"]
+[gd_scene load_steps=9 format=3 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
+[ext_resource type="ArrayMesh" uid="uid://6qcmciogok4g" path="res://models/stanford_bunny.obj" id="2_h0881"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_6atvq"]
-radial_segments = 5
-rings = 5
+radial_segments = 10
+rings = 10
 
-[sub_resource type="PTMaterial" id="PTMaterial_vop1m"]
+[sub_resource type="PTMaterial" id="PTMaterial_h0881"]
+material_type = 2
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ssvt4"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_vop1m"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_h0881"]
 
 [node name="TriangulatedTestScene" instance=ExtResource("1_218p2")]
 
@@ -21,14 +27,35 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1)
 mesh = SubResource("SphereMesh_6atvq")
 
 [node name="PTNode2" type="PTNode" parent="." index="2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.28166747)
-mesh = ExtResource("4_ajtdg")
+material = SubResource("PTMaterial_h0881")
+transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 0, 0, -0.28166747)
+mesh = ExtResource("2_h0881")
 
 [node name="PTNode3" type="PTNode" parent="." index="3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.2816675)
+transform = Transform3D(-0.321803, 0, -0.94680667, 0, 1, 0, 0.94680667, 0, -0.321803, 0, 0, -2.2816675)
 mesh = ExtResource("4_ajtdg")
 
 [node name="PTNodeGround" type="PTNode" parent="." index="4"]
-material = SubResource("PTMaterial_vop1m")
-transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
+visible = false
 mesh = SubResource("PlaneMesh_ssvt4")
+
+[node name="PTNodeGround2" type="PTNode" parent="." index="5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -1)
+visible = false
+mesh = SubResource("BoxMesh_vop1m")
+
+[node name="PTNodeGround5" type="PTNode" parent="." index="6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 2)
+visible = false
+mesh = SubResource("BoxMesh_vop1m")
+
+[node name="PTNodeGround3" type="PTNode" parent="." index="7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1)
+visible = false
+mesh = SubResource("BoxMesh_vop1m")
+
+[node name="PTNodeGround4" type="PTNode" parent="." index="8"]
+node_type = 1
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 1)
+mesh = SubResource("SphereMesh_h0881")

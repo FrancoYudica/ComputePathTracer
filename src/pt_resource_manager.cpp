@@ -29,6 +29,7 @@ void PTResourceManager::_bind_methods()
     ClassDB::bind_method(D_METHOD("get_scene_triangles_storage_buffer"), &PTResourceManager::get_scene_triangles_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_scene_vertex_storage_buffer"), &PTResourceManager::get_scene_vertex_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_scene_materials_storage_buffer"), &PTResourceManager::get_scene_materials_storage_buffer);
+    ClassDB::bind_method(D_METHOD("get_scene_bvh_storage_buffer"), &PTResourceManager::get_scene_bvh_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_image_uniform_set"), &PTResourceManager::get_image_uniform_set);
     ClassDB::bind_method(D_METHOD("get_settings_uniform_set"), &PTResourceManager::get_settings_uniform_set);
     ClassDB::bind_method(D_METHOD("get_camera_uniform_set"), &PTResourceManager::get_camera_uniform_set);
@@ -51,6 +52,7 @@ PTResourceManager::~PTResourceManager()
     _rd->free_rid(_scene_triangles_storage_buffer);
     _rd->free_rid(_scene_vertex_storage_buffer);
     _rd->free_rid(_scene_materials_storage_buffer); 
+    _rd->free_rid(_scene_bvh_storage_buffer); 
     _rd->free_rid(_image_uniform_set);
     _rd->free_rid(_settings_uniform_set);
     _rd->free_rid(_camera_uniform_set);
@@ -258,6 +260,10 @@ void PTResourceManager::_create_uniforms()
         _scene_materials_uniform = Ref<RDUniform>(memnew(RDUniform));
         _scene_materials_uniform->set_uniform_type(RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
         _scene_materials_uniform->set_binding(3);
+
+        _scene_bvh_uniform = Ref<RDUniform>(memnew(RDUniform));
+        _scene_bvh_uniform->set_uniform_type(RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
+        _scene_bvh_uniform->set_binding(4);
     }
 }
 
@@ -304,14 +310,45 @@ void PTResourceManager::_create_storage_buffers()
         _scene_materials_storage_buffer = _rd->storage_buffer_create(materials_bytes.size(), materials_bytes);
         _scene_materials_uniform->add_id(_scene_materials_storage_buffer);
     }
+    {
+        PackedByteArray bvh_bytes = PackedByteArray();
+        bvh_bytes.resize(2 * 1024 * 1024); // 2 MB initial size
+        _scene_bvh_storage_buffer = _rd->storage_buffer_create(bvh_bytes.size(), bvh_bytes);
+        _scene_bvh_uniform->add_id(_scene_bvh_storage_buffer);
+    }
 
 }
 void PTResourceManager::_create_uniform_sets()
 {
-    _image_uniform_set = _rd->uniform_set_create({_output_image_uniform, _accumulation_image_uniform, _skybox_image_uniform}, _shader, 0);
-    _settings_uniform_set = _rd->uniform_set_create({_settings_uniform}, _shader, 1);
-    _camera_uniform_set = _rd->uniform_set_create({_camera_uniform}, _shader, 2);
-    _scene_uniform_set = _rd->uniform_set_create({_scene_spheres_uniform, _scene_triangles_uniform, _scene_vertex_uniform, _scene_materials_uniform}, _shader, 3);
+    _image_uniform_set = _rd->uniform_set_create(
+        {
+            _output_image_uniform, 
+            _accumulation_image_uniform, 
+            _skybox_image_uniform
+        }, 
+        _shader, 0);
+
+    _settings_uniform_set = _rd->uniform_set_create(
+        {
+            _settings_uniform
+        }, 
+        _shader, 1);
+    
+    _camera_uniform_set = _rd->uniform_set_create(
+        {
+            _camera_uniform
+        }, 
+        _shader, 2);
+
+    _scene_uniform_set = _rd->uniform_set_create(
+        {
+            _scene_spheres_uniform, 
+            _scene_triangles_uniform, 
+            _scene_vertex_uniform, 
+            _scene_materials_uniform, 
+            _scene_bvh_uniform
+        }, 
+        _shader, 3);
 
 }
 void PTResourceManager::_create_shader_and_pipeline(String shader_path)
@@ -337,6 +374,5 @@ void PTResourceManager::_create_shader_and_pipeline(String shader_path)
         _pipeline = _rd->compute_pipeline_create(_shader);
     }   
 }
-
 
 }

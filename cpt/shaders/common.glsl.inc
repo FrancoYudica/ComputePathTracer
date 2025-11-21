@@ -1,14 +1,17 @@
 #define EPSILON 0.0001
 #define PI 3.14159265359
-struct HitRecord {
-  float t;
-  vec3 p;
-  vec3 n;
-  bool frontFace;
-  float materialIndex;
-};
+
 
 vec3 rayAt(Ray ray, float t) { return ray.origin + ray.direction * t; }
+
+/* Standard way of creating a ray */
+Ray createRay(vec3 origin, vec3 direction) {
+  Ray ray;
+  ray.origin = origin;
+  ray.direction = direction;
+  ray.invDirection = 1.0 / direction;
+  return ray;
+}
 
 bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
   vec3 oc = ray.origin - sphere.center;
@@ -42,6 +45,30 @@ bool sphereIntersection(Ray ray, Sphere sphere, out HitRecord record) {
   }
 
   return true;
+}
+
+// Ray-AABB intersection test, by the slab method.
+bool aabbIntersection(Ray ray, AABB aabb) {
+
+  float tx1 = (aabb.min.x - ray.origin.x) * ray.invDirection.x;
+  float tx2 = (aabb.max.x - ray.origin.x) * ray.invDirection.x;
+
+  float tmin = min(tx1, tx2);
+  float tmax = max(tx1, tx2);
+
+  float ty1 = (aabb.min.y - ray.origin.y) * ray.invDirection.y;
+  float ty2 = (aabb.max.y - ray.origin.y) * ray.invDirection.y;
+
+  tmin = max(tmin, min(ty1, ty2));
+  tmax = min(tmax, max(ty1, ty2));
+
+  float tz1 = (aabb.min.z - ray.origin.z) * ray.invDirection.z;
+  float tz2 = (aabb.max.z - ray.origin.z) * ray.invDirection.z;
+
+  tmin = max(tmin, min(tz1, tz2));
+  tmax = min(tmax, max(tz1, tz2));
+
+  return tmax >= max(0.0, tmin);
 }
 
 bool triangleIntersection(

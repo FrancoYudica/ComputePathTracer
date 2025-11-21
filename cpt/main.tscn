@@ -31,9 +31,9 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
+render_settings = SubResource("Resource_d13ii")
 scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
-render_settings = SubResource("Resource_d13ii")
 
 [node name="HBoxContainer" type="SplitContainer" parent="."]
 layout_mode = 1

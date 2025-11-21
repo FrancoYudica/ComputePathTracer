@@ -30,6 +30,7 @@ namespace godot {
         _scene_triangles_storage_buffer,
         _scene_vertex_storage_buffer,
         _scene_materials_storage_buffer,
+        _scene_bvh_storage_buffer,
         
         /* Uniform sets */
         _image_uniform_set,
@@ -47,7 +48,8 @@ namespace godot {
         _scene_spheres_uniform,
         _scene_triangles_uniform,
         _scene_vertex_uniform,
-        _scene_materials_uniform;
+        _scene_materials_uniform,
+        _scene_bvh_uniform;
 
         RID _skybox_sampler;
 
@@ -72,6 +74,7 @@ namespace godot {
         RID get_scene_triangles_storage_buffer() const { return _scene_triangles_storage_buffer; };
         RID get_scene_vertex_storage_buffer() const { return _scene_vertex_storage_buffer; };
         RID get_scene_materials_storage_buffer() const { return _scene_materials_storage_buffer; };
+        RID get_scene_bvh_storage_buffer() const { return _scene_bvh_storage_buffer; };
         RID get_image_uniform_set() const { return _image_uniform_set; };
         RID get_settings_uniform_set() const { return _settings_uniform_set; };
         RID get_camera_uniform_set() const { return _camera_uniform_set; };

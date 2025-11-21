@@ -1,6 +1,8 @@
 #include "scene_data_manager.h"
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/time.hpp>
 #include "ptnode.h"
+#include "bounding_volume_hierarchy.h"
 
 
 void godot::SceneDataManager::_bind_methods()
@@ -36,7 +38,8 @@ void godot::SceneDataManager::initialize(
     RID spheres_storage_buffer, 
     RID triangles_storage_buffer, 
     RID vertices_storage_buffer, 
-    RID materials_storage_buffer)
+    RID materials_storage_buffer,
+    RID bvh_storage_buffer)
 {
     _rd = p_rd;
     _tree = p_tree;
@@ -44,10 +47,12 @@ void godot::SceneDataManager::initialize(
     _triangles_storage_buffer = triangles_storage_buffer;
     _vertices_storage_buffer = vertices_storage_buffer;
     _materials_storage_buffer = materials_storage_buffer;
+    _bvh_storage_buffer = bvh_storage_buffer;
 }
 
 void godot::SceneDataManager::update_buffers()
 {
+    uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     _frame_materials.clear();
     _frame_materials_list.clear();
 
@@ -71,6 +76,10 @@ void godot::SceneDataManager::update_buffers()
     _update_spheres_buffer(all_nodes, sphere_indices);
     _update_triangles_buffer(all_nodes, triangle_indices);
     _update_materials_buffer();
+
+    uint64_t end_t = Time::get_singleton()->get_ticks_msec();
+    print_line("Elapsed on update: " + String::num_int64(end_t - start_t));
+
 }
 
 void godot::SceneDataManager::_update_spheres_buffer(
@@ -107,13 +116,11 @@ void godot::SceneDataManager::_update_triangles_buffer(
     const TypedArray<Node>& all_nodes, 
     const std::vector<uint32_t>& triangle_mesh_indices)
 {
-    PackedFloat32Array triangles_data;
-    PackedVector4Array vertices_data;
 
-    triangles_data.push_back(0.0f); // Placeholder for triangle count
-    triangles_data.push_back(0.0f); // Placeholder for triangle count
-    triangles_data.push_back(0.0f); // Placeholder for triangle count
-    triangles_data.push_back(0.0f); // Placeholder for triangle count
+    std::vector<PTTriangle> triangles;
+    std::vector<PTVertex> vertices;
+
+    PackedVector4Array vertices_data;
 
     uint32_t triangle_count = 0;
     for (uint32_t i = 0; i < triangle_mesh_indices.size(); ++i) {
@@ -143,6 +150,8 @@ void godot::SceneDataManager::_update_triangles_buffer(
                 // Apply global transform
                 vertex = triangle_mesh_node->get_global_transform().xform(vertex);
                 vertices_data.push_back(Vector4(vertex.x, vertex.y, vertex.z, 1.0f));
+
+                vertices.push_back({vertex});
             }
 
             // Add triangles
@@ -150,26 +159,114 @@ void godot::SceneDataManager::_update_triangles_buffer(
                 uint32_t i0 = base_index_offset + uint32_t(surface_indices[idx + 0]);
                 uint32_t i1 = base_index_offset + uint32_t(surface_indices[idx + 1]);
                 uint32_t i2 = base_index_offset + uint32_t(surface_indices[idx + 2]);
-
-                triangles_data.push_back(float(i0));
-                triangles_data.push_back(float(i1));
-                triangles_data.push_back(float(i2));
-                triangles_data.push_back(float(mesh_material_index));
+                triangles.push_back({i0, i1, i2, mesh_material_index });
             }
 
             triangle_count += surface_indices.size() / 3;
         }
     }
-    triangles_data[0] = float(triangle_count); // Sets triangle counts
 
-    PackedByteArray triangles_bytes = triangles_data.to_byte_array();
-    _rd->buffer_update(_triangles_storage_buffer, 0, triangles_bytes.size(), triangles_bytes);
+
+    // Write triangle count
+    PackedFloat32Array triangles_count_data;
+    triangles_count_data.push_back(float(triangle_count));
+    triangles_count_data.push_back(0.0);
+    triangles_count_data.push_back(0.0);
+    triangles_count_data.push_back(0.0);
+    PackedByteArray triangle_count_bytes = triangles_count_data.to_byte_array();
+    _rd->buffer_update(_triangles_storage_buffer, 0, triangle_count_bytes.size(), triangle_count_bytes);
 
     PackedByteArray vertices_bytes = vertices_data.to_byte_array();
     _rd->buffer_update(_vertices_storage_buffer, 0, vertices_bytes.size(), vertices_bytes);
 
     _frame_stats.triangle_count = triangle_count;
     _frame_stats.vertex_count = uint32_t(vertices_data.size());
+    uint64_t start_t = Time::get_singleton()->get_ticks_msec();
+    PTBoundingVolumeHierarchy bvh;
+    bvh.build(vertices, triangles);
+    uint64_t end_t = Time::get_singleton()->get_ticks_msec();
+    print_line("BVH creation time: " + String::num_int64(end_t - start_t));
+
+    print_line("BVH with " + String::num_int64(bvh.get_nodes().size()) + " nodes");
+
+    // std::vector<uint32_t> nodeIndices;
+    // nodeIndices.push_back(0);
+
+    // while (nodeIndices.size() > 0) {
+    //     uint32_t nodeIndex = nodeIndices.at(0);
+    //     nodeIndices.erase(nodeIndices.begin());
+    //     const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
+
+    //     if (!node.is_leaf)
+    //     {
+    //         nodeIndices.push_back(node.left_child_index);
+    //         nodeIndices.push_back(node.right_child_index);
+    //     }
+
+    //     print_line("Node " + String::num_int64(nodeIndex) 
+    //         + ". Min(" 
+    //         + String::num_real(node.aabb.min.x) + ", " 
+    //         + String::num_real(node.aabb.min.y) + ", "
+    //         + String::num_real(node.aabb.min.z) + ") " 
+    //         + ", Max("
+    //         + String::num_real(node.aabb.max.x) + ", "
+    //         + String::num_real(node.aabb.max.y) + ", "
+    //         + String::num_real(node.aabb.max.z) + ") "
+    //         + ", Left child index: "
+    //         + String::num_int64(node.left_child_index)
+    //         + ", Right child index: "
+    //         + String::num_int64(node.right_child_index)
+    //         + ", Primitive start: "
+    //         + String::num_int64(node.primitive_start_index)
+    //         + ", Primitive count: "
+    //         + String::num_int64(node.primitive_count)
+    //     ); 
+    // }
+
+    PackedFloat32Array sortedTriangles;
+    sortedTriangles.resize(triangles.size() * 4);
+
+    for (uint32_t i = 0; i < triangles.size(); i++)
+    {
+        PTTriangle& triangle = triangles[i];
+        sortedTriangles[i * 4 + 0] = triangle.i0;
+        sortedTriangles[i * 4 + 1] = triangle.i1;
+        sortedTriangles[i * 4 + 2] = triangle.i2;
+        sortedTriangles[i * 4 + 3] = triangle.materialIndex;
+    }
+
+    PackedByteArray sorted_triangles_bytes = sortedTriangles.to_byte_array();
+    _rd->buffer_update(_triangles_storage_buffer, 4 * 4, sorted_triangles_bytes.size(), sorted_triangles_bytes);
+
+    PackedFloat32Array bvh_nodes_data;
+    constexpr uint32_t floats_per_node = 12;
+    bvh_nodes_data.resize(bvh.get_nodes().size() * floats_per_node);
+    for (uint32_t i = 0; i < bvh.get_nodes().size(); i++)
+    {
+        const PTBoundingVolumeNode& node = bvh.get_nodes()[i];
+        uint32_t base = i * floats_per_node;
+        
+        Vector3 min = node.aabb.min;
+        Vector3 max = node.aabb.max;
+
+        // AABB
+        bvh_nodes_data[base + 0] = min.x;
+        bvh_nodes_data[base + 1] = min.y;
+        bvh_nodes_data[base + 2] = min.z;
+        bvh_nodes_data[base + 3] = 0.0; // Padding
+
+        bvh_nodes_data[base + 4] = max.x;
+        bvh_nodes_data[base + 5] = max.y;
+        bvh_nodes_data[base + 6] = max.z;
+        bvh_nodes_data[base + 7] = 0.0; // Padding
+
+        bvh_nodes_data[base + 8] = node.primitive_start_index;
+        bvh_nodes_data[base + 9] = node.primitive_count;
+        bvh_nodes_data[base + 10] = node.left_child_index;
+        bvh_nodes_data[base + 11] = node.right_child_index;
+    }
+    PackedByteArray bvh_nodes_byte_array = bvh_nodes_data.to_byte_array();
+    _rd->buffer_update(_bvh_storage_buffer, 0, bvh_nodes_byte_array.size(), bvh_nodes_byte_array);
 }
 
 

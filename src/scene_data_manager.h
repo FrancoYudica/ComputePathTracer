@@ -24,6 +24,7 @@ namespace godot {
         RID _triangles_storage_buffer;
         RID _vertices_storage_buffer;
         RID _materials_storage_buffer;
+        RID _bvh_storage_buffer;
 
         std::unordered_map<size_t, uint32_t> _frame_materials; // Maps material hash to index
         std::vector<Ref<PTMaterial>> _frame_materials_list; // Stores frames materials
@@ -49,7 +50,8 @@ namespace godot {
             RID spheres_storage_buffer,
             RID triangles_storage_buffer,
             RID vertices_storage_buffer,
-            RID materials_storage_buffer
+            RID materials_storage_buffer,
+            RID bvh_storage_buffer
         );
 
         void update_buffers();
