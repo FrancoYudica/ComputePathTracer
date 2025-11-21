@@ -23,6 +23,7 @@ refraction_index = 1.3
 
 [sub_resource type="PTMaterial" id="PTMaterial_g84b5"]
 color = Color(7.83328e-06, 0.36703855, 0.096576236, 1)
+roughness = 0.26
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_l8dqy"]
 

@@ -11,7 +11,7 @@ class_name Renderer extends Node
 		render_settings.changed.connect(queue_clear)
 
 var _pt_resource_manager: PTResourceManager
-var _scene_data_manager: SceneDataManager
+var scene_data_manager: SceneDataManager
 
 var _still_frames_count: int = 1
 var _render_scale: float = 1.0
@@ -70,12 +70,12 @@ func _initialize_compute():
 		get_render_width(), 
 		get_render_height())
 	
-	_scene_data_manager = SceneDataManager.new()
-	_scene_data_manager.initialize(
+	scene_data_manager = SceneDataManager.new()
+	scene_data_manager.initialize(
 		_rd,
 		get_tree(),
 		_pt_resource_manager.get_scene_spheres_storage_buffer(),
-		_pt_resource_manager.get_scene_materials_storage_buffer(),
+		_pt_resource_manager.get_scene_triangles_storage_buffer(),
 		_pt_resource_manager.get_scene_vertex_storage_buffer(),
 		_pt_resource_manager.get_scene_materials_storage_buffer()
 	)
@@ -105,14 +105,7 @@ func _draw():
 	
 	_update_settings_storage_buffer()
 	_update_camera_storage_buffer()
-	_scene_data_manager.update_buffers()
-	
-	print("Spheres: %s. Triangles: %s. Vertices %s. Materials %s" % [
-		_scene_data_manager.get_sphere_count(),
-		_scene_data_manager.get_triangle_count(),
-		_scene_data_manager.get_vertex_count(),
-		_scene_data_manager.get_material_count()
-	])
+	scene_data_manager.update_buffers()
 
 	var compute_list := _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(compute_list, _pt_resource_manager.get_pipeline())

@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://j4h1pyrgc37a"]
+[gd_scene load_steps=6 format=3 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
@@ -6,6 +6,8 @@
 [sub_resource type="SphereMesh" id="SphereMesh_6atvq"]
 radial_segments = 5
 rings = 5
+
+[sub_resource type="PTMaterial" id="PTMaterial_vop1m"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ssvt4"]
 
@@ -27,5 +29,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.2816675)
 mesh = ExtResource("4_ajtdg")
 
 [node name="PTNodeGround" type="PTNode" parent="." index="4"]
+material = SubResource("PTMaterial_vop1m")
 transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ssvt4")

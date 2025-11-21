@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=14 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer/renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://renderer/render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://ui/texture_loader.gd" id="3_h2yge"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
+[ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
 [ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
@@ -30,7 +31,7 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/MetalRoughnessTestScene")
+scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 render_settings = SubResource("Resource_d13ii")
 
@@ -210,6 +211,51 @@ layout_mode = 2
 script = ExtResource("5_dg77c")
 slider = NodePath("../FocalLengthHSlider")
 
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label")]
+layout_mode = 2
+script = ExtResource("6_dg77c")
+renderer = NodePath("../../../../../../Renderer")
+fps_label = NodePath("MarginContainer/VBoxContainer/FPSLabel")
+sphere_count_label = NodePath("MarginContainer/VBoxContainer/SpheresLabel")
+triangle_count_label = NodePath("MarginContainer/VBoxContainer/TrianglesLabel")
+vertex_count_label = NodePath("MarginContainer/VBoxContainer/VerticesLabel")
+material_count_label = NodePath("MarginContainer/VBoxContainer/MaterialsLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "STATS"
+
+[node name="FPSLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "FPS"
+
+[node name="SpheresLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Triangles"
+
+[node name="TrianglesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Triangles"
+
+[node name="VerticesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Vertices"
+
+[node name="MaterialsLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Material"
+
 [node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "View rasterized"
@@ -242,10 +288,10 @@ visible = false
 visible = false
 
 [node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
+visible = false
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(0.9999894, 0.0043330723, -0.0016035534, -0.0043368903, 0.9999877, -0.0023848694, 0.0015931965, 0.0023918008, 0.9999958, 0, 0, 0)
-visible = false
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2

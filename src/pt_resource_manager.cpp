@@ -26,6 +26,7 @@ void PTResourceManager::_bind_methods()
     ClassDB::bind_method(D_METHOD("get_settings_storage_buffer"), &PTResourceManager::get_settings_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_camera_storage_buffer"), &PTResourceManager::get_camera_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_scene_spheres_storage_buffer"), &PTResourceManager::get_scene_spheres_storage_buffer);
+    ClassDB::bind_method(D_METHOD("get_scene_triangles_storage_buffer"), &PTResourceManager::get_scene_triangles_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_scene_vertex_storage_buffer"), &PTResourceManager::get_scene_vertex_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_scene_materials_storage_buffer"), &PTResourceManager::get_scene_materials_storage_buffer);
     ClassDB::bind_method(D_METHOD("get_image_uniform_set"), &PTResourceManager::get_image_uniform_set);
