@@ -31,9 +31,9 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-render_settings = SubResource("Resource_d13ii")
 scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
+render_settings = SubResource("Resource_d13ii")
 
 [node name="HBoxContainer" type="SplitContainer" parent="."]
 layout_mode = 1
@@ -43,7 +43,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 script = ExtResource("2_lquwl")
@@ -57,6 +57,7 @@ samples_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsP
 bounces_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox")
 aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
 focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
+vsync_check_box = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox")
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer"]
 layout_mode = 2
@@ -211,6 +212,30 @@ layout_mode = 2
 script = ExtResource("5_dg77c")
 slider = NodePath("../FocalLengthHSlider")
 
+[node name="VSyncLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "VSync"
+
+[node name="VSyncCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+
+[node name="ModeLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Mode"
+
+[node name="ModeOptionButton" type="OptionButton" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "PathTrace"
+popup/item_0/id = 0
+popup/item_1/text = "BVH"
+popup/item_1/id = 1
+popup/item_2/text = "Normals"
+popup/item_2/id = 2
+popup/item_3/text = "Depth"
+popup/item_3/id = 3
+
 [node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
@@ -328,6 +353,8 @@ renderer = NodePath("../../../../../Renderer")
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_aperture_h_slider_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
+[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_v_sync_check_box_toggled"]
+[connection signal="item_selected" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ModeOptionButton" to="HBoxContainer/SettingsPanelContainer" method="_on_mode_option_button_item_selected"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]
 [connection signal="moved" from="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController" to="." method="_on_camera_controller_moved"]

@@ -129,7 +129,8 @@ func _update_settings_storage_buffer():
 			render_settings.environment_energy,
 			render_settings.camera_aperture,
 			render_settings.camera_focal_distance,
-			0.0, 0.0, 0.0
+			render_settings.mode,
+			0.0, 0.0
 		]
 	).to_byte_array()
 	_rd.buffer_update(_pt_resource_manager.get_settings_storage_buffer(), 0, data.size(), data)

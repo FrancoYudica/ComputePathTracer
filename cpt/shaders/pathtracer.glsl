@@ -1,6 +1,5 @@
 #[compute]
 #version 450
-
 #include "types.glsl.inc"
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
@@ -15,6 +14,7 @@ layout(std430, set = 1, binding = 0) buffer Settings {
   float environmentEnergy;
   float cameraAperture;
   float cameraFocalDistance;
+  float debugMode; // 0 = off, 1 = visualize BVH
 }
 settings;
 
@@ -52,7 +52,8 @@ params;
 
 #include "common.glsl.inc"
 #include "random.glsl.inc"
-#include "bvh.glsl.inc"
+#include "scene.glsl.inc"
+#include "debug.glsl.inc"
 
 Ray generateRay(vec2 pixel, uint seed) {
   // 1. Pixel -> NDC (-1, 1)
@@ -95,93 +96,6 @@ Ray generateRay(vec2 pixel, uint seed) {
   vec3 direction = normalize(focalPoint - lensPos);
 
   return createRay(lensPos, direction);
-}
-
-/**
-Iterates through all the scene and finds the closest intersection.
-*/
-bool intersectScene(Ray ray, out HitRecord nearestHit) {
-  nearestHit.t = -1.0;
-  bool didHit = false;
-  HitRecord record;
-
-  Sphere sphere;
-  for (int i = 0; i < int(sphereCount); i++) {
-    sphere = spheres[i];
-    bool h = sphereIntersection(ray, sphere, record);
-    if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
-      nearestHit = record;
-      didHit = true;
-    }
-  }
-
-  // Triangle triangle;
-  // for (int i = 0; i < int(triangleCount); i++) {
-  //   triangle = triangles[i];
-  //   vec3 v0 = vertices[int(triangle.indices.x)];
-  //   vec3 v1 = vertices[int(triangle.indices.y)];
-  //   vec3 v2 = vertices[int(triangle.indices.z)];
-  //   bool h =
-  //       triangleIntersection(ray, v0, v1, v2, triangle.materialIndex, record);
-  //   if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
-  //     nearestHit = record;
-  //     didHit = true;
-  //   }
-  // }
-
-  int nodeStack[16];
-  nodeStack[0] = 0;
-  int stackIndex = 0;
-
-  int intersections = 0;
-
-  while (stackIndex >= 0) {
-    // Pop node from stack
-    int pendingNodeIndex = nodeStack[stackIndex--];
-    BVHNode node = bvhNodes[pendingNodeIndex];
-
-    // Test intersection with AABB
-    if (aabbIntersection(ray, node.aabb)) {
-      
-      // Iterate through all its primitives and test intersections
-      for (int i = 0; i < int(node.primitiveCount); i++) {
-        int primitiveIndex = i + int(node.primitiveStartIndex);
-
-        Triangle triangle = triangles[primitiveIndex];
-        vec3 v0 = vertices[int(triangle.indices.x)];
-        vec3 v1 = vertices[int(triangle.indices.y)];
-        vec3 v2 = vertices[int(triangle.indices.z)];
-        bool h = triangleIntersection(ray, v0, v1, v2, triangle.materialIndex, record);
-        if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
-          nearestHit = record;
-          didHit = true;
-        }
-
-      }
-
-      intersections++;
-
-      int right = int(node.rightChildIndex);
-      int left = int(node.leftChildIndex);
-
-      // 0 means no child. Also, avoids overflowing the stack
-      if (right != 0 && stackIndex < 15) {
-        nodeStack[++stackIndex] = right;
-      }
-      if (left != 0 && stackIndex < 15) {
-        nodeStack[++stackIndex] = left;
-      }
-    }
-  }
-
-  return didHit;
-}
-
-vec3 sampleSky(Ray ray) {
-  vec2 uv = vec2(atan(ray.direction.z, ray.direction.x) / (2.0 * PI) + 0.5,
-                 acos(clamp(ray.direction.y, -1.0, 1.0)) / PI);
-
-  return texture(skybox, uv).rgb * settings.environmentEnergy;
 }
 
 // Non recursive version
@@ -287,8 +201,6 @@ vec3 pathTrace(Ray ray, uint seed) {
   return radiance;
 }
 
-
-
 void main() {
   ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
 
@@ -304,18 +216,40 @@ void main() {
   // Initial seed combining pixel location and frame seeds
   uint baseSeed = combineSeed(pixelIndex, frameSeed1, frameSeed2);
 
-  vec3 colorSum = vec3(0.0);
-  for (int i = 0; i < int(settings.samples); i++) {
+  vec3 frameColor = vec3(0.0);
 
-    uint sampleSeed = combineSeed(baseSeed, uint(i));
+  int debugMode = int(settings.debugMode);
 
-    vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, sampleSeed);
-    Ray ray = generateRay(jitteredPixel, sampleSeed);
-    colorSum += pathTrace(ray, sampleSeed);
-    // colorSum += debugTraceBVH(ray);
+  // Debug modes
+  if (debugMode > 0)
+  {
+    Ray ray = generateRay(pixel, baseSeed);
+    switch (debugMode) {
+      case 1:
+        frameColor =  debugTraceBVH(ray, baseSeed);
+        break;
+
+      case 2:
+        frameColor = debugNormal(ray, baseSeed);
+        break;
+
+      case 3:
+        frameColor = debugDepth(ray, baseSeed);
+        break;
+    }
   }
 
-  vec3 frameColor = colorSum / settings.samples;
+  // No debug mode. Normal rendering
+  else {
+    vec3 colorSum = vec3(0.0);
+    for (int i = 0; i < int(settings.samples); i++) {
+      uint sampleSeed = combineSeed(baseSeed, uint(i));
+      vec2 jitteredPixel = vec2(pixel) + randomVec2(0.0, 1.0, sampleSeed);
+      Ray ray = generateRay(jitteredPixel, sampleSeed);
+      colorSum += pathTrace(ray, sampleSeed);
+    }
+    frameColor = colorSum / settings.samples;
+  }
 
   // Write pixel color
   vec3 writeColor;

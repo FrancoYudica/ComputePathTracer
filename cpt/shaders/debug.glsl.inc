@@ -14,8 +14,7 @@ vec3 heatMapColor(float value, float maxValue) {
 }
 
 
-
-vec3 debugTraceBVH(Ray ray)
+vec3 debugTraceBVH(Ray ray, uint seed)
 {
   int nodeStack[16];
   nodeStack[0] = 0;
@@ -45,4 +44,24 @@ vec3 debugTraceBVH(Ray ray)
   }
 
   return heatMapColor(float(intersections), 50.0); 
+}
+
+
+vec3 debugNormal(Ray ray, uint seed) {
+  
+  HitRecord record;
+  if (intersectScene(ray, record)) {
+    return record.n * 0.5 + 0.5;
+  }
+
+  return ray.direction * 0.5 + 0.5;
+}
+
+vec3 debugDepth(Ray ray, uint seed) {
+  HitRecord record;
+  ray.direction = normalize(ray.direction);
+  if (intersectScene(ray, record)) {
+    return vec3(record.t / 100.0); // Assuming max depth of 100 units
+  }
+  return vec3(1.0);
 }
