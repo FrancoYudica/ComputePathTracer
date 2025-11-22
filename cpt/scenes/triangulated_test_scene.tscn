@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://j4h1pyrgc37a"]
+[gd_scene load_steps=11 format=3 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
 [ext_resource type="ArrayMesh" uid="uid://6qcmciogok4g" path="res://models/stanford_bunny.obj" id="2_h0881"]
@@ -12,9 +12,18 @@ rings = 10
 
 [sub_resource type="BoxMesh" id="BoxMesh_vop1m"]
 
+[sub_resource type="PTMaterial" id="PTMaterial_rxb0a"]
+metallic = 1.0
+roughness = 0.0
+
 [sub_resource type="SphereMesh" id="SphereMesh_h0881"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_h0881"]
+
+[sub_resource type="PTMaterial" id="PTMaterial_h0881"]
+material_type = 2
+roughness = 0.0
+refraction_index = 1.18
 
 [node name="TriangulatedTestScene" instance=ExtResource("1_218p2")]
 
@@ -27,11 +36,12 @@ visible = false
 mesh = SubResource("SphereMesh_6atvq")
 
 [node name="PTNode2" type="PTNode" parent="." index="2"]
-transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 0, 0, -0.28166747)
+transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 2.6155887, 0, -1.9867525)
 mesh = ExtResource("2_h0881")
 
 [node name="PTNode3" type="PTNode" parent="." index="3"]
 transform = Transform3D(-0.321803, 0, -0.94680667, 0, 1, 0, 0.94680667, 0, -0.321803, 0, 0, -2.2816675)
+visible = false
 mesh = ExtResource("4_ajtdg")
 
 [node name="PTNodeGround" type="PTNode" parent="." index="4"]
@@ -44,15 +54,23 @@ mesh = SubResource("BoxMesh_vop1m")
 
 [node name="PTNodeGround5" type="PTNode" parent="." index="6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 2)
+visible = false
 mesh = SubResource("BoxMesh_vop1m")
 
 [node name="PTNodeGround3" type="PTNode" parent="." index="7"]
+material = SubResource("PTMaterial_rxb0a")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1)
 mesh = SubResource("BoxMesh_vop1m")
 
 [node name="PTNodeGround4" type="PTNode" parent="." index="8"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 1)
+visible = false
 mesh = SubResource("SphereMesh_h0881")
 
 [node name="PTNode4" type="PTNode" parent="." index="9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8666239, 0)
 mesh = SubResource("BoxMesh_h0881")
+
+[node name="PTNode5" type="PTNode" parent="." index="10"]
+node_type = 1
+material = SubResource("PTMaterial_h0881")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.1163602)

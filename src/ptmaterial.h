@@ -5,13 +5,12 @@
 
 namespace godot {
 
-    enum MaterialType  {
+    enum MaterialType {
         MATERIAL_TYPE_LAMBERTIAN = 0,
         MATERIAL_TYPE_METAL = 1,
         MATERIAL_TYPE_DIELECTRIC = 2,
         MATERIAL_TYPE_EMISSIVE = 3,
     };
-
 
     class PTMaterial : public Resource {
         GDCLASS(PTMaterial, Resource)
@@ -30,7 +29,7 @@ namespace godot {
         PTMaterial();
         ~PTMaterial() {}
 
-        void set_color(const Color &p_color);
+        void set_color(const Color& p_color);
         Color get_color() const;
 
         void set_metallic(float p_metallic);
@@ -47,13 +46,12 @@ namespace godot {
 
         MaterialType get_material_type() const;
         void set_material_type(MaterialType p_material_type);
-        
+
         size_t get_hash() const;
 
         String to_string() const;
-
     };
-}
+}  // namespace godot
 
 VARIANT_ENUM_CAST(godot::MaterialType);
 

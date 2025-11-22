@@ -8,16 +8,14 @@
 
 namespace godot {
 
-    enum PTNodeType  {
-        NODE_TYPE_TRIANGLE_MESH = 0,
-        NODE_TYPE_SPHERE = 1
-    };
+    enum PTNodeType { NODE_TYPE_TRIANGLE_MESH = 0, NODE_TYPE_SPHERE = 1 };
 
     class PTNode : public MeshInstance3D {
         GDCLASS(PTNode, MeshInstance3D)
     private:
         PTNodeType node_type = NODE_TYPE_TRIANGLE_MESH;
         Ref<PTMaterial> material;
+
     protected:
         static void _bind_methods();
 
@@ -33,7 +31,7 @@ namespace godot {
         void set_node_type(PTNodeType p_node_type);
         PTNodeType get_node_type() const;
     };
-}
+}  // namespace godot
 
 VARIANT_ENUM_CAST(godot::PTNodeType);
 

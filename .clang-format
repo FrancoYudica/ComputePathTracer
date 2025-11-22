@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+AccessModifierOffset: -4
+PointerAlignment: Left
+BreakBeforeBraces: Attach
+NamespaceIndentation: All
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: true
+ColumnLimit: 80
+SortIncludes: false

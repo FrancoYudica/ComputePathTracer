@@ -3,8 +3,8 @@
 
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/ref.hpp>
-#include <vector>
 #include <godot_cpp/classes/ref_counted.hpp>
+#include <vector>
 
 namespace godot {
 
@@ -24,14 +24,13 @@ namespace godot {
         Vector3 max;
 
         PTAABB merge(PTAABB& other) {
-            return { min.min(other.min), max.max(other.max) };
+            return {min.min(other.min), max.max(other.max)};
         }
 
         void expand_to(Vector3 point) {
             min = min.min(point);
             max = max.max(point);
         }
-
     };
 
     struct PTBoundingVolumeNode {
@@ -55,18 +54,16 @@ namespace godot {
         PTBoundingVolumeHierarchy();
         ~PTBoundingVolumeHierarchy();
 
-        const std::vector<PTBoundingVolumeNode> &get_nodes() const { return nodes; }
-        
-        void build(const std::vector<PTVertex> &vertices, std::vector<PTTriangle>& triangles);
-        void split(
-            uint32_t nodeIndex, 
-            const std::vector<PTVertex> &vertices, 
-            std::vector<PTTriangle>& triangles, 
-            uint32_t begin,
-            uint32_t end,
-            uint32_t depth);
+        const std::vector<PTBoundingVolumeNode>& get_nodes() const {
+            return nodes;
+        }
 
+        void build(const std::vector<PTVertex>& vertices,
+                   std::vector<PTTriangle>& triangles);
+        void split(uint32_t nodeIndex, const std::vector<PTVertex>& vertices,
+                   std::vector<PTTriangle>& triangles, uint32_t begin,
+                   uint32_t end, uint32_t depth);
     };
-}
+}  // namespace godot
 
 #endif
