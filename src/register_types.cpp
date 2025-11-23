@@ -6,9 +6,9 @@
 #include <godot_cpp/godot.hpp>
 
 #include "pt_resource_manager.hpp"
-#include "ptmaterial.h"
-#include "ptnode.h"
-#include "scene_data_manager.h"
+#include "pt_material.h"
+#include "pt_node.h"
+#include "pt_scene_data_manager.h"
 using namespace godot;
 
 void initialize_module(ModuleInitializationLevel p_level) {
@@ -16,7 +16,7 @@ void initialize_module(ModuleInitializationLevel p_level) {
         return;
     }
 
-    GDREGISTER_RUNTIME_CLASS(SceneDataManager);
+    GDREGISTER_RUNTIME_CLASS(PTSceneDataManager);
     GDREGISTER_RUNTIME_CLASS(PTMaterial);
     GDREGISTER_RUNTIME_CLASS(PTNode);
     GDREGISTER_RUNTIME_CLASS(PTResourceManager);

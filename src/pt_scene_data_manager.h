@@ -8,18 +8,18 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ptmaterial.h"
+#include "pt_material.h"
 
 namespace godot {
 
     /**
-     * SceneDataManager handles the GPU buffers for scene
+     * PTSceneDataManager handles the GPU buffers for scene
      * data such as spheres, triangles, vertices, and
      * materials.
      */
 
-    class SceneDataManager : public RefCounted {
-        GDCLASS(SceneDataManager, RefCounted)
+    class PTSceneDataManager : public RefCounted {
+        GDCLASS(PTSceneDataManager, RefCounted)
     private:
         RenderingDevice* _rd;
         SceneTree* _tree;
@@ -45,8 +45,8 @@ namespace godot {
         static void _bind_methods();
 
     public:
-        SceneDataManager();
-        ~SceneDataManager();
+        PTSceneDataManager();
+        ~PTSceneDataManager();
 
         void initialize(RenderingDevice* p_rd, SceneTree* p_tree,
                         RID spheres_storage_buffer,

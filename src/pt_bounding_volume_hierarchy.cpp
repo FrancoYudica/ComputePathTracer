@@ -1,4 +1,4 @@
-#include "bounding_volume_hierarchy.h"
+#include "pt_bounding_volume_hierarchy.h"
 
 #include <algorithm>
 

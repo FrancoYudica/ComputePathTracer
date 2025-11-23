@@ -39,9 +39,9 @@ void intersectScene(Ray ray, out HitRecord record) {
                 int primitiveIndex = i + int(node.primitiveStartIndex);
 
                 Triangle triangle = triangles[primitiveIndex];
-                vec3 v0 = vertices[int(triangle.indices.x)];
-                vec3 v1 = vertices[int(triangle.indices.y)];
-                vec3 v2 = vertices[int(triangle.indices.z)];
+                Vertex v0 = vertices[int(triangle.indices.x)];
+                Vertex v1 = vertices[int(triangle.indices.y)];
+                Vertex v2 = vertices[int(triangle.indices.z)];
                 triangleIntersection(ray, v0, v1, v2, triangle.materialIndex,
                                      record);
             }

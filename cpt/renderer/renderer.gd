@@ -11,7 +11,7 @@ class_name Renderer extends Node
 		render_settings.changed.connect(queue_clear)
 
 var _pt_resource_manager: PTResourceManager
-var scene_data_manager: SceneDataManager
+var scene_data_manager: PTSceneDataManager
 
 var _still_frames_count: int = 1
 var _render_scale: float = 1.0
@@ -20,6 +20,7 @@ var _render_scale: float = 1.0
 var _frame_materials: Dictionary[PTMaterial, int]
 
 var _clear_buffer: bool = false
+var _update_scene: bool = false
 
 func queue_clear():
 	_clear_buffer = true
@@ -50,6 +51,9 @@ func get_render_height():
 
 	return int(render_control.size.y * _render_scale)
 
+func update_scene():
+	_update_scene = true
+
 func _clear_accumulated_buffer():
 	_still_frames_count = 1
 
@@ -60,6 +64,8 @@ func _ready() -> void:
 		func():
 			resize(get_render_width(), get_render_height())
 	)
+	
+	update_scene()
 
 func _initialize_compute():
 	_pt_resource_manager = PTResourceManager.new()
@@ -70,7 +76,7 @@ func _initialize_compute():
 		get_render_width(), 
 		get_render_height())
 	
-	scene_data_manager = SceneDataManager.new()
+	scene_data_manager = PTSceneDataManager.new()
 	scene_data_manager.initialize(
 		_rd,
 		get_tree(),
@@ -100,13 +106,16 @@ func _draw():
 		_clear_accumulated_buffer()
 		_clear_buffer = false
 	
+	if _update_scene:
+		scene_data_manager.update_buffers()
+		_update_scene = false
+	
 	var push_constant_byte_array = _get_push_constant_bytes()
 	var x_groups = ceili(float(get_render_width()) / 8)
 	var y_groups = ceili(float(get_render_height()) / 8)
 	
 	_update_settings_storage_buffer()
 	_update_camera_storage_buffer()
-	scene_data_manager.update_buffers()
 
 	var compute_list := _rd.compute_list_begin()
 	_rd.compute_list_bind_compute_pipeline(compute_list, _pt_resource_manager.get_pipeline())

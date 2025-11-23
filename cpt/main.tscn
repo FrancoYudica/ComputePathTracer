@@ -236,6 +236,10 @@ popup/item_2/id = 2
 popup/item_3/text = "Depth"
 popup/item_3/id = 3
 
+[node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Update scene buffers"
+
 [node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
@@ -310,13 +314,13 @@ render_target_update_mode = 0
 visible = false
 
 [node name="SpheresScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("10_w48qg")]
+visible = false
 
 [node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
 visible = false
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
-visible = false
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -355,6 +359,7 @@ renderer = NodePath("../../../../../Renderer")
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_v_sync_check_box_toggled"]
 [connection signal="item_selected" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ModeOptionButton" to="HBoxContainer/SettingsPanelContainer" method="_on_mode_option_button_item_selected"]
+[connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/UpdateSceneButton" to="HBoxContainer/SettingsPanelContainer" method="_on_update_scene_button_pressed"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]
 [connection signal="moved" from="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController" to="." method="_on_camera_controller_moved"]

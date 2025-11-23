@@ -68,3 +68,6 @@ func _set_vsync_mode(toggled_on: bool):
 
 func _on_mode_option_button_item_selected(index: int) -> void:
 	renderer.render_settings.mode = index
+
+func _on_update_scene_button_pressed() -> void:
+	renderer.update_scene()

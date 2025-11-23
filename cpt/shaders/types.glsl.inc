@@ -10,6 +10,7 @@ struct HitRecord {
     vec3 n;
     bool frontFace;
     float materialIndex;
+    vec3 color;
     bool didHit;
 };
 
@@ -50,4 +51,10 @@ struct MaterialSample {
     vec3 albedo;
     bool isEmissive;
     Ray ray;
+};
+
+struct Vertex {
+    vec3 position;
+    vec3 color;
+    vec3 normal;
 };

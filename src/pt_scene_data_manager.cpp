@@ -1,32 +1,32 @@
-#include "scene_data_manager.h"
+#include "pt_scene_data_manager.h"
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/time.hpp>
 #include <unordered_set>
 
-#include "bounding_volume_hierarchy.h"
-#include "ptnode.h"
+#include "pt_bounding_volume_hierarchy.h"
+#include "pt_node.h"
 
-void godot::SceneDataManager::_bind_methods() {
+void godot::PTSceneDataManager::_bind_methods() {
     ClassDB::bind_method(
         D_METHOD("initialize", "rd", "tree", "spheres_storage_buffer",
                  "triangles_storage_buffer", "vertices_storage_buffer",
                  "materials_storage_buffer"),
-        &SceneDataManager::initialize);
+        &PTSceneDataManager::initialize);
     ClassDB::bind_method(D_METHOD("update_buffers"),
-                         &SceneDataManager::update_buffers);
+                         &PTSceneDataManager::update_buffers);
 
     ClassDB::bind_method(D_METHOD("get_sphere_count"),
-                         &SceneDataManager::get_sphere_count);
+                         &PTSceneDataManager::get_sphere_count);
     ClassDB::bind_method(D_METHOD("get_triangle_count"),
-                         &SceneDataManager::get_triangle_count);
+                         &PTSceneDataManager::get_triangle_count);
     ClassDB::bind_method(D_METHOD("get_vertex_count"),
-                         &SceneDataManager::get_vertex_count);
+                         &PTSceneDataManager::get_vertex_count);
     ClassDB::bind_method(D_METHOD("get_material_count"),
-                         &SceneDataManager::get_material_count);
+                         &PTSceneDataManager::get_material_count);
 }
 
-godot::SceneDataManager::SceneDataManager()
+godot::PTSceneDataManager::PTSceneDataManager()
     : _rd(nullptr),
       _tree(nullptr),
       _spheres_storage_buffer(RID()),
@@ -36,9 +36,9 @@ godot::SceneDataManager::SceneDataManager()
       _frame_materials({}),
       _frame_materials_list({}) {}
 
-godot::SceneDataManager::~SceneDataManager() {}
+godot::PTSceneDataManager::~PTSceneDataManager() {}
 
-void godot::SceneDataManager::initialize(
+void godot::PTSceneDataManager::initialize(
     RenderingDevice* p_rd, SceneTree* p_tree, RID spheres_storage_buffer,
     RID triangles_storage_buffer, RID vertices_storage_buffer,
     RID materials_storage_buffer, RID bvh_storage_buffer) {
@@ -51,7 +51,7 @@ void godot::SceneDataManager::initialize(
     _bvh_storage_buffer = bvh_storage_buffer;
 }
 
-void godot::SceneDataManager::update_buffers() {
+void godot::PTSceneDataManager::update_buffers() {
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     _frame_materials.clear();
     _frame_materials_list.clear();
@@ -81,7 +81,7 @@ void godot::SceneDataManager::update_buffers() {
     print_line("Elapsed on update: " + String::num_int64(end_t - start_t));
 }
 
-void godot::SceneDataManager::_update_spheres_buffer(
+void godot::PTSceneDataManager::_update_spheres_buffer(
     const TypedArray<Node>& all_nodes,
     const std::vector<uint32_t>& sphere_indices) {
     Ref<PTMaterial> defaultMaterial = Ref<PTMaterial>(memnew(PTMaterial()));
@@ -112,13 +112,13 @@ void godot::SceneDataManager::_update_spheres_buffer(
     _stats.sphere_count = uint32_t(sphere_indices.size());
 }
 
-void godot::SceneDataManager::_update_triangles_buffer(
+void godot::PTSceneDataManager::_update_triangles_buffer(
     const TypedArray<Node>& all_nodes,
     const std::vector<uint32_t>& triangle_mesh_indices) {
     std::vector<PTTriangle> triangles;
     std::vector<PTVertex> vertices;
 
-    PackedVector4Array vertices_data;
+    PackedFloat32Array vertices_data;
 
     for (uint32_t i = 0; i < triangle_mesh_indices.size(); ++i) {
         // Access PTNode mesh
@@ -139,20 +139,50 @@ void godot::SceneDataManager::_update_triangles_buffer(
             Array arr = mesh->surface_get_arrays(surface_idx);
             PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
             PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
+            PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
+            PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
+            print_line(
+                "Color count: " + String::num_int64(surface_colors.size()),
+                " Normal count: " + String::num_int64(surface_normals.size()));
 
             // Base offset relative to current vertices size
-            uint32_t base_index_offset = uint32_t(vertices_data.size());
+            uint32_t base_index_offset = uint32_t(vertices.size());
 
             // Add vertices
             for (uint32_t v = 0; v < surface_vertices.size(); ++v) {
                 Vector3 position = surface_vertices[v];
+                Color color = surface_colors.size() > 0
+                                  ? surface_colors[v]
+                                  : Color(1.0, 1.0, 1.0, 1.0);
+
+                Vector3 normal = surface_normals.size() > 0
+                                     ? surface_normals[v]
+                                     : Vector3(0.0, 1.0, 0.0);
+
                 position = triangle_mesh_node->get_transform().xform(position);
 
-                PTVertex vertex = {position};
+                // TODO: Handle translation/scale properly
+                normal =
+                    triangle_mesh_node->get_transform().basis.xform(normal);
 
-                vertices_data.push_back(Vector4(vertex.position.x,
-                                                vertex.position.y,
-                                                vertex.position.z, 1.0f));
+                PTVertex vertex = {position, Vector3(color.r, color.g, color.b),
+                                   normal};
+
+                vertices_data.push_back(vertex.position.x);
+                vertices_data.push_back(vertex.position.y);
+                vertices_data.push_back(vertex.position.z);
+                vertices_data.push_back(0.0);  // Padding
+
+                vertices_data.push_back(vertex.color.x);
+                vertices_data.push_back(vertex.color.y);
+                vertices_data.push_back(vertex.color.z);
+                vertices_data.push_back(0.0);  // Padding
+
+                vertices_data.push_back(vertex.normal.x);
+                vertices_data.push_back(vertex.normal.y);
+                vertices_data.push_back(vertex.normal.z);
+                vertices_data.push_back(0.0);  // Padding
+
                 vertices.push_back(vertex);
             }
 
@@ -186,7 +216,8 @@ void godot::SceneDataManager::_update_triangles_buffer(
 
     _stats.triangle_count = triangles.size();
     _stats.vertex_count = uint32_t(vertices_data.size());
-
+    print_line("Total vertices: " + String::num_int64(vertices_data.size()) +
+               ", bytes: " + String::num_int64(vertices_bytes.size()));
     // Build BVH
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     PTBoundingVolumeHierarchy bvh;
@@ -269,7 +300,7 @@ void godot::SceneDataManager::_update_triangles_buffer(
                        bvh_nodes_byte_array);
 }
 
-void godot::SceneDataManager::_update_materials_buffer() {
+void godot::PTSceneDataManager::_update_materials_buffer() {
     PackedFloat32Array materials_data;
 
     // vec3 color + float metallic + float roughness + float
@@ -298,7 +329,7 @@ void godot::SceneDataManager::_update_materials_buffer() {
     _stats.material_count = uint32_t(_frame_materials_list.size());
 }
 
-uint32_t godot::SceneDataManager::_push_material(
+uint32_t godot::PTSceneDataManager::_push_material(
     const Ref<PTMaterial>& material) {
     if (material.is_null()) {
         return 0;  // Default material index

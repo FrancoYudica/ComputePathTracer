@@ -316,14 +316,14 @@ namespace godot {
         }
         {
             PackedByteArray triangles_bytes = PackedByteArray();
-            triangles_bytes.resize(4 * 1024 * 1024);  // 4 MB initial size
+            triangles_bytes.resize(32 * 1024 * 1024);  // 32 MB initial size
             _scene_triangles_storage_buffer = _rd->storage_buffer_create(
                 triangles_bytes.size(), triangles_bytes);
             _scene_triangles_uniform->add_id(_scene_triangles_storage_buffer);
         }
         {
             PackedByteArray vertex_bytes = PackedByteArray();
-            vertex_bytes.resize(8 * 1024 * 1024);  // 8 MB initial size
+            vertex_bytes.resize(32 * 1024 * 1024);  // 32 MB initial size
             _scene_vertex_storage_buffer =
                 _rd->storage_buffer_create(vertex_bytes.size(), vertex_bytes);
             _scene_vertex_uniform->add_id(_scene_vertex_storage_buffer);

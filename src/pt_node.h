@@ -4,7 +4,7 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/ref.hpp>
 
-#include "ptmaterial.h"
+#include "pt_material.h"
 
 namespace godot {
 

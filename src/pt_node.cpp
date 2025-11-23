@@ -1,4 +1,4 @@
-#include "ptnode.h"
+#include "pt_node.h"
 
 void godot::PTNode::_bind_methods() {
     ClassDB::bind_method(D_METHOD("set_material", "material"),

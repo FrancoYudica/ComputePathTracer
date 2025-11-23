@@ -59,7 +59,7 @@ vec3 debugDepth(Ray ray, uint seed) {
     ray.direction = normalize(ray.direction);
     intersectScene(ray, record);
     if (record.didHit) {
-        return vec3(record.t / 100.0);  // Assuming max depth of 100 units
+        return vec3(record.t / 20.0);  // Assuming max depth of 100 units
     }
     return vec3(1.0);
 }

@@ -43,7 +43,7 @@ layout(std140, set = 3, binding = 1) buffer Triangles {
     Triangle triangles[];
 };
 
-layout(std140, set = 3, binding = 2) buffer Vertices { vec3 vertices[]; };
+layout(std430, set = 3, binding = 2) buffer Vertices { Vertex vertices[]; };
 
 layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
 
@@ -136,7 +136,7 @@ vec3 pathTrace(Ray ray, uint seed) {
             radiance += throughput * materialSample.albedo;
             break;
         } else {
-            throughput *= materialSample.albedo;
+            throughput *= materialSample.albedo * hitRecord.color;
         }
 
         ray = materialSample.ray;
