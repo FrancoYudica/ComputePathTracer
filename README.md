@@ -37,6 +37,22 @@ A compute shader based path tracer implemented in the Godot game engine
 
 **Gamma Correction**: Proper sRGB gamma correction (2.2) applied to final output for accurate color display.
 
+## Setting up the project
+The project uses C++ with the GDExtension API and SCons as the build system.  For setup instructions, refer to the [GDExtension C++ example](https://docs.godotengine.org/en/4.4/tutorials/scripting/gdextension/gdextension_cpp_example.html) on the Godot documentation.
+
+## Future work
+- Physically-Based BRDFs: Implement industry-standard BRDFs (e.g., GGX/Trowbridge-Reitz microfacet model).
+- Support for loading and sampling albedo, normal, roughness, and metallic texture maps with proper UV coordinate handling.
+- Implement Surface Area Heuristic (SAH) for BVH building to achieve better ray traversal performance and reduce intersection tests..
+
+- Post processing pipeline: Bloom and glare effects, tonemapping operators (ACES, Reinhard), exposure control.
+
+- Importance sampling: NEE (Next Event Estimation) and MIS (Multiple Importance Sampling) for faster convergence with emissive objects and HDR environments.
+
+- Advanced materials: Support for subsurface scattering, anisotropic materials and clearcoat layers.
+
+- Instancing support
+
 ## Samples
 ![](imgs/sample1.png)
 ![](imgs/sample2.png)
