@@ -54,5 +54,6 @@ The project uses C++ with the GDExtension API and SCons as the build system.  Fo
 - Instancing support
 
 ## Samples
+![](imgs/sample3.png)
 ![](imgs/sample1.png)
 ![](imgs/sample2.png)
