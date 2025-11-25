@@ -31,6 +31,23 @@ namespace godot {
         }
     };
 
+    enum MaterialType {
+        MATERIAL_TYPE_LAMBERTIAN = 0,
+        MATERIAL_TYPE_METAL = 1,
+        MATERIAL_TYPE_DIELECTRIC = 2,
+        MATERIAL_TYPE_EMISSIVE = 3,
+    };
+
+    struct PTMaterial {
+        MaterialType material_type = MaterialType::MATERIAL_TYPE_LAMBERTIAN;
+        Color color = Color(1.0, 1.0, 1.0, 1.0);
+        float metallic = 0.0;
+        float roughness = 1.0;
+        float refraction_index = 0.0;
+        float emission = 0.0;
+        size_t get_hash() const;
+    };
+
 }  // namespace godot
 
 #endif

@@ -8,11 +8,14 @@ func _ready() -> void:
 		var x = (float(i) - size / 2.0) * radius * 1.5
 		for j in range(size):
 			var z = (float(j) - size / 2.0) * radius * 1.5
-			var sphere = PTNode.new()
-			sphere.node_type = PTNode.NODE_TYPE_SPHERE
+			var sphere = PTAnalyticalGeometry.new()
+			sphere.node_type = PTAnalyticalGeometry.NODE_TYPE_SPHERE
 			sphere.position.x = x
 			sphere.position.z = z
-			sphere.material = PTMaterial.new()
-			sphere.material.metallic = float(i) / (size - 1)
-			sphere.material.roughness = float(j) / (size - 1)
+			
+			var material = StandardMaterial3D.new()
+			material.metallic = float(i) / (size - 1)
+			material.roughness = float(j) / (size - 1)
+			sphere.material = material
+			
 			add_child(sphere)

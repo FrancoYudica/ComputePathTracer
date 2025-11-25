@@ -6,12 +6,13 @@
 #include <godot_cpp/classes/rendering_device.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/mesh.hpp>
+#include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <unordered_map>
 #include <vector>
+#include <stack>
 
-#include "pt_material.h"
-#include "pt_node.h"
+#include "pt_analytical_geometry.h"
 #include "pt_types.h"
 
 namespace godot {
@@ -35,7 +36,7 @@ namespace godot {
 
         std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
                                                                 // hash to index
-        std::vector<Ref<PTMaterial>> _frame_materials_list;     // Stores frames
+        std::vector<PTMaterial> _frame_materials_list;          // Stores frames
                                                                 // materials
 
         struct FrameStats {
@@ -67,12 +68,8 @@ namespace godot {
 
     private:
         void _update_spheres_buffer(
-            const TypedArray<Node>& all_nodes,
-            const std::vector<uint32_t>& sphere_indices);
-
-        void _update_triangles_buffer(
-            const TypedArray<Node>& all_nodes,
-            const std::vector<uint32_t>& triangle_mesh_indices);
+            const TypedArray<PTAnalyticalGeometry>& spheres);
+        void _update_triangles_buffer(const TypedArray<MeshInstance3D>& meshes);
 
         void _update_materials_buffer();
         void _load_mesh_surfaces(const Ref<Mesh> mesh,
@@ -81,9 +78,10 @@ namespace godot {
                                  PackedFloat32Array& vertices_data,
                                  std::vector<PTTriangle>& triangles);
 
-        uint32_t _push_material(const Ref<PTMaterial>& material);
+        uint32_t _push_material(const PTMaterial& material);
         uint32_t _parse_material(const Ref<Material>& material);
     };
+
 }  // namespace godot
 
 #endif

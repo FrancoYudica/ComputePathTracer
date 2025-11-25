@@ -142,51 +142,50 @@ material = SubResource("StandardMaterial3D_kj211")
 [node name="Camera3D" parent="." index="0"]
 transform = Transform3D(-0.58453286, 0, -0.81137, 0, 1, 0, 0.81137, 0, -0.58453286, -1.9659795, 0.56565464, -2.3887377)
 
-[node name="PTNode" type="PTNode" parent="." index="1"]
-node_type = 1
+[node name="PTNode" type="MeshInstance3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6285791, 1.4295664)
 visible = false
 mesh = SubResource("SphereMesh_6atvq")
 
-[node name="PTNode2" type="PTNode" parent="." index="2"]
+[node name="PTNode2" type="MeshInstance3D" parent="." index="2"]
 transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 2.6155887, 0, -1.9867525)
 mesh = SubResource("ArrayMesh_kj211")
 
-[node name="PTNode7" type="PTNode" parent="." index="3"]
+[node name="PTNode7" type="MeshInstance3D" parent="." index="3"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0374985, 0, 1.0254045)
 mesh = SubResource("ArrayMesh_218p2")
 
-[node name="PTNode6" type="PTNode" parent="." index="4"]
+[node name="PTNode6" type="MeshInstance3D" parent="." index="4"]
 transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 4.6155887, 0, 0.01324749)
 
-[node name="PTNode3" type="PTNode" parent="." index="5"]
+[node name="PTNode3" type="MeshInstance3D" parent="." index="5"]
 transform = Transform3D(-0.321803, 0, -0.94680667, 0, 1, 0, 0.94680667, 0, -0.321803, 0, 0, -2.2816675)
 mesh = ExtResource("4_ajtdg")
 
-[node name="PTNodeGround" type="PTNode" parent="." index="6"]
+[node name="PTNodeGround" type="MeshInstance3D" parent="." index="6"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ssvt4")
 
-[node name="PTNodeGround2" type="PTNode" parent="." index="7"]
+[node name="PTNodeGround2" type="MeshInstance3D" parent="." index="7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -1)
 mesh = SubResource("BoxMesh_vop1m")
 
-[node name="PTNodeGround5" type="PTNode" parent="." index="8"]
+[node name="PTNodeGround5" type="MeshInstance3D" parent="." index="8"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 2)
 visible = false
 mesh = SubResource("BoxMesh_vop1m")
 
-[node name="PTNodeGround3" type="PTNode" parent="." index="9"]
+[node name="PTNodeGround3" type="MeshInstance3D" parent="." index="9"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1)
 mesh = SubResource("BoxMesh_ttxly")
 
-[node name="PTNodeGround4" type="PTNode" parent="." index="10"]
+[node name="PTNodeGround4" type="MeshInstance3D" parent="." index="10"]
 visible = false
 mesh = SubResource("SphereMesh_h0881")
 
-[node name="PTNode4" type="PTNode" parent="." index="11"]
+[node name="PTNode4" type="MeshInstance3D" parent="." index="11"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8666239, 0)
 mesh = SubResource("BoxMesh_h0881")
 
-[node name="PTNode5" type="PTNode" parent="." index="12"]
+[node name="PTNode5" type="MeshInstance3D" parent="." index="12"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.1163602)

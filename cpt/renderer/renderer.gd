@@ -16,9 +16,6 @@ var scene_data_manager: PTSceneDataManager
 var _still_frames_count: int = 1
 var _render_scale: float = 1.0
 
-## Updated every frame, holds all the scene materials
-var _frame_materials: Dictionary[PTMaterial, int]
-
 var _clear_buffer: bool = false
 var _update_scene: bool = false
 
@@ -148,10 +145,3 @@ func _update_camera_storage_buffer():
 	# Update buffer data
 	var camera_bytes = CameraManager.get_camera_bytes(scene.camera, get_render_width(), get_render_height())
 	_rd.buffer_update(_pt_resource_manager.get_camera_storage_buffer(), 0, camera_bytes.size(), camera_bytes)
-
-
-func _push_material(material: PTMaterial) -> int:
-	if not _frame_materials.has(material):
-		_frame_materials[material] = _frame_materials.size()
-		
-	return _frame_materials[material]

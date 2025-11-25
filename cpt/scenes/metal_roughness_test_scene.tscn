@@ -1,13 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bebv6dlx2oomf"]
+[gd_scene load_steps=3 format=3 uid="uid://bebv6dlx2oomf"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_ge8mg"]
 [ext_resource type="Script" uid="uid://2tu85pmmq26l" path="res://scenes/metal_roughness_test_scene.gd" id="2_6n7px"]
-
-[sub_resource type="PTMaterial" id="PTMaterial_6n7px"]
-material_type = 3
-emission = 10.6
-
-[sub_resource type="SphereMesh" id="SphereMesh_6n7px"]
 
 [node name="MetalRoughnessTestScene" instance=ExtResource("1_ge8mg")]
 script = ExtResource("2_6n7px")
@@ -17,26 +11,14 @@ radius = null
 [node name="LightsNode3D" type="Node3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4766798, 0)
 
-[node name="PTNode" type="PTNode" parent="LightsNode3D" index="0"]
-node_type = 1
-material = SubResource("PTMaterial_6n7px")
+[node name="PTNode" type="PTAnalyticalGeometry" parent="LightsNode3D" index="0"]
 transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 1, 0, 1)
-mesh = SubResource("SphereMesh_6n7px")
 
-[node name="PTNode2" type="PTNode" parent="LightsNode3D" index="1"]
-node_type = 1
-material = SubResource("PTMaterial_6n7px")
+[node name="PTNode2" type="PTAnalyticalGeometry" parent="LightsNode3D" index="1"]
 transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, -1, 0, 1)
-mesh = SubResource("SphereMesh_6n7px")
 
-[node name="PTNode3" type="PTNode" parent="LightsNode3D" index="2"]
-node_type = 1
-material = SubResource("PTMaterial_6n7px")
+[node name="PTNode3" type="PTAnalyticalGeometry" parent="LightsNode3D" index="2"]
 transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, -1, 0, -1)
-mesh = SubResource("SphereMesh_6n7px")
 
-[node name="PTNode4" type="PTNode" parent="LightsNode3D" index="3"]
-node_type = 1
-material = SubResource("PTMaterial_6n7px")
+[node name="PTNode4" type="PTAnalyticalGeometry" parent="LightsNode3D" index="3"]
 transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 1, 0, -1)
-mesh = SubResource("SphereMesh_6n7px")
