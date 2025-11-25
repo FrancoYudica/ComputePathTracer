@@ -5,10 +5,14 @@
 #include <godot_cpp/classes/ref_counted.hpp>
 #include <godot_cpp/classes/rendering_device.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
+#include <godot_cpp/classes/mesh.hpp>
+#include <godot_cpp/variant/packed_float32_array.hpp>
 #include <unordered_map>
 #include <vector>
 
 #include "pt_material.h"
+#include "pt_node.h"
+#include "pt_types.h"
 
 namespace godot {
 
@@ -71,8 +75,14 @@ namespace godot {
             const std::vector<uint32_t>& triangle_mesh_indices);
 
         void _update_materials_buffer();
+        void _load_mesh_surfaces(const Ref<Mesh> mesh,
+                                 Transform3D& mesh_transform,
+                                 std::vector<PTVertex>& vertices,
+                                 PackedFloat32Array& vertices_data,
+                                 std::vector<PTTriangle>& triangles);
 
         uint32_t _push_material(const Ref<PTMaterial>& material);
+        uint32_t _parse_material(const Ref<Material>& material);
     };
 }  // namespace godot
 

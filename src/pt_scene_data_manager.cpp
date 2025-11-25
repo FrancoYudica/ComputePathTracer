@@ -2,9 +2,14 @@
 
 #include <godot_cpp/classes/node.hpp>
 #include <godot_cpp/classes/time.hpp>
+#include <godot_cpp/classes/ref.hpp>
+#include <godot_cpp/classes/material.hpp>
+#include <godot_cpp/classes/base_material3d.hpp>
+#include <godot_cpp/classes/standard_material3d.hpp>
 #include <unordered_set>
 
 #include "pt_bounding_volume_hierarchy.h"
+#include "pt_types.h"
 #include "pt_node.h"
 
 void godot::PTSceneDataManager::_bind_methods() {
@@ -124,7 +129,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
         // Access PTNode mesh
         PTNode* triangle_mesh_node =
             Object::cast_to<PTNode>(all_nodes[triangle_mesh_indices[i]]);
-        Ref<Mesh> mesh = triangle_mesh_node->get_mesh();
+        const Ref<Mesh> mesh = triangle_mesh_node->get_mesh();
 
         // Ignore when null
         if (mesh.is_null()) {
@@ -134,69 +139,9 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
         uint32_t mesh_material_index =
             _push_material(triangle_mesh_node->get_material());
 
-        for (uint32_t surface_idx = 0; surface_idx < mesh->get_surface_count();
-             ++surface_idx) {
-            Array arr = mesh->surface_get_arrays(surface_idx);
-            PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
-            PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
-            PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
-            PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
-            print_line(
-                "Color count: " + String::num_int64(surface_colors.size()),
-                " Normal count: " + String::num_int64(surface_normals.size()));
-
-            // Base offset relative to current vertices size
-            uint32_t base_index_offset = uint32_t(vertices.size());
-
-            // Add vertices
-            for (uint32_t v = 0; v < surface_vertices.size(); ++v) {
-                Vector3 position = surface_vertices[v];
-                Color color = surface_colors.size() > 0
-                                  ? surface_colors[v]
-                                  : Color(1.0, 1.0, 1.0, 1.0);
-
-                Vector3 normal = surface_normals.size() > 0
-                                     ? surface_normals[v]
-                                     : Vector3(0.0, 1.0, 0.0);
-
-                position = triangle_mesh_node->get_transform().xform(position);
-
-                // TODO: Handle translation/scale properly
-                normal =
-                    triangle_mesh_node->get_transform().basis.xform(normal);
-
-                PTVertex vertex = {position, Vector3(color.r, color.g, color.b),
-                                   normal};
-
-                vertices_data.push_back(vertex.position.x);
-                vertices_data.push_back(vertex.position.y);
-                vertices_data.push_back(vertex.position.z);
-                vertices_data.push_back(0.0);  // Padding
-
-                vertices_data.push_back(vertex.color.x);
-                vertices_data.push_back(vertex.color.y);
-                vertices_data.push_back(vertex.color.z);
-                vertices_data.push_back(0.0);  // Padding
-
-                vertices_data.push_back(vertex.normal.x);
-                vertices_data.push_back(vertex.normal.y);
-                vertices_data.push_back(vertex.normal.z);
-                vertices_data.push_back(0.0);  // Padding
-
-                vertices.push_back(vertex);
-            }
-
-            // Add triangles
-            for (uint32_t idx = 0; idx < surface_indices.size(); idx += 3) {
-                uint32_t i0 =
-                    base_index_offset + uint32_t(surface_indices[idx + 0]);
-                uint32_t i1 =
-                    base_index_offset + uint32_t(surface_indices[idx + 1]);
-                uint32_t i2 =
-                    base_index_offset + uint32_t(surface_indices[idx + 2]);
-                triangles.push_back({i0, i1, i2, mesh_material_index});
-            }
-        }
+        Transform3D mesh_transform = triangle_mesh_node->get_transform();
+        _load_mesh_surfaces(mesh, mesh_transform, vertices, vertices_data,
+                            triangles);
     }
 
     // Write triangle count
@@ -329,6 +274,77 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
     _stats.material_count = uint32_t(_frame_materials_list.size());
 }
 
+void godot::PTSceneDataManager::_load_mesh_surfaces(
+    const Ref<Mesh> mesh, Transform3D& mesh_transform,
+    std::vector<PTVertex>& vertices, PackedFloat32Array& vertices_data,
+    std::vector<PTTriangle>& triangles) {
+    // Iterates through all surfaces of the mesh
+    for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
+        // Access surface material and parses
+        Ref<Material> surface_material = mesh->surface_get_material(i);
+        uint32_t mesh_material_index = _parse_material(surface_material);
+
+        Array arr = mesh->surface_get_arrays(i);
+        PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
+        PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
+        PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
+        PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
+        print_line(
+            "Color count: " + String::num_int64(surface_colors.size()),
+            " Normal count: " + String::num_int64(surface_normals.size()));
+
+        // Base offset relative to current vertices size
+        uint32_t base_index_offset = uint32_t(vertices.size());
+
+        // Add vertices
+        for (uint32_t v = 0; v < surface_vertices.size(); ++v) {
+            Vector3 position = surface_vertices[v];
+            Color color = surface_colors.size() > 0 ? surface_colors[v]
+                                                    : Color(1.0, 1.0, 1.0, 1.0);
+
+            Vector3 normal = surface_normals.size() > 0
+                                 ? surface_normals[v]
+                                 : Vector3(0.0, 1.0, 0.0);
+
+            position = mesh_transform.xform(position);
+
+            // TODO: Handle translation/scale properly
+            normal = mesh_transform.basis.xform(normal);
+
+            PTVertex vertex = {position, Vector3(color.r, color.g, color.b),
+                               normal};
+
+            vertices_data.push_back(vertex.position.x);
+            vertices_data.push_back(vertex.position.y);
+            vertices_data.push_back(vertex.position.z);
+            vertices_data.push_back(0.0);  // Padding
+
+            vertices_data.push_back(vertex.color.x);
+            vertices_data.push_back(vertex.color.y);
+            vertices_data.push_back(vertex.color.z);
+            vertices_data.push_back(0.0);  // Padding
+
+            vertices_data.push_back(vertex.normal.x);
+            vertices_data.push_back(vertex.normal.y);
+            vertices_data.push_back(vertex.normal.z);
+            vertices_data.push_back(0.0);  // Padding
+
+            vertices.push_back(vertex);
+        }
+
+        // Add triangles
+        for (uint32_t idx = 0; idx < surface_indices.size(); idx += 3) {
+            uint32_t i0 =
+                base_index_offset + uint32_t(surface_indices[idx + 0]);
+            uint32_t i1 =
+                base_index_offset + uint32_t(surface_indices[idx + 1]);
+            uint32_t i2 =
+                base_index_offset + uint32_t(surface_indices[idx + 2]);
+            triangles.push_back({i0, i1, i2, mesh_material_index});
+        }
+    }
+}
+
 uint32_t godot::PTSceneDataManager::_push_material(
     const Ref<PTMaterial>& material) {
     if (material.is_null()) {
@@ -344,4 +360,58 @@ uint32_t godot::PTSceneDataManager::_push_material(
     } else {
         return uint32_t(_frame_materials[hash]);
     }
+}
+
+uint32_t godot::PTSceneDataManager::_parse_material(
+    const Ref<Material>& material) {
+    const Color BLACK_COLOR = Color{0.0, 0.0, 0.0, 1.0};
+    const float DEFAULT_REFRACTION_SCALE = 0.05f;
+
+    if (material.is_null()) {
+        return 0;  // Default material index
+    }
+
+    if (material->is_class("StandardMaterial3D")) {
+        Ref<StandardMaterial3D> std_material =
+            Ref<StandardMaterial3D>(material);
+        Ref<PTMaterial> pt_material = Ref<PTMaterial>(memnew(PTMaterial()));
+
+        // Determine material type
+        MaterialType materialType = MATERIAL_TYPE_LAMBERTIAN;
+
+        // Emissive when emission color and intensity is set
+        if (std_material->get_emission_energy_multiplier() > 0.0 &&
+            std_material->get_emission() != BLACK_COLOR) {
+            materialType = MATERIAL_TYPE_EMISSIVE;
+        }
+        // Dielectric only when a non default refraction is set
+        else if (std_material->get_refraction() != DEFAULT_REFRACTION_SCALE) {
+            // Transforms refraction index to refraction scale
+            float refractionIndex =
+                1.0 / (1.0 - std_material->get_refraction());
+            materialType = MATERIAL_TYPE_DIELECTRIC;
+            print_line("Found dielectric material. Refraction index: " +
+                       String::num_real(std_material->get_refraction()));
+
+            pt_material->set_refraction_index(refractionIndex);
+        }
+        pt_material->set_material_type(materialType);
+
+        Color albedo_color = std_material->get_albedo();
+        pt_material->set_color(albedo_color);
+        pt_material->set_metallic(std_material->get_metallic());
+        pt_material->set_roughness(std_material->get_roughness());
+
+        pt_material->set_emission(
+            std_material->get_emission_energy_multiplier());
+
+        return _push_material(pt_material);
+    }
+
+    else {
+        ERR_PRINT("Unimplemented material parser for type: " +
+                  material->get_class());
+    }
+
+    return 0;
 }
