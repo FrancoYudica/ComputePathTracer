@@ -21,7 +21,8 @@ namespace godot {
         RID _output_texture;
         RID _accumulation_texture;
         RID _skybox_texture;
-        RID _skybox_sampler;
+        RID _texture_array;
+        RID _default_sampler;
 
         /* Storage buffers */
         RID _settings_storage_buffer;
@@ -31,6 +32,7 @@ namespace godot {
         RID _scene_vertex_storage_buffer;
         RID _scene_materials_storage_buffer;
         RID _scene_bvh_storage_buffer;
+        RID _scene_textures_storage_buffer;
 
         /* Uniform sets */
         RID _image_uniform_set;
@@ -49,6 +51,10 @@ namespace godot {
         Ref<RDUniform> _scene_vertex_uniform;
         Ref<RDUniform> _scene_materials_uniform;
         Ref<RDUniform> _scene_bvh_uniform;
+        Ref<RDUniform> _scene_textures_array_uniform;
+
+        uint32_t _texture_array_resolution = 1024;
+        uint32_t _texture_array_layers = 256;
 
     protected:
         static void _bind_methods();
@@ -85,10 +91,33 @@ namespace godot {
         RID get_scene_bvh_storage_buffer() const {
             return _scene_bvh_storage_buffer;
         }
+
+        RID get_scene_texture_array() const { return _texture_array; }
+
         RID get_image_uniform_set() const { return _image_uniform_set; };
         RID get_settings_uniform_set() const { return _settings_uniform_set; };
         RID get_camera_uniform_set() const { return _camera_uniform_set; };
         RID get_scene_uniform_set() const { return _scene_uniform_set; };
+
+        Ref<RDUniform> get_scene_texture_array_uniform() const {
+            return _scene_textures_array_uniform;
+        };
+
+        uint32_t get_texture_array_resolution() const {
+            return _texture_array_resolution;
+        };
+
+        void set_texture_array_resolution(uint32_t resolution) {
+            _texture_array_resolution = resolution;
+        };
+
+        uint32_t get_texture_array_layers() const {
+            return _texture_array_layers;
+        };
+
+        void set_texture_array_layers(uint32_t layers) {
+            _texture_array_layers = layers;
+        };
 
     private:
         void _create_textures(uint32_t width, uint32_t height);

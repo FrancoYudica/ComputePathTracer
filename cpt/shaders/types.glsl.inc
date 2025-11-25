@@ -8,6 +8,7 @@ struct HitRecord {
     float t;
     vec3 p;
     vec3 n;
+    vec2 uv;
     bool frontFace;
     float materialIndex;
     vec3 color;
@@ -34,6 +35,7 @@ struct Material {
     float refractionIndex;  // for dielectric
     vec3 albedo;
     float emission;
+    float albedoTextureIndex;
 };
 
 struct Sphere {
@@ -49,6 +51,7 @@ struct Triangle {
 
 struct MaterialSample {
     vec3 albedo;
+    vec2 uv;
     bool isEmissive;
     Ray ray;
 };
@@ -57,4 +60,5 @@ struct Vertex {
     vec3 position;
     vec3 color;
     vec3 normal;
+    vec2 uv;
 };

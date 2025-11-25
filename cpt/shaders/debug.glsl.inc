@@ -63,3 +63,12 @@ vec3 debugDepth(Ray ray, uint seed) {
     }
     return vec3(1.0);
 }
+
+vec3 debugUV(Ray ray, uint seed) {
+    HitRecord record;
+    intersectScene(ray, record);
+    if (record.didHit) {
+        return vec3(record.uv, 0.0);
+    }
+    return vec3(0.0);
+}

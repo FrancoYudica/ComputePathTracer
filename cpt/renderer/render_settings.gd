@@ -25,7 +25,7 @@ class_name RenderSettings extends Resource
 		camera_focal_distance = value
 		emit_changed()
 
-@export_enum("PathTrace:0", "BVH:1", "Normals:2", "Depth:3") var mode: int = 0:
+@export_enum("PathTrace:0", "BVH:1", "Normals:2", "Depth:3", "UV:4") var mode: int = 0:
 	set(value):
 		mode = value
 		emit_changed()

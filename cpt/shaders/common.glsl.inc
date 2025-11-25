@@ -167,6 +167,7 @@ void triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
     float w = 1.0 - u - v;  // alpha
     record.n = normalize(w * v0.normal + u * v1.normal + v * v2.normal);
     record.color = w * v0.color + u * v1.color + v * v2.color;
+    record.uv = w * v0.uv + u * v1.uv + v * v2.uv;
 
     // Set front face. Uses geometric normal
     vec3 geometricNormal = -cross(edge1, edge2);

@@ -6,6 +6,7 @@
 #include <godot_cpp/classes/rendering_device.hpp>
 #include <godot_cpp/classes/scene_tree.hpp>
 #include <godot_cpp/classes/mesh.hpp>
+#include <godot_cpp/classes/texture2d.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/variant/packed_float32_array.hpp>
 #include <unordered_map>
@@ -33,17 +34,23 @@ namespace godot {
         RID _vertices_storage_buffer;
         RID _materials_storage_buffer;
         RID _bvh_storage_buffer;
+        RID _textures_storage_buffer;
 
         std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
                                                                 // hash to index
         std::vector<PTMaterial> _frame_materials_list;          // Stores frames
                                                                 // materials
 
+        std::vector<Ref<Texture2D>> _frame_textures;
+
+        Ref<Texture2D> _default_texture;
+
         struct FrameStats {
             uint32_t sphere_count = 0;
             uint32_t triangle_count = 0;
             uint32_t vertex_count = 0;
             uint32_t material_count = 0;
+            uint32_t texture_count = 0;
         } _stats;
 
     protected:
@@ -57,7 +64,8 @@ namespace godot {
                         RID spheres_storage_buffer,
                         RID triangles_storage_buffer,
                         RID vertices_storage_buffer,
-                        RID materials_storage_buffer, RID bvh_storage_buffer);
+                        RID materials_storage_buffer, RID bvh_storage_buffer,
+                        RID textures_storage_buffer);
 
         void update_buffers();
 
@@ -65,6 +73,7 @@ namespace godot {
         uint32_t get_triangle_count() const { return _stats.triangle_count; }
         uint32_t get_vertex_count() const { return _stats.vertex_count; }
         uint32_t get_material_count() const { return _stats.material_count; }
+        uint32_t get_texture_count() const { return _stats.texture_count; }
 
     private:
         void _update_spheres_buffer(
@@ -72,6 +81,7 @@ namespace godot {
         void _update_triangles_buffer(const TypedArray<MeshInstance3D>& meshes);
 
         void _update_materials_buffer();
+        void _update_textures_buffer();
         void _load_mesh_surfaces(const Ref<Mesh> mesh,
                                  Transform3D& mesh_transform,
                                  std::vector<PTVertex>& vertices,
@@ -80,6 +90,7 @@ namespace godot {
 
         uint32_t _push_material(const PTMaterial& material);
         uint32_t _parse_material(const Ref<Material>& material);
+        uint32_t _push_texture(const Ref<Texture2D>& texture);
     };
 
 }  // namespace godot

@@ -6,15 +6,21 @@ MaterialSample createMaterialSample() {
     return materialSample;
 }
 
+vec3 getMaterialAlbedo(Material mat, vec2 uv) {
+    return mat.albedo *
+           texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex)).rgb;
+}
+
 void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
                       inout MaterialSample result) {
     vec3 direction;
 
+    vec3 albedo = getMaterialAlbedo(mat, hit.uv);
+
     if (randomFloat(seed) > mat.metal) {
         // Diffuse reflection with roughness
         direction = normalize(hit.n + randomVec3N(seed));
-        result.albedo = mat.albedo * 0.5;
-
+        result.albedo = albedo * 0.5;
     } else {
         // Specular reflection with roughness
         vec3 perfectReflection = reflect(ray.direction, hit.n);
@@ -26,7 +32,7 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
                               mat.roughness * randomVec3N(pcgHash(seed)));
 
         // Metals tint their reflections
-        vec3 specularTint = mix(vec3(1.0), mat.albedo, mat.metal);
+        vec3 specularTint = mix(vec3(1.0), albedo, mat.metal);
         result.albedo = specularTint;
     }
 
@@ -39,7 +45,8 @@ void sampleMetallic(Material mat, Ray ray, HitRecord hit, uint seed,
     // perfect mirror.
     vec3 direction = normalize(reflect(ray.direction, hit.n)) +
                      mat.roughness * randomVec3N(seed);
-    result.albedo = mat.albedo;
+
+    result.albedo = getMaterialAlbedo(mat, hit.uv);
 
     result.ray = createRay(hit.p + hit.n * EPSILON, direction);
 }
@@ -72,15 +79,14 @@ void sampleDielectric(Material mat, Ray ray, HitRecord hit, uint seed,
     direction =
         normalize(direction + mat.roughness * randomVec3(-1.0, 1.0, seed));
 
-    result.albedo = mat.albedo;
-
+    result.albedo = getMaterialAlbedo(mat, hit.uv);
     result.ray = createRay(hit.p + rayOriginOffset * EPSILON, direction);
 }
 
 void sampleEmissive(Material mat, Ray ray, HitRecord hit, uint seed,
                     inout MaterialSample result) {
     result.isEmissive = true;
-    result.albedo = mat.albedo * mat.emission;
+    result.albedo = getMaterialAlbedo(mat, hit.uv) * mat.emission;
 }
 
 MaterialSample sampleMaterial(Material mat, Ray ray, HitRecord hit, uint seed) {

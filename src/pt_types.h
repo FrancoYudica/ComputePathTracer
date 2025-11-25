@@ -15,6 +15,7 @@ namespace godot {
         Vector3 position;
         Vector3 color;
         Vector3 normal;
+        Vector2 uv;
     };
 
     struct PTAABB {
@@ -45,6 +46,7 @@ namespace godot {
         float roughness = 1.0;
         float refraction_index = 0.0;
         float emission = 0.0;
+        uint32_t albedo_texture_index = 0;
         size_t get_hash() const;
     };
 

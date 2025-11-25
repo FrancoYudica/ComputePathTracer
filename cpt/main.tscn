@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=15 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer/renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
 [ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
+[ext_resource type="PackedScene" uid="uid://b8nsm2ngx4xuu" path="res://scenes/cornell_box_gobot.tscn" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
 [ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
 
@@ -31,7 +32,7 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
+scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/CornellBoxScene2")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 render_settings = SubResource("Resource_d13ii")
 
@@ -226,7 +227,7 @@ text = "Mode"
 [node name="ModeOptionButton" type="OptionButton" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 selected = 0
-item_count = 4
+item_count = 5
 popup/item_0/text = "PathTrace"
 popup/item_0/id = 0
 popup/item_1/text = "BVH"
@@ -235,12 +236,14 @@ popup/item_2/text = "Normals"
 popup/item_2/id = 2
 popup/item_3/text = "Depth"
 popup/item_3/id = 3
+popup/item_4/text = "UV"
+popup/item_4/id = 4
 
 [node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Update scene buffers"
 
-[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label")]
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
 renderer = NodePath("../../../../../../Renderer")
@@ -249,6 +252,7 @@ sphere_count_label = NodePath("MarginContainer/VBoxContainer/SpheresLabel")
 triangle_count_label = NodePath("MarginContainer/VBoxContainer/TrianglesLabel")
 vertex_count_label = NodePath("MarginContainer/VBoxContainer/VerticesLabel")
 material_count_label = NodePath("MarginContainer/VBoxContainer/MaterialsLabel")
+texture_count_label = NodePath("MarginContainer/VBoxContainer/TexturesLabel")
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer"]
 layout_mode = 2
@@ -285,6 +289,10 @@ text = "Vertices"
 layout_mode = 2
 text = "Material"
 
+[node name="TexturesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Texture"
+
 [node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "View rasterized"
@@ -314,6 +322,7 @@ render_target_update_mode = 0
 visible = false
 
 [node name="SpheresScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("10_w48qg")]
+visible = false
 
 [node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
 visible = false
@@ -321,6 +330,8 @@ visible = false
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
 visible = false
+
+[node name="CornellBoxScene2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2

@@ -81,7 +81,8 @@ func _initialize_compute():
 		_pt_resource_manager.get_scene_triangles_storage_buffer(),
 		_pt_resource_manager.get_scene_vertex_storage_buffer(),
 		_pt_resource_manager.get_scene_materials_storage_buffer(),
-		_pt_resource_manager.get_scene_bvh_storage_buffer()
+		_pt_resource_manager.get_scene_bvh_storage_buffer(),
+		_pt_resource_manager.get_scene_texture_array_buffer()
 	)
 	
 func _get_push_constant_bytes() -> PackedByteArray:

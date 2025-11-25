@@ -7,6 +7,8 @@
 #include <godot_cpp/classes/base_material3d.hpp>
 #include <godot_cpp/classes/standard_material3d.hpp>
 #include <godot_cpp/classes/window.hpp>
+#include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/resource_loader.hpp>
 #include <unordered_set>
 
 #include "pt_bounding_volume_hierarchy.h"
@@ -30,6 +32,8 @@ void godot::PTSceneDataManager::_bind_methods() {
                          &PTSceneDataManager::get_vertex_count);
     ClassDB::bind_method(D_METHOD("get_material_count"),
                          &PTSceneDataManager::get_material_count);
+    ClassDB::bind_method(D_METHOD("get_texture_count"),
+                         &PTSceneDataManager::get_texture_count);
 }
 
 godot::PTSceneDataManager::PTSceneDataManager()
@@ -47,7 +51,8 @@ godot::PTSceneDataManager::~PTSceneDataManager() {}
 void godot::PTSceneDataManager::initialize(
     RenderingDevice* p_rd, SceneTree* p_tree, RID spheres_storage_buffer,
     RID triangles_storage_buffer, RID vertices_storage_buffer,
-    RID materials_storage_buffer, RID bvh_storage_buffer) {
+    RID materials_storage_buffer, RID bvh_storage_buffer,
+    RID textures_storage_buffer) {
     _rd = p_rd;
     _tree = p_tree;
     _spheres_storage_buffer = spheres_storage_buffer;
@@ -55,15 +60,28 @@ void godot::PTSceneDataManager::initialize(
     _vertices_storage_buffer = vertices_storage_buffer;
     _materials_storage_buffer = materials_storage_buffer;
     _bvh_storage_buffer = bvh_storage_buffer;
+    _textures_storage_buffer = textures_storage_buffer;
+
+    // Create default texture
+    _default_texture =
+        ResourceLoader::get_singleton()->load("res://textures/white.png");
 }
 
 void godot::PTSceneDataManager::update_buffers() {
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
+
+    _stats = {};
+
     _frame_materials.clear();
     _frame_materials_list.clear();
+    _frame_textures.clear();
 
+    // Default material at index 0
     PTMaterial default_material;
-    _push_material(default_material);  // Ensure default material is at index 0
+    _push_material(default_material);
+
+    // Default texture at index 0
+    _push_texture(_default_texture);
 
     TypedArray<PTAnalyticalGeometry> all_analytical =
         PTUtils::gather_nodes_of_type<PTAnalyticalGeometry>(_tree->get_root());
@@ -89,6 +107,8 @@ void godot::PTSceneDataManager::update_buffers() {
     _update_triangles_buffer(mesh_instances);
 
     _update_materials_buffer();
+
+    _update_textures_buffer();
 
     uint64_t end_t = Time::get_singleton()->get_ticks_msec();
     print_line("Elapsed on update: " + String::num_int64(end_t - start_t));
@@ -167,8 +187,6 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
                        triangle_count_bytes.size(), triangle_count_bytes);
 
     if (triangles.size() == 0) {
-        _stats.triangle_count = 0;
-        _stats.vertex_count = 0;
         print_line("No triangles to process.");
         return;
     }
@@ -270,7 +288,7 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
     // vec3 color + float metallic + float roughness + float
     // refraction_index + float emission + uint32_t material_type + 3
     // padding
-    constexpr uint32_t MATERIAL_FLOATS = 8;
+    constexpr uint32_t MATERIAL_FLOATS = 12;
 
     materials_data.resize(_frame_materials_list.size() * MATERIAL_FLOATS);
     for (uint32_t i = 0; i < _frame_materials_list.size(); ++i) {
@@ -284,12 +302,31 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
         materials_data[base_offset + 5] = material.color.g;
         materials_data[base_offset + 6] = material.color.b;
         materials_data[base_offset + 7] = material.emission;
+        materials_data[base_offset + 8] = material.albedo_texture_index;
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
     _rd->buffer_update(_materials_storage_buffer, 0, materials_bytes.size(),
                        materials_bytes);
     _stats.material_count = uint32_t(_frame_materials_list.size());
+}
+
+void godot::PTSceneDataManager::_update_textures_buffer() {
+    print_line("Updating textures buffer. Total textures: " +
+               String::num_int64(_frame_textures.size()));
+
+    // //combine textures into a single large texture
+    for (size_t i = 0; i < _frame_textures.size(); i++) {
+        auto image = _frame_textures[i]->get_image();
+        image->clear_mipmaps();
+        image->decompress();
+        image->resize(1024, 1024);
+        if (_rd->texture_update(_textures_storage_buffer, i,
+                                image->get_data()) != Error::OK) {
+            ERR_PRINT("Failed to update texture index: " +
+                      String::num_int64(i));
+        }
+    }
 }
 
 void godot::PTSceneDataManager::_load_mesh_surfaces(
@@ -307,6 +344,7 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
         PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
         PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
         PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
+        PackedVector2Array surface_uvs = arr[ArrayMesh::ARRAY_TEX_UV];
         print_line(
             "Color count: " + String::num_int64(surface_colors.size()),
             " Normal count: " + String::num_int64(surface_normals.size()));
@@ -329,8 +367,11 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
             // TODO: Handle translation/scale properly
             normal = mesh_transform.basis.xform(normal);
 
+            Vector2 uv =
+                surface_uvs.size() > 0 ? surface_uvs[v] : Vector2(0.0, 0.0);
+
             PTVertex vertex = {position, Vector3(color.r, color.g, color.b),
-                               normal};
+                               normal, uv};
 
             vertices_data.push_back(vertex.position.x);
             vertices_data.push_back(vertex.position.y);
@@ -345,6 +386,11 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
             vertices_data.push_back(vertex.normal.x);
             vertices_data.push_back(vertex.normal.y);
             vertices_data.push_back(vertex.normal.z);
+            vertices_data.push_back(0.0);  // Padding
+
+            vertices_data.push_back(vertex.uv.x);
+            vertices_data.push_back(vertex.uv.y);
+            vertices_data.push_back(0.0);  // Padding
             vertices_data.push_back(0.0);  // Padding
 
             vertices.push_back(vertex);
@@ -387,8 +433,10 @@ uint32_t godot::PTSceneDataManager::_parse_material(
     if (material->is_class("StandardMaterial3D")) {
         Ref<StandardMaterial3D> std_material =
             Ref<StandardMaterial3D>(material);
-        PTMaterial pt_material;
 
+        PTMaterial pt_material;
+        pt_material.albedo_texture_index = _push_texture(
+            std_material->get_texture(StandardMaterial3D::TEXTURE_ALBEDO));
         // Determine material type
         MaterialType materialType = MATERIAL_TYPE_LAMBERTIAN;
 
@@ -425,4 +473,20 @@ uint32_t godot::PTSceneDataManager::_parse_material(
     }
 
     return 0;
+}
+
+uint32_t godot::PTSceneDataManager::_push_texture(
+    const Ref<Texture2D>& texture) {
+    if (texture.is_null()) {
+        return 0;  // Default texture index
+    }
+
+    for (uint32_t i = 0; i < _frame_textures.size(); ++i) {
+        if (_frame_textures[i] == texture) {
+            return i;
+        }
+    }
+    _stats.texture_count++;
+    _frame_textures.push_back(texture);
+    return uint32_t(_frame_textures.size() - 1);
 }

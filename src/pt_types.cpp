@@ -14,6 +14,7 @@ namespace godot {
         hash_combine(hash, std::hash<float>()(roughness));
         hash_combine(hash, std::hash<float>()(refraction_index));
         hash_combine(hash, std::hash<float>()(emission));
+        hash_combine(hash, std::hash<uint32_t>()(albedo_texture_index));
         return hash;
     }
 }  // namespace godot

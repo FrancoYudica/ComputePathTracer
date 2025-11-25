@@ -56,6 +56,12 @@ namespace godot {
                              &PTResourceManager::get_camera_uniform_set);
         ClassDB::bind_method(D_METHOD("get_scene_uniform_set"),
                              &PTResourceManager::get_scene_uniform_set);
+        ClassDB::bind_method(
+            D_METHOD("get_scene_texture_array_uniform"),
+            &PTResourceManager::get_scene_texture_array_uniform);
+
+        ClassDB::bind_method(D_METHOD("get_scene_texture_array_buffer"),
+                             &PTResourceManager::get_scene_texture_array);
     }
 
     PTResourceManager::PTResourceManager() {}
@@ -63,9 +69,10 @@ namespace godot {
     PTResourceManager::~PTResourceManager() {
         _rd->free_rid(_output_texture);
         _rd->free_rid(_accumulation_texture);
+        _rd->free_rid(_texture_array);
         // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
         // created here
-        _rd->free_rid(_skybox_sampler);
+        _rd->free_rid(_default_sampler);
         _rd->free_rid(_settings_storage_buffer);
         _rd->free_rid(_camera_storage_buffer);
         _rd->free_rid(_scene_spheres_storage_buffer);
@@ -73,6 +80,7 @@ namespace godot {
         _rd->free_rid(_scene_vertex_storage_buffer);
         _rd->free_rid(_scene_materials_storage_buffer);
         _rd->free_rid(_scene_bvh_storage_buffer);
+        _rd->free_rid(_scene_textures_storage_buffer);
         _rd->free_rid(_image_uniform_set);
         _rd->free_rid(_settings_uniform_set);
         _rd->free_rid(_camera_uniform_set);
@@ -82,14 +90,19 @@ namespace godot {
     }
 
     static RID create_texture(RenderingDevice* rd, int width, int height,
-                              RenderingDevice::DataFormat format) {
+                              RenderingDevice::DataFormat format,
+                              uint32_t array_layers = 1,
+                              RenderingDevice::TextureType texture_type =
+                                  RenderingDevice::TEXTURE_TYPE_2D) {
         // Texture format
         Ref<RDTextureFormat> texture_format =
             Ref<RDTextureFormat>(memnew(RDTextureFormat));
+        texture_format->set_texture_type(texture_type);
         texture_format->set_width(width);
         texture_format->set_height(height);
         texture_format->set_depth(1);
         texture_format->set_format(format);
+        texture_format->set_array_layers(array_layers);
         texture_format->set_usage_bits(
             RenderingDevice::TextureUsageBits::TEXTURE_USAGE_SAMPLING_BIT |
             RenderingDevice::TextureUsageBits::TEXTURE_USAGE_STORAGE_BIT |
@@ -154,6 +167,19 @@ namespace godot {
         _accumulation_texture =
             create_texture(_rd, width, height,
                            RenderingDevice::DATA_FORMAT_R32G32B32A32_SFLOAT);
+
+        // Texture array for scene textures
+        _texture_array = create_texture(
+            _rd, get_texture_array_resolution(), get_texture_array_resolution(),
+            RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM,
+            get_texture_array_layers(), RenderingDevice::TEXTURE_TYPE_2D_ARRAY);
+
+        // Skybox sampler
+        Ref<RDSamplerState> sampler_state =
+            Ref<RDSamplerState>(memnew(RDSamplerState));
+        sampler_state->set_min_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
+        sampler_state->set_mag_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
+        _default_sampler = _rd->sampler_create(sampler_state);
     }
 
     void PTResourceManager::_load_skybox_texture() {
@@ -228,17 +254,8 @@ namespace godot {
                 RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
             _skybox_image_uniform->set_binding(2);
 
-            // Skybox sampler
-            Ref<RDSamplerState> sampler_state =
-                Ref<RDSamplerState>(memnew(RDSamplerState));
-            sampler_state->set_min_filter(
-                RenderingDevice::SAMPLER_FILTER_LINEAR);
-            sampler_state->set_mag_filter(
-                RenderingDevice::SAMPLER_FILTER_LINEAR);
-            _skybox_sampler = _rd->sampler_create(sampler_state);
-
             // Sampler and then texture
-            _skybox_image_uniform->add_id(_skybox_sampler);
+            _skybox_image_uniform->add_id(_default_sampler);
             _skybox_image_uniform->add_id(_skybox_texture);
         }
 
@@ -284,6 +301,13 @@ namespace godot {
             _scene_bvh_uniform->set_uniform_type(
                 RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
             _scene_bvh_uniform->set_binding(4);
+
+            _scene_textures_array_uniform = Ref<RDUniform>(memnew(RDUniform));
+            _scene_textures_array_uniform->set_uniform_type(
+                RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
+            _scene_textures_array_uniform->set_binding(5);
+            _scene_textures_array_uniform->add_id(_default_sampler);
+            _scene_textures_array_uniform->add_id(_texture_array);
         }
     }
 
@@ -342,6 +366,17 @@ namespace godot {
                 _rd->storage_buffer_create(bvh_bytes.size(), bvh_bytes);
             _scene_bvh_uniform->add_id(_scene_bvh_storage_buffer);
         }
+        {
+            PackedFloat32Array texture_array_bytes = PackedFloat32Array();
+            texture_array_bytes.resize(
+                get_texture_array_resolution() *
+                get_texture_array_resolution() * 4 *
+                get_texture_array_layers());  // width * height * RGBA * layers
+
+            PackedByteArray texture_array_byte_array;
+            _scene_textures_storage_buffer = _rd->storage_buffer_create(
+                texture_array_bytes.size(), texture_array_byte_array);
+        }
     }
     void PTResourceManager::_create_uniform_sets() {
         _image_uniform_set = _rd->uniform_set_create(
@@ -358,7 +393,7 @@ namespace godot {
         _scene_uniform_set = _rd->uniform_set_create(
             {_scene_spheres_uniform, _scene_triangles_uniform,
              _scene_vertex_uniform, _scene_materials_uniform,
-             _scene_bvh_uniform},
+             _scene_bvh_uniform, _scene_textures_array_uniform},
             _shader, 3);
     }
     void PTResourceManager::_create_shader_and_pipeline(String shader_path) {

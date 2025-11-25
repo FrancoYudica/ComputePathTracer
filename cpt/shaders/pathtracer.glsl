@@ -49,6 +49,9 @@ layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
 
 layout(std140, set = 3, binding = 4) buffer BVHNodes { BVHNode bvhNodes[]; };
 
+// Textures array with sampler
+layout(set = 3, binding = 5) uniform sampler2DArray textureArray;
+
 // Push constants to get image size
 layout(push_constant) uniform PushConstants {
     float width;
@@ -177,6 +180,10 @@ void main() {
 
             case 3:
                 frameColor = debugDepth(ray, baseSeed);
+                break;
+
+            case 4:
+                frameColor = debugUV(ray, baseSeed);
                 break;
         }
     }
