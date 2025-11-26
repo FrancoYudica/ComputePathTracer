@@ -15,6 +15,10 @@ namespace godot {
         hash_combine(hash, std::hash<float>()(refraction_index));
         hash_combine(hash, std::hash<float>()(emission));
         hash_combine(hash, std::hash<uint32_t>()(albedo_texture_index));
+        hash_combine(hash, std::hash<uint32_t>()(metallic_texture_index));
+        hash_combine(hash, std::hash<uint32_t>()(roughness_texture_index));
+        hash_combine(hash, std::hash<uint32_t>()(metallic_texture_channel));
+        hash_combine(hash, std::hash<uint32_t>()(roughness_texture_channel));
         return hash;
     }
 }  // namespace godot

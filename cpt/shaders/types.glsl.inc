@@ -35,7 +35,15 @@ struct Material {
     float refractionIndex;  // for dielectric
     vec3 albedo;
     float emission;
+
+    // Texture indices (0 means default)
     float albedoTextureIndex;
+    float metallicTextureIndex;
+    float roughnessTextureIndex;
+
+    // Texture channels
+    float metallicTextureChannel;
+    float roughnessTextureChannel;
 };
 
 struct Sphere {

@@ -156,7 +156,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
             continue;
         }
 
-        Transform3D mesh_transform = mesh_instance_ptr->get_transform();
+        Transform3D mesh_transform = mesh_instance_ptr->get_global_transform();
         _load_mesh_surfaces(mesh, mesh_transform, vertices, vertices_data,
                             triangles);
     }
@@ -273,7 +273,7 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
     // vec3 color + float metallic + float roughness + float
     // refraction_index + float emission + uint32_t material_type + 3
     // padding
-    constexpr uint32_t MATERIAL_FLOATS = 12;
+    constexpr uint32_t MATERIAL_FLOATS = 16;
 
     materials_data.resize(_frame_materials_list.size() * MATERIAL_FLOATS);
     for (uint32_t i = 0; i < _frame_materials_list.size(); ++i) {
@@ -288,6 +288,10 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
         materials_data[base_offset + 6] = material.color.b;
         materials_data[base_offset + 7] = material.emission;
         materials_data[base_offset + 8] = material.albedo_texture_index;
+        materials_data[base_offset + 9] = material.metallic_texture_index;
+        materials_data[base_offset + 10] = material.roughness_texture_index;
+        materials_data[base_offset + 11] = material.metallic_texture_channel;
+        materials_data[base_offset + 12] = material.roughness_texture_channel;
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
@@ -423,6 +427,19 @@ uint32_t godot::PTSceneDataManager::_parse_material(
         PTMaterial pt_material;
         pt_material.albedo_texture_index = _push_texture(
             std_material->get_texture(StandardMaterial3D::TEXTURE_ALBEDO));
+        pt_material.metallic_texture_index = _push_texture(
+            std_material->get_texture(StandardMaterial3D::TEXTURE_METALLIC));
+        pt_material.roughness_texture_index = _push_texture(
+            std_material->get_texture(StandardMaterial3D::TEXTURE_ROUGHNESS));
+        pt_material.ao_texture_index = _push_texture(std_material->get_texture(
+            StandardMaterial3D::TEXTURE_AMBIENT_OCCLUSION));
+
+        pt_material.metallic_texture_channel =
+            std_material->get_metallic_texture_channel();
+        pt_material.roughness_texture_channel =
+            std_material->get_roughness_texture_channel();
+        pt_material.ao_texture_channel = std_material->get_ao_texture_channel();
+
         // Determine material type
         MaterialType materialType = MATERIAL_TYPE_LAMBERTIAN;
 

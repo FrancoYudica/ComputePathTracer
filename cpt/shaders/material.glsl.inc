@@ -17,6 +17,9 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
         direction = normalize(hit.n + randomVec3N(seed));
         result.albedo = albedo * 0.5;
     } else {
+        float metallic = getMaterialMetallic(mat, hit.uv);
+        float roughness = getMaterialRoughness(mat, hit.uv);
+
         // Specular reflection with roughness
         vec3 perfectReflection = reflect(ray.direction, hit.n);
 
@@ -24,10 +27,10 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
         // roughness = 0: perfect mirror
         // roughness = 1: very rough/blurry reflection
         direction = normalize(perfectReflection +
-                              mat.roughness * randomVec3N(pcgHash(seed)));
+                              roughness * randomVec3N(pcgHash(seed)));
 
         // Metals tint their reflections
-        vec3 specularTint = mix(vec3(1.0), albedo, mat.metal);
+        vec3 specularTint = mix(vec3(1.0), albedo, metallic);
         result.albedo = specularTint;
     }
 
@@ -36,11 +39,11 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
 
 void sampleMetallic(Material mat, Ray ray, HitRecord hit, uint seed,
                     inout MaterialSample result) {
+    float roughness = getMaterialRoughness(mat, hit.uv);
     // Perfect reflection + some roughness. If roughness is 0, it's a
     // perfect mirror.
     vec3 direction = normalize(reflect(ray.direction, hit.n)) +
-                     mat.roughness * randomVec3N(seed);
-
+                     roughness * randomVec3N(seed);
     result.albedo = getMaterialAlbedo(mat, hit.uv);
 
     result.ray = createRay(hit.p + hit.n * EPSILON, direction);
@@ -48,6 +51,8 @@ void sampleMetallic(Material mat, Ray ray, HitRecord hit, uint seed,
 
 void sampleDielectric(Material mat, Ray ray, HitRecord hit, uint seed,
                       inout MaterialSample result) {
+    float roughness = getMaterialRoughness(mat, hit.uv);
+
     // Refraction ratio
     float ri =
         hit.frontFace ? (1.0 / mat.refractionIndex) : mat.refractionIndex;
@@ -71,8 +76,7 @@ void sampleDielectric(Material mat, Ray ray, HitRecord hit, uint seed,
         // Flips the normal when refracted
         rayOriginOffset = -hit.n;
     }
-    direction =
-        normalize(direction + mat.roughness * randomVec3(-1.0, 1.0, seed));
+    direction = normalize(direction + roughness * randomVec3(-1.0, 1.0, seed));
 
     result.albedo = getMaterialAlbedo(mat, hit.uv);
     result.ray = createRay(hit.p + rayOriginOffset * EPSILON, direction);

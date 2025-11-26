@@ -200,3 +200,42 @@ vec3 getMaterialAlbedo(Material mat, vec2 uv) {
     return mat.albedo *
            texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex)).rgb;
 }
+
+// Helper function to sample a specific channel
+float sampleChannel(sampler2DArray tex, vec3 uvw, uint channel) {
+    vec4 color = texture(tex, uvw);
+
+    switch (channel) {
+        case 0:
+            return color.r;  // Red
+        case 1:
+            return color.g;  // Green
+        case 2:
+            return color.b;  // Blue
+        case 3:
+            return color.a;  // Alpha
+
+        default:
+            return color.r;
+    }
+}
+
+float getMaterialMetallic(Material mat, vec2 uv) {
+    if (mat.metallicTextureIndex >= 0) {
+        float texMetallic =
+            sampleChannel(textureArray, vec3(uv, mat.metallicTextureIndex),
+                          uint(mat.metallicTextureChannel));
+        return mat.metal * texMetallic;
+    }
+    return mat.metal;
+}
+
+float getMaterialRoughness(Material mat, vec2 uv) {
+    if (mat.roughnessTextureIndex >= 0) {
+        float texRoughness =
+            sampleChannel(textureArray, vec3(uv, mat.roughnessTextureIndex),
+                          uint(mat.roughnessTextureChannel));
+        return mat.roughness * texRoughness;
+    }
+    return mat.roughness;
+}

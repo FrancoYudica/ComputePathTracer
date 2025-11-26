@@ -47,6 +47,10 @@ namespace godot {
         float refraction_index = 0.0;
         float emission = 0.0;
         uint32_t albedo_texture_index = 0;
+        uint32_t metallic_texture_index = 0;
+        uint32_t roughness_texture_index = 0;
+        uint32_t metallic_texture_channel = 0;
+        uint32_t roughness_texture_channel = 0;
         size_t get_hash() const;
     };
 

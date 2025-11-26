@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=16 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer/renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
 [ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
 [ext_resource type="PackedScene" uid="uid://b8nsm2ngx4xuu" path="res://scenes/cornell_box_gobot.tscn" id="11_ycdy4"]
+[ext_resource type="PackedScene" uid="uid://caxa1luxbe1eo" path="res://scenes/pbr_scene.tscn" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
 [ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
 
@@ -32,7 +33,7 @@ renderer = NodePath("Renderer")
 
 [node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
 script = ExtResource("1_0xm2m")
-scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/CornellBoxScene2")
+scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/PBRScene")
 render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 render_settings = SubResource("Resource_d13ii")
 
@@ -333,7 +334,10 @@ visible = false
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
 visible = false
 
-[node name="CornellBoxScene2" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
+[node name="GobotCornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
+
+[node name="PBRScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_2cqfq")]
+visible = false
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2

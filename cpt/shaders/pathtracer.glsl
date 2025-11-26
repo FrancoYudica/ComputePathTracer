@@ -175,19 +175,19 @@ void main() {
                 break;
 
             case 2:
-                frameColor = debugNormal(ray, baseSeed);
+                frameColor = debugTraceBVH(ray, baseSeed);
                 break;
 
             case 3:
-                frameColor = debugDepth(ray, baseSeed);
+                frameColor = debugNormal(ray, baseSeed);
                 break;
 
             case 4:
-                frameColor = debugUV(ray, baseSeed);
+                frameColor = debugDepth(ray, baseSeed);
                 break;
 
             case 5:
-                frameColor = debugTraceBVH(ray, baseSeed);
+                frameColor = debugUV(ray, baseSeed);
                 break;
         }
     }
