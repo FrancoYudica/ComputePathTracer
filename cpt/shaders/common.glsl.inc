@@ -191,3 +191,12 @@ vec3 reflectance(float cosine, vec3 refIdx) {
     r0 = r0 * r0;
     return r0 + (1.0 - r0) * pow((1.0 - cosine), 5.0);
 }
+
+Material getMaterial(float materialIndex) {
+    return materials[int(materialIndex)];
+}
+
+vec3 getMaterialAlbedo(Material mat, vec2 uv) {
+    return mat.albedo *
+           texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex)).rgb;
+}

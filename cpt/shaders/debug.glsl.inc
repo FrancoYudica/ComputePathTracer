@@ -72,3 +72,16 @@ vec3 debugUV(Ray ray, uint seed) {
     }
     return vec3(0.0);
 }
+
+vec3 debugRayCast(Ray ray, uint seed) {
+    HitRecord record;
+    intersectScene(ray, record);
+
+    if (record.didHit) {
+        Material material = getMaterial(record.materialIndex);
+        vec3 albedo = getMaterialAlbedo(material, record.uv);
+        return albedo;
+    }
+
+    return sampleSky(ray);
+}

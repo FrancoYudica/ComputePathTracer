@@ -171,7 +171,7 @@ void main() {
         Ray ray = generateRay(pixel, baseSeed);
         switch (debugMode) {
             case 1:
-                frameColor = debugTraceBVH(ray, baseSeed);
+                frameColor = debugRayCast(ray, baseSeed);
                 break;
 
             case 2:
@@ -184,6 +184,10 @@ void main() {
 
             case 4:
                 frameColor = debugUV(ray, baseSeed);
+                break;
+
+            case 5:
+                frameColor = debugTraceBVH(ray, baseSeed);
                 break;
         }
     }

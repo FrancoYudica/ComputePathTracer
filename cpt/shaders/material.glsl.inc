@@ -6,11 +6,6 @@ MaterialSample createMaterialSample() {
     return materialSample;
 }
 
-vec3 getMaterialAlbedo(Material mat, vec2 uv) {
-    return mat.albedo *
-           texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex)).rgb;
-}
-
 void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
                       inout MaterialSample result) {
     vec3 direction;

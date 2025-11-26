@@ -227,17 +227,19 @@ text = "Mode"
 [node name="ModeOptionButton" type="OptionButton" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 selected = 0
-item_count = 5
+item_count = 6
 popup/item_0/text = "PathTrace"
 popup/item_0/id = 0
-popup/item_1/text = "BVH"
+popup/item_1/text = "RayCast"
 popup/item_1/id = 1
-popup/item_2/text = "Normals"
+popup/item_2/text = "BVH"
 popup/item_2/id = 2
-popup/item_3/text = "Depth"
+popup/item_3/text = "Normals"
 popup/item_3/id = 3
-popup/item_4/text = "UV"
+popup/item_4/text = "Depth"
 popup/item_4/id = 4
+popup/item_5/text = "UV"
+popup/item_5/id = 5
 
 [node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
