@@ -1,4 +1,4 @@
-#include "pt_resource_manager.hpp"
+#include "pt_resource_manager.h"
 
 #include <godot_cpp/classes/cubemap.hpp>
 #include <godot_cpp/classes/environment.hpp>
@@ -62,32 +62,13 @@ namespace godot {
 
         ClassDB::bind_method(D_METHOD("get_scene_texture_array_buffer"),
                              &PTResourceManager::get_scene_texture_array);
+
+        ClassDB::bind_method(D_METHOD("cleanup"), &PTResourceManager::cleanup);
     }
 
     PTResourceManager::PTResourceManager() {}
 
-    PTResourceManager::~PTResourceManager() {
-        _rd->free_rid(_output_texture);
-        _rd->free_rid(_accumulation_texture);
-        _rd->free_rid(_texture_array);
-        // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
-        // created here
-        _rd->free_rid(_default_sampler);
-        _rd->free_rid(_settings_storage_buffer);
-        _rd->free_rid(_camera_storage_buffer);
-        _rd->free_rid(_scene_spheres_storage_buffer);
-        _rd->free_rid(_scene_triangles_storage_buffer);
-        _rd->free_rid(_scene_vertex_storage_buffer);
-        _rd->free_rid(_scene_materials_storage_buffer);
-        _rd->free_rid(_scene_bvh_storage_buffer);
-        _rd->free_rid(_scene_textures_storage_buffer);
-        _rd->free_rid(_image_uniform_set);
-        _rd->free_rid(_settings_uniform_set);
-        _rd->free_rid(_camera_uniform_set);
-        _rd->free_rid(_scene_uniform_set);
-        _rd->free_rid(_pipeline);
-        _rd->free_rid(_shader);
-    }
+    PTResourceManager::~PTResourceManager() {}
 
     static RID create_texture(RenderingDevice* rd, int width, int height,
                               RenderingDevice::DataFormat format,
@@ -125,12 +106,37 @@ namespace godot {
         _camera = camera;
 
         _create_shader_and_pipeline(shader_path);
-        _create_textures(width, height);
+        _create_viewport_textures(width, height);
+        _create_resources();
         _load_skybox_texture();
         _create_uniforms();
         _create_storage_buffers();
         _create_uniform_sets();
+
+        print_line("PTResourceManager initialized.");
     }
+    void PTResourceManager::cleanup() {
+        _rd->free_rid(_output_texture);
+        _rd->free_rid(_accumulation_texture);
+        _rd->free_rid(_texture_array);
+        // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
+        // created here
+        _rd->free_rid(_default_sampler);
+        _rd->free_rid(_settings_storage_buffer);
+        _rd->free_rid(_camera_storage_buffer);
+        _rd->free_rid(_scene_spheres_storage_buffer);
+        _rd->free_rid(_scene_triangles_storage_buffer);
+        _rd->free_rid(_scene_vertex_storage_buffer);
+        _rd->free_rid(_scene_materials_storage_buffer);
+        _rd->free_rid(_scene_bvh_storage_buffer);
+        _rd->free_rid(_image_uniform_set);
+        _rd->free_rid(_settings_uniform_set);
+        _rd->free_rid(_camera_uniform_set);
+        _rd->free_rid(_scene_uniform_set);
+        _rd->free_rid(_pipeline);
+        _rd->free_rid(_shader);
+    }
+
     void PTResourceManager::resize(uint32_t width, uint32_t height) {
         // Destroys _frees textures
         _output_image_uniform->clear_ids();
@@ -143,7 +149,7 @@ namespace godot {
             _rd->free_rid(_accumulation_texture);
         }
 
-        _create_textures(width, height);
+        _create_viewport_textures(width, height);
 
         _output_image_uniform->add_id(_output_texture);
         _accumulation_image_uniform->add_id(_accumulation_texture);
@@ -157,7 +163,8 @@ namespace godot {
              _skybox_image_uniform},
             _shader, 0);
     }
-    void PTResourceManager::_create_textures(uint32_t width, uint32_t height) {
+    void PTResourceManager::_create_viewport_textures(uint32_t width,
+                                                      uint32_t height) {
         // LDR output texture
         _output_texture =
             create_texture(_rd, width, height,
@@ -167,7 +174,9 @@ namespace godot {
         _accumulation_texture =
             create_texture(_rd, width, height,
                            RenderingDevice::DATA_FORMAT_R32G32B32A32_SFLOAT);
+    }
 
+    void PTResourceManager::_create_resources() {
         // Texture array for scene textures
         _texture_array = create_texture(
             _rd, get_texture_array_resolution(), get_texture_array_resolution(),
@@ -365,17 +374,6 @@ namespace godot {
             _scene_bvh_storage_buffer =
                 _rd->storage_buffer_create(bvh_bytes.size(), bvh_bytes);
             _scene_bvh_uniform->add_id(_scene_bvh_storage_buffer);
-        }
-        {
-            PackedFloat32Array texture_array_bytes = PackedFloat32Array();
-            texture_array_bytes.resize(
-                get_texture_array_resolution() *
-                get_texture_array_resolution() * 4 *
-                get_texture_array_layers());  // width * height * RGBA * layers
-
-            PackedByteArray texture_array_byte_array;
-            _scene_textures_storage_buffer = _rd->storage_buffer_create(
-                texture_array_bytes.size(), texture_array_byte_array);
         }
     }
     void PTResourceManager::_create_uniform_sets() {

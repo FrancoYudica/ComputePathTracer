@@ -15,6 +15,7 @@
 
 #include "pt_analytical_geometry.h"
 #include "pt_types.h"
+#include "pt_resource_manager.h"
 
 namespace godot {
 
@@ -29,12 +30,7 @@ namespace godot {
     private:
         RenderingDevice* _rd;
         SceneTree* _tree;
-        RID _spheres_storage_buffer;
-        RID _triangles_storage_buffer;
-        RID _vertices_storage_buffer;
-        RID _materials_storage_buffer;
-        RID _bvh_storage_buffer;
-        RID _textures_storage_buffer;
+        Ref<PTResourceManager> _resource_manager;
 
         std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
                                                                 // hash to index
@@ -44,6 +40,13 @@ namespace godot {
         std::vector<Ref<Texture2D>> _frame_textures;
 
         Ref<Texture2D> _default_texture;
+
+        RID _spheres_storage_buffer;
+        RID _triangles_storage_buffer;
+        RID _vertices_storage_buffer;
+        RID _materials_storage_buffer;
+        RID _textures_storage_buffer;
+        RID _bvh_storage_buffer;
 
         struct FrameStats {
             uint32_t sphere_count = 0;
@@ -61,11 +64,7 @@ namespace godot {
         ~PTSceneDataManager();
 
         void initialize(RenderingDevice* p_rd, SceneTree* p_tree,
-                        RID spheres_storage_buffer,
-                        RID triangles_storage_buffer,
-                        RID vertices_storage_buffer,
-                        RID materials_storage_buffer, RID bvh_storage_buffer,
-                        RID textures_storage_buffer);
+                        Ref<PTResourceManager> resource_manager);
 
         void update_buffers();
 

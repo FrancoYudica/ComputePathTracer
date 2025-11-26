@@ -40,7 +40,7 @@ material = SubResource("StandardMaterial3D_jodhc")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wfw7y"]
 emission_enabled = true
-emission = Color(1, 1, 1, 1)
+emission = Color(1, 1, 0.7647059, 1)
 emission_energy_multiplier = 9.86
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_53siw"]
@@ -236,6 +236,22 @@ mesh = SubResource("PlaneMesh_53siw")
 
 [node name="Gobot" type="MeshInstance3D" parent="." index="2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.41352987)
+material_overlay = SubResource("StandardMaterial3D_1saxw")
+mesh = SubResource("ArrayMesh_fdge7")
+skin = SubResource("Skin_kulhs")
+surface_material_override/1 = SubResource("StandardMaterial3D_4r786")
+surface_material_override/2 = ExtResource("7_mwfgj")
+
+[node name="Gobot2" type="MeshInstance3D" parent="." index="3"]
+transform = Transform3D(0.2715433, 0, -0.41983837, 0, 0.5, 0, 0.41983837, 0, 0.2715433, 0.49983722, 0, 0.48976207)
+material_overlay = SubResource("StandardMaterial3D_1saxw")
+mesh = SubResource("ArrayMesh_fdge7")
+skin = SubResource("Skin_kulhs")
+surface_material_override/1 = SubResource("StandardMaterial3D_4r786")
+surface_material_override/2 = ExtResource("7_mwfgj")
+
+[node name="Gobot3" type="MeshInstance3D" parent="." index="4"]
+transform = Transform3D(0.43648234, 0, 0.24389172, 0, 0.5, 0, -0.24389172, 0, 0.43648234, -0.6876995, 0, 0.68145096)
 material_overlay = SubResource("StandardMaterial3D_1saxw")
 mesh = SubResource("ArrayMesh_fdge7")
 skin = SubResource("Skin_kulhs")

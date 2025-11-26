@@ -64,6 +64,10 @@ func _ready() -> void:
 	
 	update_scene()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_pt_resource_manager.cleanup()
+
 func _initialize_compute():
 	_pt_resource_manager = PTResourceManager.new()
 	_pt_resource_manager.initialize(
@@ -77,13 +81,7 @@ func _initialize_compute():
 	scene_data_manager.initialize(
 		_rd,
 		get_tree(),
-		_pt_resource_manager.get_scene_spheres_storage_buffer(),
-		_pt_resource_manager.get_scene_triangles_storage_buffer(),
-		_pt_resource_manager.get_scene_vertex_storage_buffer(),
-		_pt_resource_manager.get_scene_materials_storage_buffer(),
-		_pt_resource_manager.get_scene_bvh_storage_buffer(),
-		_pt_resource_manager.get_scene_texture_array_buffer()
-	)
+		_pt_resource_manager)
 	
 func _get_push_constant_bytes() -> PackedByteArray:
 	var texture_width = get_render_width()

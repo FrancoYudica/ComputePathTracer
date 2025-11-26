@@ -22,6 +22,8 @@ namespace godot {
         RID _accumulation_texture;
         RID _skybox_texture;
         RID _texture_array;
+
+        /* Sampler */
         RID _default_sampler;
 
         /* Storage buffers */
@@ -32,7 +34,6 @@ namespace godot {
         RID _scene_vertex_storage_buffer;
         RID _scene_materials_storage_buffer;
         RID _scene_bvh_storage_buffer;
-        RID _scene_textures_storage_buffer;
 
         /* Uniform sets */
         RID _image_uniform_set;
@@ -65,6 +66,9 @@ namespace godot {
 
         void initialize(RenderingDevice* rd, Camera3D* camera,
                         String shader_path, uint32_t width, uint32_t height);
+
+        void cleanup();
+
         void resize(uint32_t width, uint32_t height);
 
         RID get_output_texture() const { return _output_texture; };
@@ -115,17 +119,28 @@ namespace godot {
             return _texture_array_layers;
         };
 
-        void set_texture_array_layers(uint32_t layers) {
-            _texture_array_layers = layers;
+        uint32_t get_texture_array_resolution() {
+            return _texture_array_resolution;
         };
 
     private:
-        void _create_textures(uint32_t width, uint32_t height);
+        // Creates size dependent textures
+        void _create_viewport_textures(uint32_t width, uint32_t height);
+
+        // Creates other resources, suchs as independent viewport size textures
+        // and samplers
+        void _create_resources();
+
         void _load_skybox_texture();
+
         RID _get_camera_skybox_texture(Camera3D* camera);
+
         void _create_uniforms();
+
         void _create_storage_buffers();
+
         void _create_uniform_sets();
+
         void _create_shader_and_pipeline(String shader_path);
     };
 }  // namespace godot

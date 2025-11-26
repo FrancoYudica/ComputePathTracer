@@ -5,7 +5,7 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "pt_resource_manager.hpp"
+#include "pt_resource_manager.h"
 #include "pt_analytical_geometry.h"
 #include "pt_scene_data_manager.h"
 

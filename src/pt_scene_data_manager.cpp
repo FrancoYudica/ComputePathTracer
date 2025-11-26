@@ -16,11 +16,8 @@
 #include "pt_utils.h"
 
 void godot::PTSceneDataManager::_bind_methods() {
-    ClassDB::bind_method(
-        D_METHOD("initialize", "rd", "tree", "spheres_storage_buffer",
-                 "triangles_storage_buffer", "vertices_storage_buffer",
-                 "materials_storage_buffer"),
-        &PTSceneDataManager::initialize);
+    ClassDB::bind_method(D_METHOD("initialize", "rd", "resource_manager"),
+                         &PTSceneDataManager::initialize);
     ClassDB::bind_method(D_METHOD("update_buffers"),
                          &PTSceneDataManager::update_buffers);
 
@@ -39,29 +36,17 @@ void godot::PTSceneDataManager::_bind_methods() {
 godot::PTSceneDataManager::PTSceneDataManager()
     : _rd(nullptr),
       _tree(nullptr),
-      _spheres_storage_buffer(RID()),
-      _triangles_storage_buffer(RID()),
-      _vertices_storage_buffer(RID()),
-      _materials_storage_buffer(RID()),
       _frame_materials({}),
       _frame_materials_list({}) {}
 
 godot::PTSceneDataManager::~PTSceneDataManager() {}
 
 void godot::PTSceneDataManager::initialize(
-    RenderingDevice* p_rd, SceneTree* p_tree, RID spheres_storage_buffer,
-    RID triangles_storage_buffer, RID vertices_storage_buffer,
-    RID materials_storage_buffer, RID bvh_storage_buffer,
-    RID textures_storage_buffer) {
+    RenderingDevice* p_rd, SceneTree* p_tree,
+    Ref<PTResourceManager> resource_manager) {
     _rd = p_rd;
     _tree = p_tree;
-    _spheres_storage_buffer = spheres_storage_buffer;
-    _triangles_storage_buffer = triangles_storage_buffer;
-    _vertices_storage_buffer = vertices_storage_buffer;
-    _materials_storage_buffer = materials_storage_buffer;
-    _bvh_storage_buffer = bvh_storage_buffer;
-    _textures_storage_buffer = textures_storage_buffer;
-
+    _resource_manager = resource_manager;
     // Create default texture
     _default_texture =
         ResourceLoader::get_singleton()->load("res://textures/white.png");
@@ -140,8 +125,8 @@ void godot::PTSceneDataManager::_update_spheres_buffer(
     }
 
     PackedByteArray spheres_bytes = spheres_data.to_byte_array();
-    _rd->buffer_update(_spheres_storage_buffer, 0, spheres_bytes.size(),
-                       spheres_bytes);
+    _rd->buffer_update(_resource_manager->get_scene_spheres_storage_buffer(), 0,
+                       spheres_bytes.size(), spheres_bytes);
     _stats.sphere_count = uint32_t(spheres.size());
 }
 
@@ -183,8 +168,8 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     triangles_count_data.push_back(0.0);
     triangles_count_data.push_back(0.0);
     PackedByteArray triangle_count_bytes = triangles_count_data.to_byte_array();
-    _rd->buffer_update(_triangles_storage_buffer, 0,
-                       triangle_count_bytes.size(), triangle_count_bytes);
+    _rd->buffer_update(_resource_manager->get_scene_triangles_storage_buffer(),
+                       0, triangle_count_bytes.size(), triangle_count_bytes);
 
     if (triangles.size() == 0) {
         print_line("No triangles to process.");
@@ -193,13 +178,11 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
 
     // Write vertices
     PackedByteArray vertices_bytes = vertices_data.to_byte_array();
-    _rd->buffer_update(_vertices_storage_buffer, 0, vertices_bytes.size(),
-                       vertices_bytes);
+    _rd->buffer_update(_resource_manager->get_scene_vertex_storage_buffer(), 0,
+                       vertices_bytes.size(), vertices_bytes);
 
     _stats.triangle_count = triangles.size();
     _stats.vertex_count = uint32_t(vertices_data.size());
-    print_line("Total vertices: " + String::num_int64(vertices_data.size()) +
-               ", bytes: " + String::num_int64(vertices_bytes.size()));
     // Build BVH
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     PTBoundingVolumeHierarchy bvh;
@@ -209,32 +192,33 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     print_line("BVH with " + String::num_int64(bvh.get_nodes().size()) +
                " nodes");
 
-    std::vector<uint32_t> nodeIndices;
-    nodeIndices.push_back(0);
+    // std::vector<uint32_t> nodeIndices;
+    // nodeIndices.push_back(0);
 
-    while (nodeIndices.size() > 0) {
-        uint32_t nodeIndex = nodeIndices.at(0);
-        nodeIndices.erase(nodeIndices.begin());
-        const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
+    // while (nodeIndices.size() > 0) {
+    //     uint32_t nodeIndex = nodeIndices.at(0);
+    //     nodeIndices.erase(nodeIndices.begin());
+    //     const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
 
-        if (!node.is_leaf) {
-            nodeIndices.push_back(node.left_child_index);
-            nodeIndices.push_back(node.right_child_index);
-        }
+    //     if (!node.is_leaf) {
+    //         nodeIndices.push_back(node.left_child_index);
+    //         nodeIndices.push_back(node.right_child_index);
+    //     }
 
-        print_line(
-            "Node " + String::num_int64(nodeIndex) + ". Min(" +
-            String::num_real(node.aabb.min.x) + ", " +
-            String::num_real(node.aabb.min.y) + ", " +
-            String::num_real(node.aabb.min.z) + ") " + ", Max(" +
-            String::num_real(node.aabb.max.x) + ", " +
-            String::num_real(node.aabb.max.y) + ", " +
-            String::num_real(node.aabb.max.z) + ") " + ", Left child index: " +
-            String::num_int64(node.left_child_index) + ", Right child index: " +
-            String::num_int64(node.right_child_index) + ", Primitive start: " +
-            String::num_int64(node.primitive_start_index) +
-            ", Primitive count: " + String::num_int64(node.primitive_count));
-    }
+    //     print_line(
+    //         "Node " + String::num_int64(nodeIndex) + ". Min(" +
+    //         String::num_real(node.aabb.min.x) + ", " +
+    //         String::num_real(node.aabb.min.y) + ", " +
+    //         String::num_real(node.aabb.min.z) + ") " + ", Max(" +
+    //         String::num_real(node.aabb.max.x) + ", " +
+    //         String::num_real(node.aabb.max.y) + ", " +
+    //         String::num_real(node.aabb.max.z) + ") " + ", Left child index: "
+    //         + String::num_int64(node.left_child_index) + ", Right child
+    //         index: " + String::num_int64(node.right_child_index) + ",
+    //         Primitive start: " +
+    //         String::num_int64(node.primitive_start_index) +
+    //         ", Primitive count: " + String::num_int64(node.primitive_count));
+    // }
 
     PackedFloat32Array sorted_triangles;
     sorted_triangles.resize(triangles.size() * 4);
@@ -248,8 +232,9 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     }
 
     PackedByteArray sorted_triangles_bytes = sorted_triangles.to_byte_array();
-    _rd->buffer_update(_triangles_storage_buffer, 4 * 4,
-                       sorted_triangles_bytes.size(), sorted_triangles_bytes);
+    _rd->buffer_update(_resource_manager->get_scene_triangles_storage_buffer(),
+                       4 * 4, sorted_triangles_bytes.size(),
+                       sorted_triangles_bytes);
 
     PackedFloat32Array bvh_nodes_data;
     constexpr uint32_t floats_per_node = 12;
@@ -278,8 +263,8 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
         bvh_nodes_data[base + 11] = node.right_child_index;
     }
     PackedByteArray bvh_nodes_byte_array = bvh_nodes_data.to_byte_array();
-    _rd->buffer_update(_bvh_storage_buffer, 0, bvh_nodes_byte_array.size(),
-                       bvh_nodes_byte_array);
+    _rd->buffer_update(_resource_manager->get_scene_bvh_storage_buffer(), 0,
+                       bvh_nodes_byte_array.size(), bvh_nodes_byte_array);
 }
 
 void godot::PTSceneDataManager::_update_materials_buffer() {
@@ -306,8 +291,8 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
-    _rd->buffer_update(_materials_storage_buffer, 0, materials_bytes.size(),
-                       materials_bytes);
+    _rd->buffer_update(_resource_manager->get_scene_materials_storage_buffer(),
+                       0, materials_bytes.size(), materials_bytes);
     _stats.material_count = uint32_t(_frame_materials_list.size());
 }
 
@@ -320,10 +305,11 @@ void godot::PTSceneDataManager::_update_textures_buffer() {
         auto image = _frame_textures[i]->get_image();
         image->clear_mipmaps();
         image->decompress();
-        image->resize(1024, 1024);
-        if (_rd->texture_update(_textures_storage_buffer, i,
+        image->resize(_resource_manager->get_texture_array_resolution(),
+                      _resource_manager->get_texture_array_resolution());
+        if (_rd->texture_update(_resource_manager->get_scene_texture_array(), i,
                                 image->get_data()) != Error::OK) {
-            ERR_PRINT("Failed to update texture index: " +
+            ERR_PRINT("Failed to update texture array layer index: " +
                       String::num_int64(i));
         }
     }
@@ -486,6 +472,15 @@ uint32_t godot::PTSceneDataManager::_push_texture(
             return i;
         }
     }
+
+    if (_frame_textures.size() >=
+        _resource_manager->get_texture_array_layers()) {
+        ERR_PRINT(
+            "Exceeded maximum number of scene textures: " +
+            String::num_int64(_resource_manager->get_texture_array_layers()));
+        return 0;
+    }
+
     _stats.texture_count++;
     _frame_textures.push_back(texture);
     return uint32_t(_frame_textures.size() - 1);
