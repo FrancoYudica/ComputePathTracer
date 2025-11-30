@@ -5,9 +5,9 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
-#include "pt_resource_manager.h"
 #include "pt_analytical_geometry.h"
-#include "pt_scene_data_manager.h"
+#include "pt_renderer_settings.h"
+#include "pt_renderer.h"
 
 using namespace godot;
 
@@ -16,9 +16,9 @@ void initialize_module(ModuleInitializationLevel p_level) {
         return;
     }
 
-    GDREGISTER_RUNTIME_CLASS(PTSceneDataManager);
     GDREGISTER_RUNTIME_CLASS(PTAnalyticalGeometry);
-    GDREGISTER_RUNTIME_CLASS(PTResourceManager);
+    GDREGISTER_RUNTIME_CLASS(PTRendererSettings);
+    GDREGISTER_RUNTIME_CLASS(PTRenderer);
 }
 
 void uninitialize_module(ModuleInitializationLevel p_level) {

@@ -1,10 +1,8 @@
-[gd_scene load_steps=16 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=13 format=3 uid="uid://cnli58scmym3d"]
 
-[ext_resource type="Script" uid="uid://4bioo7rfdpe8" path="res://renderer/renderer.gd" id="1_0xm2m"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://ui/settings_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
-[ext_resource type="Script" uid="uid://bb3p5d8pcpo0d" path="res://renderer/render_settings.gd" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://co7o0yn67fcwx" path="res://ui/texture_loader.gd" id="3_h2yge"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
@@ -15,12 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
 [ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
 
-[sub_resource type="Resource" id="Resource_d13ii"]
-script = ExtResource("3_efxa6")
-camera_focal_distance = 5.0
-metadata/_custom_type_script = "uid://bb3p5d8pcpo0d"
-
-[node name="MainScene" type="Control" node_paths=PackedStringArray("renderer")]
+[node name="MainScene" type="Control" node_paths=PackedStringArray("pt_renderer", "scene", "render_control", "camera_controller")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,13 +22,12 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_7mycd")
-renderer = NodePath("Renderer")
+pt_renderer = NodePath("PTRenderer")
+scene = NodePath("HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
+render_control = NodePath("HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
+camera_controller = NodePath("HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
 
-[node name="Renderer" type="Node" parent="." node_paths=PackedStringArray("scene", "render_control")]
-script = ExtResource("1_0xm2m")
-scene = NodePath("../HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/PBRScene")
-render_control = NodePath("../HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
-render_settings = SubResource("Resource_d13ii")
+[node name="PTRenderer" type="PTRenderer" parent="."]
 
 [node name="HBoxContainer" type="SplitContainer" parent="."]
 layout_mode = 1
@@ -45,12 +37,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "pt_renderer", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 script = ExtResource("2_lquwl")
 rasterized_panel = NodePath("../HBoxContainer/RasterizedSubViewportContainer")
-renderer = NodePath("../../Renderer")
+pt_renderer = NodePath("../../PTRenderer")
 rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
 sub_viewport = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport")
 camera_controller = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
@@ -246,10 +238,9 @@ popup/item_5/id = 5
 layout_mode = 2
 text = "Update scene buffers"
 
-[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label")]
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
-renderer = NodePath("../../../../../../Renderer")
 fps_label = NodePath("MarginContainer/VBoxContainer/FPSLabel")
 sphere_count_label = NodePath("MarginContainer/VBoxContainer/SpheresLabel")
 triangle_count_label = NodePath("MarginContainer/VBoxContainer/TrianglesLabel")
@@ -332,9 +323,9 @@ visible = false
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
-visible = false
 
 [node name="GobotCornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
+visible = false
 
 [node name="PBRScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_2cqfq")]
 visible = false
@@ -362,11 +353,10 @@ expand_mode = 1
 
 [node name="TextureLoader" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/TextureRect" node_paths=PackedStringArray("renderer")]
 script = ExtResource("3_h2yge")
-renderer = NodePath("../../../../../../Renderer")
+renderer = NodePath("../../../../../../PTRenderer")
 
-[node name="CameraController" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport" node_paths=PackedStringArray("renderer")]
+[node name="CameraController" type="Node" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
 script = ExtResource("3_1bvp3")
-renderer = NodePath("../../../../../Renderer")
 
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_bounces_spin_box_value_changed"]

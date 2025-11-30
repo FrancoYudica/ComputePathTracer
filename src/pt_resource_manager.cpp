@@ -15,56 +15,6 @@
 #include <godot_cpp/classes/texture2d.hpp>
 
 namespace godot {
-    void PTResourceManager::_bind_methods() {
-        ClassDB::bind_method(D_METHOD("initialize", "rd", "camera"),
-                             &PTResourceManager::initialize);
-        ClassDB::bind_method(D_METHOD("resize", "width", "height"),
-                             &PTResourceManager::resize);
-        ClassDB::bind_method(D_METHOD("get_output_texture"),
-                             &PTResourceManager::get_output_texture);
-        ClassDB::bind_method(D_METHOD("get_accumulation_texture"),
-                             &PTResourceManager::get_accumulation_texture);
-        ClassDB::bind_method(D_METHOD("get_skybox_texture"),
-                             &PTResourceManager::get_skybox_texture);
-        ClassDB::bind_method(D_METHOD("get_pipeline"),
-                             &PTResourceManager::get_pipeline);
-        ClassDB::bind_method(D_METHOD("get_shader"),
-                             &PTResourceManager::get_shader);
-        ClassDB::bind_method(D_METHOD("get_settings_storage_buffer"),
-                             &PTResourceManager::get_settings_storage_buffer);
-        ClassDB::bind_method(D_METHOD("get_camera_storage_buffer"),
-                             &PTResourceManager::get_camera_storage_buffer);
-        ClassDB::bind_method(
-            D_METHOD("get_scene_spheres_storage_buffer"),
-            &PTResourceManager::get_scene_spheres_storage_buffer);
-        ClassDB::bind_method(
-            D_METHOD("get_scene_triangles_storage_buffer"),
-            &PTResourceManager::get_scene_triangles_storage_buffer);
-        ClassDB::bind_method(
-            D_METHOD("get_scene_vertex_storage_buffer"),
-            &PTResourceManager::get_scene_vertex_storage_buffer);
-        ClassDB::bind_method(
-            D_METHOD("get_scene_materials_storage_buffer"),
-            &PTResourceManager::get_scene_materials_storage_buffer);
-        ClassDB::bind_method(D_METHOD("get_scene_bvh_storage_buffer"),
-                             &PTResourceManager::get_scene_bvh_storage_buffer);
-        ClassDB::bind_method(D_METHOD("get_image_uniform_set"),
-                             &PTResourceManager::get_image_uniform_set);
-        ClassDB::bind_method(D_METHOD("get_settings_uniform_set"),
-                             &PTResourceManager::get_settings_uniform_set);
-        ClassDB::bind_method(D_METHOD("get_camera_uniform_set"),
-                             &PTResourceManager::get_camera_uniform_set);
-        ClassDB::bind_method(D_METHOD("get_scene_uniform_set"),
-                             &PTResourceManager::get_scene_uniform_set);
-        ClassDB::bind_method(
-            D_METHOD("get_scene_texture_array_uniform"),
-            &PTResourceManager::get_scene_texture_array_uniform);
-
-        ClassDB::bind_method(D_METHOD("get_scene_texture_array_buffer"),
-                             &PTResourceManager::get_scene_texture_array);
-
-        ClassDB::bind_method(D_METHOD("cleanup"), &PTResourceManager::cleanup);
-    }
 
     PTResourceManager::PTResourceManager() {}
 
@@ -99,18 +49,17 @@ namespace godot {
         return texture;
     }
 
-    void PTResourceManager::initialize(RenderingDevice* rd, Camera3D* camera,
-                                       String shader_path, uint32_t width,
-                                       uint32_t height) {
+    void PTResourceManager::initialize(RenderingDevice* rd, String shader_path,
+                                       uint32_t width, uint32_t height) {
         _rd = rd;
-        _camera = camera;
+        _camera = nullptr;
 
         _create_shader_and_pipeline(shader_path);
         _create_viewport_textures(width, height);
         _create_resources();
-        _load_skybox_texture();
         _create_uniforms();
         _create_storage_buffers();
+        load_skybox_from_camera(nullptr);
         _create_uniform_sets();
 
         print_line("PTResourceManager initialized.");
@@ -138,16 +87,16 @@ namespace godot {
     }
 
     void PTResourceManager::resize(uint32_t width, uint32_t height) {
-        // Destroys _frees textures
-        _output_image_uniform->clear_ids();
-        _accumulation_image_uniform->clear_ids();
-
         if (_output_texture.is_valid()) {
             _rd->free_rid(_output_texture);
         }
         if (_accumulation_texture.is_valid()) {
             _rd->free_rid(_accumulation_texture);
         }
+
+        // Destroys _frees textures
+        _output_image_uniform->clear_ids();
+        _accumulation_image_uniform->clear_ids();
 
         _create_viewport_textures(width, height);
 
@@ -163,6 +112,50 @@ namespace godot {
              _skybox_image_uniform},
             _shader, 0);
     }
+    void PTResourceManager::load_skybox_from_camera(Camera3D* camera) {
+        // Early return if camera hasn't changed
+        if (camera != nullptr && camera == _camera) {
+            return;
+        }
+
+        // Update camera reference
+        _camera = camera;
+
+        // Clean up previous skybox texture if we own it
+        if (_skybox_texture.is_valid() && _owns_skybox_texture) {
+            _rd->free_rid(_skybox_texture);
+            _skybox_texture = RID();
+            _owns_skybox_texture = false;
+        }
+
+        // Try to get skybox from camera, or create fallback
+        if (camera) {
+            _skybox_texture = _get_camera_skybox_texture(camera);
+            _owns_skybox_texture = false;
+        }
+
+        // Create fallback black texture if no valid skybox
+        if (!_skybox_texture.is_valid()) {
+            _skybox_texture = create_texture(
+                _rd, 1, 1, RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM);
+            _owns_skybox_texture = true;
+        }
+
+        // Update uniform with new texture
+        _skybox_image_uniform->clear_ids();
+        _skybox_image_uniform->add_id(_default_sampler);
+        _skybox_image_uniform->add_id(_skybox_texture);
+
+        if (_image_uniform_set.is_valid()) {
+            _rd->free_rid(_image_uniform_set);
+        }
+
+        _image_uniform_set = _rd->uniform_set_create(
+            {_output_image_uniform, _accumulation_image_uniform,
+             _skybox_image_uniform},
+            _shader, 0);
+    }
+
     void PTResourceManager::_create_viewport_textures(uint32_t width,
                                                       uint32_t height) {
         // LDR output texture
@@ -183,7 +176,7 @@ namespace godot {
             RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM,
             get_texture_array_layers(), RenderingDevice::TEXTURE_TYPE_2D_ARRAY);
 
-        // Skybox sampler
+        // Default sampler
         Ref<RDSamplerState> sampler_state =
             Ref<RDSamplerState>(memnew(RDSamplerState));
         sampler_state->set_min_filter(RenderingDevice::SAMPLER_FILTER_LINEAR);
@@ -191,19 +184,12 @@ namespace godot {
         _default_sampler = _rd->sampler_create(sampler_state);
     }
 
-    void PTResourceManager::_load_skybox_texture() {
-        // Gets skybox texture from camera environment
-        _skybox_texture = _get_camera_skybox_texture(_camera);
-
-        if (!_skybox_texture.is_valid()) {
-            // Fallback to a 1x1 black texture if no skybox is set
-            _skybox_texture = create_texture(
-                _rd, 1, 1, RenderingDevice::DATA_FORMAT_R8G8B8A8_UNORM);
-        }
-    }
-
     RID PTResourceManager::_get_camera_skybox_texture(Camera3D* camera) {
         // Skybox texture. Gotten from the environment later.
+        if (camera == nullptr) {
+            return RID();
+        }
+
         Ref<Environment> env = camera->get_environment();
         if (!env.is_valid()) {
             return RID();
@@ -262,10 +248,6 @@ namespace godot {
             _skybox_image_uniform->set_uniform_type(
                 RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
             _skybox_image_uniform->set_binding(2);
-
-            // Sampler and then texture
-            _skybox_image_uniform->add_id(_default_sampler);
-            _skybox_image_uniform->add_id(_skybox_texture);
         }
 
         // Settings uniform
@@ -377,10 +359,12 @@ namespace godot {
         }
     }
     void PTResourceManager::_create_uniform_sets() {
-        _image_uniform_set = _rd->uniform_set_create(
-            {_output_image_uniform, _accumulation_image_uniform,
-             _skybox_image_uniform},
-            _shader, 0);
+        if (!_image_uniform_set.is_valid()) {
+            _image_uniform_set = _rd->uniform_set_create(
+                {_output_image_uniform, _accumulation_image_uniform,
+                 _skybox_image_uniform},
+                _shader, 0);
+        }
 
         _settings_uniform_set =
             _rd->uniform_set_create({_settings_uniform}, _shader, 1);

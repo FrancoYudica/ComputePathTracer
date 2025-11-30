@@ -15,24 +15,6 @@
 #include "pt_types.h"
 #include "pt_utils.h"
 
-void godot::PTSceneDataManager::_bind_methods() {
-    ClassDB::bind_method(D_METHOD("initialize", "rd", "resource_manager"),
-                         &PTSceneDataManager::initialize);
-    ClassDB::bind_method(D_METHOD("update_buffers"),
-                         &PTSceneDataManager::update_buffers);
-
-    ClassDB::bind_method(D_METHOD("get_sphere_count"),
-                         &PTSceneDataManager::get_sphere_count);
-    ClassDB::bind_method(D_METHOD("get_triangle_count"),
-                         &PTSceneDataManager::get_triangle_count);
-    ClassDB::bind_method(D_METHOD("get_vertex_count"),
-                         &PTSceneDataManager::get_vertex_count);
-    ClassDB::bind_method(D_METHOD("get_material_count"),
-                         &PTSceneDataManager::get_material_count);
-    ClassDB::bind_method(D_METHOD("get_texture_count"),
-                         &PTSceneDataManager::get_texture_count);
-}
-
 godot::PTSceneDataManager::PTSceneDataManager()
     : _rd(nullptr),
       _tree(nullptr),
@@ -43,7 +25,7 @@ godot::PTSceneDataManager::~PTSceneDataManager() {}
 
 void godot::PTSceneDataManager::initialize(
     RenderingDevice* p_rd, SceneTree* p_tree,
-    Ref<PTResourceManager> resource_manager) {
+    PTResourceManager* resource_manager) {
     _rd = p_rd;
     _tree = p_tree;
     _resource_manager = resource_manager;
@@ -431,14 +413,11 @@ uint32_t godot::PTSceneDataManager::_parse_material(
             std_material->get_texture(StandardMaterial3D::TEXTURE_METALLIC));
         pt_material.roughness_texture_index = _push_texture(
             std_material->get_texture(StandardMaterial3D::TEXTURE_ROUGHNESS));
-        pt_material.ao_texture_index = _push_texture(std_material->get_texture(
-            StandardMaterial3D::TEXTURE_AMBIENT_OCCLUSION));
 
         pt_material.metallic_texture_channel =
             std_material->get_metallic_texture_channel();
         pt_material.roughness_texture_channel =
             std_material->get_roughness_texture_channel();
-        pt_material.ao_texture_channel = std_material->get_ao_texture_channel();
 
         // Determine material type
         MaterialType materialType = MATERIAL_TYPE_LAMBERTIAN;

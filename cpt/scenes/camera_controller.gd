@@ -1,4 +1,4 @@
-extends Node
+class_name CameraController extends Node
 
 signal moved
 
@@ -14,11 +14,7 @@ var motion := Vector3()
 # Stores the effective camera velocity.
 var velocity := Vector3()
 
-@export var renderer: Renderer
-
-var camera: Camera3D:
-	get:
-		return renderer.scene.camera
+@export var camera: Camera3D
 
 var _tracking_mouse: bool = false
 
@@ -29,9 +25,6 @@ var fov: float:
 		fov = value
 		camera.fov = fov
 		moved.emit()
-
-func _ready() -> void:
-	fov = camera.fov
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_released("mouse_down"):

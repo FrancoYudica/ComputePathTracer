@@ -8,8 +8,7 @@
 
 namespace godot {
 
-    class PTResourceManager : public RefCounted {
-        GDCLASS(PTResourceManager, RefCounted)
+    class PTResourceManager {
     private:
         RenderingDevice* _rd;
         Camera3D* _camera;
@@ -57,19 +56,19 @@ namespace godot {
         uint32_t _texture_array_resolution = 1024;
         uint32_t _texture_array_layers = 256;
 
-    protected:
-        static void _bind_methods();
+        bool _owns_skybox_texture = false;
 
     public:
         PTResourceManager();
         ~PTResourceManager();
 
-        void initialize(RenderingDevice* rd, Camera3D* camera,
-                        String shader_path, uint32_t width, uint32_t height);
+        void initialize(RenderingDevice* rd, String shader_path, uint32_t width,
+                        uint32_t height);
 
         void cleanup();
 
         void resize(uint32_t width, uint32_t height);
+        void load_skybox_from_camera(Camera3D* camera);
 
         RID get_output_texture() const { return _output_texture; };
         RID get_accumulation_texture() const { return _accumulation_texture; };
@@ -130,8 +129,6 @@ namespace godot {
         // Creates other resources, suchs as independent viewport size textures
         // and samplers
         void _create_resources();
-
-        void _load_skybox_texture();
 
         RID _get_camera_skybox_texture(Camera3D* camera);
 

@@ -24,13 +24,11 @@ namespace godot {
      * data such as spheres, triangles, vertices, and
      * materials.
      */
-
-    class PTSceneDataManager : public RefCounted {
-        GDCLASS(PTSceneDataManager, RefCounted)
+    class PTSceneDataManager {
     private:
         RenderingDevice* _rd;
         SceneTree* _tree;
-        Ref<PTResourceManager> _resource_manager;
+        PTResourceManager* _resource_manager;
 
         std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
                                                                 // hash to index
@@ -56,15 +54,12 @@ namespace godot {
             uint32_t texture_count = 0;
         } _stats;
 
-    protected:
-        static void _bind_methods();
-
     public:
         PTSceneDataManager();
         ~PTSceneDataManager();
 
         void initialize(RenderingDevice* p_rd, SceneTree* p_tree,
-                        Ref<PTResourceManager> resource_manager);
+                        PTResourceManager* resource_manager);
 
         void update_buffers();
 

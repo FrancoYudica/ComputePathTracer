@@ -2,6 +2,7 @@
 #define PT_UTILS_H
 
 #include <godot_cpp/classes/node.hpp>
+#include <godot_cpp/classes/camera3d.hpp>
 #include <godot_cpp/classes/ref.hpp>
 #include <stack>
 
@@ -37,8 +38,12 @@ namespace godot {
             return nodes;
         }
 
+        PackedFloat32Array transform3d_to_float32_array(
+            const Transform3D& transform);
+
+        PackedByteArray get_camera_bytes(Camera3D* camera, uint32_t width,
+                                         uint32_t height);
     }  // namespace PTUtils
 
 }  // namespace godot
-
 #endif
