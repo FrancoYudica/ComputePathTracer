@@ -2,6 +2,7 @@ extends PanelContainer
 
 @export var renderer: PTRenderer
 @export var fps_label: Label
+@export var samples_label: Label
 @export var sphere_count_label: Label
 @export var triangle_count_label: Label
 @export var vertex_count_label: Label
@@ -14,6 +15,7 @@ extends PanelContainer
 func _process(_delta: float) -> void:
 	fps_label.text = "FPS: %s" % roundf(1.0 / _delta)
 	var stats = renderer.get_stats()
+	samples_label.text = "Samples: %s" % stats.get_samples()
 	sphere_count_label.text = "Spheres: %s" % stats.get_sphere_count()
 	triangle_count_label.text = "Triangles: %s" % stats.get_triangle_count()
 	vertex_count_label.text = "Vertices: %s" % stats.get_vertex_count()

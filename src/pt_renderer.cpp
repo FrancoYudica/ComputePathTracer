@@ -94,7 +94,10 @@ namespace godot {
         queue_clear();
     }
 
-    void PTRenderer::_clear_accumulated_buffer() { _frame_count = 1; }
+    void PTRenderer::_clear_accumulated_buffer() {
+        _frame_count = 1;
+        _stats->set_samples(0);
+    }
 
     void PTRenderer::draw(Camera3D* camera, uint32_t width, uint32_t height) {
         _viewport_width = width;
@@ -152,6 +155,9 @@ namespace godot {
         _rd->compute_list_dispatch(compute_list, x_groups, y_groups, 1);
         _rd->compute_list_end();
         _frame_count++;
+
+        _stats->set_samples(_stats->get_samples() +
+                            _renderer_settings->get_samples_per_pixel());
     }
 
     void PTRenderer::_initialize_compute() {

@@ -238,11 +238,12 @@ popup/item_5/id = 5
 layout_mode = 2
 text = "Update scene buffers"
 
-[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "samples_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
 renderer = NodePath("../../../../../../PTRenderer")
 fps_label = NodePath("MarginContainer/VBoxContainer/FPSLabel")
+samples_label = NodePath("MarginContainer/VBoxContainer/SamplesLabel")
 sphere_count_label = NodePath("MarginContainer/VBoxContainer/SpheresLabel")
 triangle_count_label = NodePath("MarginContainer/VBoxContainer/TrianglesLabel")
 vertex_count_label = NodePath("MarginContainer/VBoxContainer/VerticesLabel")
@@ -268,6 +269,10 @@ text = "STATS"
 [node name="FPSLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "FPS"
+
+[node name="SamplesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Samples"
 
 [node name="SpheresLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2

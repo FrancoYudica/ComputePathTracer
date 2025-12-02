@@ -30,6 +30,11 @@ void godot::PTRendererStats::_bind_methods() {
                          &PTRendererStats::get_bvh_node_count);
     ClassDB::bind_method(D_METHOD("set_bvh_node_count", "count"),
                          &PTRendererStats::set_bvh_node_count);
+
+    ClassDB::bind_method(D_METHOD("get_samples"),
+                         &PTRendererStats::get_samples);
+    ClassDB::bind_method(D_METHOD("set_samples", "count"),
+                         &PTRendererStats::set_samples);
 }
 
 void godot::PTRendererStats::reset() {
@@ -39,4 +44,5 @@ void godot::PTRendererStats::reset() {
     texture_count = 0;
     material_count = 0;
     bvh_node_count = 0;
+    samples = 0;
 }

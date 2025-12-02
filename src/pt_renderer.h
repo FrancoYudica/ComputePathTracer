@@ -36,10 +36,6 @@ namespace godot {
         uint32_t _viewport_width = 800;
         uint32_t _viewport_height = 600;
 
-        // Store the NodePath exported from the Inspector
-        NodePath _camera_path;
-        NodePath _render_control_path;
-
         Ref<PTRendererStats> _stats;
 
     protected:
