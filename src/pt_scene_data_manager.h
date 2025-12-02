@@ -16,6 +16,7 @@
 #include "pt_analytical_geometry.h"
 #include "pt_types.h"
 #include "pt_resource_manager.h"
+#include "pt_renderer_stats.h"
 
 namespace godot {
 
@@ -46,13 +47,7 @@ namespace godot {
         RID _textures_storage_buffer;
         RID _bvh_storage_buffer;
 
-        struct FrameStats {
-            uint32_t sphere_count = 0;
-            uint32_t triangle_count = 0;
-            uint32_t vertex_count = 0;
-            uint32_t material_count = 0;
-            uint32_t texture_count = 0;
-        } _stats;
+        Ref<PTRendererStats> _stats;
 
     public:
         PTSceneDataManager();
@@ -61,13 +56,7 @@ namespace godot {
         void initialize(RenderingDevice* p_rd, SceneTree* p_tree,
                         PTResourceManager* resource_manager);
 
-        void update_buffers();
-
-        uint32_t get_sphere_count() const { return _stats.sphere_count; }
-        uint32_t get_triangle_count() const { return _stats.triangle_count; }
-        uint32_t get_vertex_count() const { return _stats.vertex_count; }
-        uint32_t get_material_count() const { return _stats.material_count; }
-        uint32_t get_texture_count() const { return _stats.texture_count; }
+        void update_buffers(Ref<PTRendererStats> stats);
 
     private:
         void _update_spheres_buffer(

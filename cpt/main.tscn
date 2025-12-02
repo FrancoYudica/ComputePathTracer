@@ -238,15 +238,17 @@ popup/item_5/id = 5
 layout_mode = 2
 text = "Update scene buffers"
 
-[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label")]
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("renderer", "fps_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
+renderer = NodePath("../../../../../../PTRenderer")
 fps_label = NodePath("MarginContainer/VBoxContainer/FPSLabel")
 sphere_count_label = NodePath("MarginContainer/VBoxContainer/SpheresLabel")
 triangle_count_label = NodePath("MarginContainer/VBoxContainer/TrianglesLabel")
 vertex_count_label = NodePath("MarginContainer/VBoxContainer/VerticesLabel")
 material_count_label = NodePath("MarginContainer/VBoxContainer/MaterialsLabel")
 texture_count_label = NodePath("MarginContainer/VBoxContainer/TexturesLabel")
+bvh_node_count_label = NodePath("MarginContainer/VBoxContainer/BVHNodesCount")
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer"]
 layout_mode = 2
@@ -286,6 +288,10 @@ text = "Material"
 [node name="TexturesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Texture"
+
+[node name="BVHNodesCount" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "BVH Nodes"
 
 [node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2

@@ -14,6 +14,7 @@
 #include "pt_resource_manager.h"
 #include "pt_renderer_settings.h"
 #include "pt_scene_data_manager.h"
+#include "pt_renderer_stats.h"
 
 namespace godot {
 
@@ -39,6 +40,8 @@ namespace godot {
         NodePath _camera_path;
         NodePath _render_control_path;
 
+        Ref<PTRendererStats> _stats;
+
     protected:
         static void _bind_methods();
 
@@ -49,30 +52,16 @@ namespace godot {
         void _ready() override;
         void _exit_tree() override;
 
-        void queue_clear();
         RID get_texture_rid() const;
-        uint32_t get_render_width() const {
-            return Math::max(
-                static_cast<uint32_t>(_viewport_width *
-                                      _renderer_settings->get_render_scale()),
-                1u);
-        }
-        uint32_t get_render_height() const {
-            return Math::max(
-                static_cast<uint32_t>(_viewport_height *
-                                      _renderer_settings->get_render_scale()),
-                1u);
-        };
+        uint32_t get_render_width() const;
+        uint32_t get_render_height() const;
+        Ref<PTRendererSettings> get_renderer_settings() const;
+
+        void set_renderer_settings(const Ref<PTRendererSettings>& settings);
+        void queue_clear();
         void update_scene();
-
-        void set_renderer_settings(const Ref<PTRendererSettings>& settings) {
-            _renderer_settings = settings;
-        }
-        Ref<PTRendererSettings> get_renderer_settings() const {
-            return _renderer_settings;
-        }
-
         void draw(Camera3D* camera, uint32_t width, uint32_t height);
+        Ref<PTRendererStats> get_stats() const { return _stats; }
 
     private:
         void _initialize_compute();

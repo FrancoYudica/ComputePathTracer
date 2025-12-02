@@ -77,3 +77,38 @@ void godot::PTRendererSettings::_bind_methods() {
     BIND_ENUM_CONSTANT(RENDER_MODE_DEPTH);
     BIND_ENUM_CONSTANT(RENDER_MODE_UV);
 }
+
+void godot::PTRendererSettings::set_samples_per_pixel(uint32_t p_spp) {
+    samples_per_pixel = p_spp;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_max_bounces(uint32_t p_bounces) {
+    max_bounces = p_bounces;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_environment_energy(float p_energy) {
+    environment_energy = p_energy;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_camera_aperture(float p_aperture) {
+    camera_aperture = p_aperture;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_camera_focus_distance(float p_distance) {
+    camera_focus_distance = p_distance;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_render_mode(PTRenderMode p_mode) {
+    render_mode = p_mode;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_render_scale(float p_scale) {
+    render_scale = p_scale;
+    emit_changed();
+}

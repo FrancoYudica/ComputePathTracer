@@ -20,6 +20,7 @@ namespace godot {
             &PTRenderer::set_renderer_settings);
         ClassDB::bind_method(D_METHOD("get_renderer_settings"),
                              &PTRenderer::get_renderer_settings);
+        ClassDB::bind_method(D_METHOD("get_stats"), &PTRenderer::get_stats);
 
         ClassDB::bind_method(D_METHOD("draw", "camera", "width", "height"),
                              &PTRenderer::draw);
@@ -42,6 +43,9 @@ namespace godot {
                 Ref<PTRendererSettings>(memnew(PTRendererSettings));
         }
 
+        _stats = Ref<PTRendererStats>(memnew(PTRendererStats));
+        _stats->reset();
+
         _initialize_compute();
         update_scene();
 
@@ -50,15 +54,39 @@ namespace godot {
 
     void PTRenderer::_exit_tree() { _cleanup(); }
 
+    RID PTRenderer::get_texture_rid() const {
+        return _resource_manager.get_output_texture();
+    }
+
+    uint32_t PTRenderer::get_render_width() const {
+        return Math::max(
+            static_cast<uint32_t>(_viewport_width *
+                                  _renderer_settings->get_render_scale()),
+            1u);
+    }
+
+    uint32_t PTRenderer::get_render_height() const {
+        return Math::max(
+            static_cast<uint32_t>(_viewport_height *
+                                  _renderer_settings->get_render_scale()),
+            1u);
+    };
+
+    Ref<PTRendererSettings> PTRenderer::get_renderer_settings() const {
+        return _renderer_settings;
+    }
+
+    void PTRenderer::set_renderer_settings(
+        const Ref<PTRendererSettings>& settings) {
+        _renderer_settings = settings;
+        _renderer_settings->connect("changed", Callable(this, "queue_clear"));
+    }
+
     void PTRenderer::queue_clear() { _clear_buffer = true; }
 
     void PTRenderer::update_scene() { _update_scene = true; }
 
     void PTRenderer::_cleanup() { _resource_manager.cleanup(); }
-
-    RID PTRenderer::get_texture_rid() const {
-        return _resource_manager.get_output_texture();
-    }
 
     void PTRenderer::_resize(uint32_t width, uint32_t height) {
         _resource_manager.resize(get_render_width(), get_render_height());
@@ -88,7 +116,8 @@ namespace godot {
         }
 
         if (_update_scene) {
-            _scene_data_manager.update_buffers();
+            _stats->reset();
+            _scene_data_manager.update_buffers(_stats);
             _update_scene = false;
         }
 

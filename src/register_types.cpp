@@ -8,6 +8,7 @@
 #include "pt_analytical_geometry.h"
 #include "pt_renderer_settings.h"
 #include "pt_renderer.h"
+#include "pt_renderer_stats.h"
 
 using namespace godot;
 
@@ -18,6 +19,7 @@ void initialize_module(ModuleInitializationLevel p_level) {
 
     GDREGISTER_RUNTIME_CLASS(PTAnalyticalGeometry);
     GDREGISTER_RUNTIME_CLASS(PTRendererSettings);
+    GDREGISTER_RUNTIME_CLASS(PTRendererStats);
     GDREGISTER_RUNTIME_CLASS(PTRenderer);
 }
 

@@ -1,7 +1,7 @@
 [gd_scene load_steps=31 format=4 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
-[ext_resource type="Texture2D" uid="uid://cpyb2y23yju5t" path="res://sky/kloppenheim_02_puresky_4k.exr" id="2_ajtdg"]
+[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://sky/qwantani_dusk_2_puresky_4k.exr" id="2_ajtdg"]
 [ext_resource type="Texture2D" uid="uid://bt5o0sr6peltq" path="res://models/gdquest_gobot/model/gobot_gobot_diffuse.png" id="3_ssvt4"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
 [ext_resource type="Texture2D" uid="uid://cgkj45d67dalm" path="res://models/gdquest_gobot/model/gobot_gobot_roughness.png" id="4_kj211"]
