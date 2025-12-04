@@ -45,12 +45,15 @@ namespace godot {
         float metallic = 0.0;
         float roughness = 1.0;
         float refraction_index = 0.0;
-        float emission = 0.0;
+        Vector3 emission = Vector3(0.0, 0.0, 0.0);
         uint32_t albedo_texture_index = 0;
         uint32_t metallic_texture_index = 0;
         uint32_t roughness_texture_index = 0;
+        uint32_t emission_texture_index = 0;
         uint32_t metallic_texture_channel = 0;
         uint32_t roughness_texture_channel = 0;
+        float emission_energy_multiplier = 1.0;
+
         size_t get_hash() const;
     };
 

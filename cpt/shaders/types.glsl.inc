@@ -29,21 +29,23 @@ struct BVHNode {
 };
 
 struct Material {
+    vec3 albedo;
     float type;  // 0: diffuse, 1: metal, 2: dielectric, 3: emissive
+    vec3 emission;
     float metal;
     float roughness;
     float refractionIndex;  // for dielectric
-    vec3 albedo;
-    float emission;
 
     // Texture indices (0 means default)
     float albedoTextureIndex;
     float metallicTextureIndex;
     float roughnessTextureIndex;
+    float emissionTextureIndex;
 
     // Texture channels
     float metallicTextureChannel;
     float roughnessTextureChannel;
+    float emissionEnergyMultiplier;
 };
 
 struct Sphere {
@@ -59,6 +61,7 @@ struct Triangle {
 
 struct MaterialSample {
     vec3 albedo;
+    vec3 emission;
     vec2 uv;
     bool isEmissive;
     Ray ray;

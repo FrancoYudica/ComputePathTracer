@@ -197,8 +197,12 @@ Material getMaterial(float materialIndex) {
 }
 
 vec3 getMaterialAlbedo(Material mat, vec2 uv) {
-    return mat.albedo *
-           texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex)).rgb;
+    if (mat.albedoTextureIndex > 0) {
+        return mat.albedo *
+               texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex))
+                   .rgb;
+    }
+    return mat.albedo;
 }
 
 // Helper function to sample a specific channel
@@ -221,7 +225,7 @@ float sampleChannel(sampler2DArray tex, vec3 uvw, uint channel) {
 }
 
 float getMaterialMetallic(Material mat, vec2 uv) {
-    if (mat.metallicTextureIndex >= 0) {
+    if (mat.metallicTextureIndex > 0) {
         float texMetallic =
             sampleChannel(textureArray, vec3(uv, mat.metallicTextureIndex),
                           uint(mat.metallicTextureChannel));
@@ -231,11 +235,20 @@ float getMaterialMetallic(Material mat, vec2 uv) {
 }
 
 float getMaterialRoughness(Material mat, vec2 uv) {
-    if (mat.roughnessTextureIndex >= 0) {
+    if (mat.roughnessTextureIndex > 0) {
         float texRoughness =
             sampleChannel(textureArray, vec3(uv, mat.roughnessTextureIndex),
                           uint(mat.roughnessTextureChannel));
         return mat.roughness * texRoughness;
     }
     return mat.roughness;
+}
+
+vec3 getMaterialEmission(Material mat, vec2 uv) {
+    if (mat.emissionTextureIndex > 0) {
+        vec3 emission =
+            texture(textureArray, vec3(uv, mat.emissionTextureIndex)).rgb;
+        return mat.emissionEnergyMultiplier * (emission + mat.emission);
+    }
+    return mat.emission;
 }

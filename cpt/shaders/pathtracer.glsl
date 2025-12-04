@@ -45,7 +45,7 @@ layout(std140, set = 3, binding = 1) buffer Triangles {
 
 layout(std430, set = 3, binding = 2) buffer Vertices { Vertex vertices[]; };
 
-layout(std140, set = 3, binding = 3) buffer Materials { Material materials[]; };
+layout(std430, set = 3, binding = 3) buffer Materials { Material materials[]; };
 
 layout(std140, set = 3, binding = 4) buffer BVHNodes { BVHNode bvhNodes[]; };
 
@@ -136,9 +136,10 @@ vec3 pathTrace(Ray ray, uint seed) {
         materialSample = sampleMaterial(hitMaterial, ray, hitRecord, seed);
 
         if (materialSample.isEmissive) {
-            radiance += throughput * materialSample.albedo;
+            radiance += throughput * materialSample.emission;
             break;
         } else {
+            radiance += throughput * materialSample.emission;
             throughput *= materialSample.albedo * hitRecord.color;
         }
 

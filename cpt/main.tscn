@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=14 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://ui/settings_panel_container.gd" id="2_lquwl"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
 [ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
+[ext_resource type="PackedScene" uid="uid://xpfm7su0rbtr" path="res://scenes/test_base_scene.tscn" id="11_w48qg"]
 [ext_resource type="PackedScene" uid="uid://b8nsm2ngx4xuu" path="res://scenes/cornell_box_gobot.tscn" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://caxa1luxbe1eo" path="res://scenes/pbr_scene.tscn" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
@@ -23,7 +24,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_7mycd")
 pt_renderer = NodePath("PTRenderer")
-scene = NodePath("HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TriangulatedTestScene")
+scene = NodePath("HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport/TestBaseScene")
 render_control = NodePath("HBoxContainer/HBoxContainer/SubViewportContainerPathTracer")
 camera_controller = NodePath("HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
 
@@ -334,12 +335,15 @@ visible = false
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
+visible = false
 
 [node name="GobotCornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
 visible = false
 
 [node name="PBRScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_2cqfq")]
 visible = false
+
+[node name="TestBaseScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_w48qg")]
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 layout_mode = 2

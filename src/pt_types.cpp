@@ -10,10 +10,13 @@ namespace godot {
         hash_combine(hash, std::hash<float>()(color.r));
         hash_combine(hash, std::hash<float>()(color.g));
         hash_combine(hash, std::hash<float>()(color.b));
+
+        hash_combine(hash, std::hash<float>()(emission.x));
+        hash_combine(hash, std::hash<float>()(emission.y));
+        hash_combine(hash, std::hash<float>()(emission.z));
         hash_combine(hash, std::hash<float>()(metallic));
         hash_combine(hash, std::hash<float>()(roughness));
         hash_combine(hash, std::hash<float>()(refraction_index));
-        hash_combine(hash, std::hash<float>()(emission));
         hash_combine(hash, std::hash<uint32_t>()(albedo_texture_index));
         hash_combine(hash, std::hash<uint32_t>()(metallic_texture_index));
         hash_combine(hash, std::hash<uint32_t>()(roughness_texture_index));

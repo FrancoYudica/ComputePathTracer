@@ -257,28 +257,29 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
 void godot::PTSceneDataManager::_update_materials_buffer() {
     PackedFloat32Array materials_data;
 
-    // vec3 color + float metallic + float roughness + float
-    // refraction_index + float emission + uint32_t material_type + 3
-    // padding
-    constexpr uint32_t MATERIAL_FLOATS = 16;
+    constexpr uint32_t MATERIAL_FLOATS = 20;
 
     materials_data.resize(_frame_materials_list.size() * MATERIAL_FLOATS);
     for (uint32_t i = 0; i < _frame_materials_list.size(); ++i) {
         PTMaterial& material = _frame_materials_list[i];
         uint32_t base_offset = i * MATERIAL_FLOATS;
-        materials_data[base_offset + 0] = float(material.material_type);
-        materials_data[base_offset + 1] = material.metallic;
-        materials_data[base_offset + 2] = material.roughness;
-        materials_data[base_offset + 3] = material.refraction_index;
-        materials_data[base_offset + 4] = material.color.r;
-        materials_data[base_offset + 5] = material.color.g;
-        materials_data[base_offset + 6] = material.color.b;
-        materials_data[base_offset + 7] = material.emission;
-        materials_data[base_offset + 8] = material.albedo_texture_index;
-        materials_data[base_offset + 9] = material.metallic_texture_index;
-        materials_data[base_offset + 10] = material.roughness_texture_index;
-        materials_data[base_offset + 11] = material.metallic_texture_channel;
-        materials_data[base_offset + 12] = material.roughness_texture_channel;
+        materials_data[base_offset + 0] = material.color.r;
+        materials_data[base_offset + 1] = material.color.g;
+        materials_data[base_offset + 2] = material.color.b;
+        materials_data[base_offset + 3] = float(material.material_type);
+        materials_data[base_offset + 4] = material.emission.x;
+        materials_data[base_offset + 5] = material.emission.y;
+        materials_data[base_offset + 6] = material.emission.z;
+        materials_data[base_offset + 7] = material.metallic;
+        materials_data[base_offset + 8] = material.roughness;
+        materials_data[base_offset + 9] = material.refraction_index;
+        materials_data[base_offset + 10] = material.albedo_texture_index;
+        materials_data[base_offset + 11] = material.metallic_texture_index;
+        materials_data[base_offset + 12] = material.roughness_texture_index;
+        materials_data[base_offset + 13] = material.emission_texture_index;
+        materials_data[base_offset + 14] = material.metallic_texture_channel;
+        materials_data[base_offset + 15] = material.roughness_texture_channel;
+        materials_data[base_offset + 16] = material.emission_energy_multiplier;
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
@@ -419,12 +420,19 @@ uint32_t godot::PTSceneDataManager::_parse_material(
             std_material->get_texture(StandardMaterial3D::TEXTURE_METALLIC));
         pt_material.roughness_texture_index = _push_texture(
             std_material->get_texture(StandardMaterial3D::TEXTURE_ROUGHNESS));
+        pt_material.emission_texture_index = _push_texture(
+            std_material->get_texture(StandardMaterial3D::TEXTURE_EMISSION));
 
         pt_material.metallic_texture_channel =
             std_material->get_metallic_texture_channel();
         pt_material.roughness_texture_channel =
             std_material->get_roughness_texture_channel();
 
+        pt_material.emission_energy_multiplier =
+            std_material->get_emission_energy_multiplier();
+
+        Color emission = std_material->get_emission();
+        pt_material.emission = Vector3(emission.r, emission.g, emission.b);
         // Determine material type
         MaterialType materialType = MATERIAL_TYPE_LAMBERTIAN;
 
@@ -450,7 +458,6 @@ uint32_t godot::PTSceneDataManager::_parse_material(
         pt_material.color = albedo_color;
         pt_material.metallic = std_material->get_metallic();
         pt_material.roughness = std_material->get_roughness();
-        pt_material.emission = std_material->get_emission_energy_multiplier();
 
         return _push_material(pt_material);
     }

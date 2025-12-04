@@ -11,7 +11,7 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
     vec3 direction;
 
     vec3 albedo = getMaterialAlbedo(mat, hit.uv);
-
+    vec3 emission = getMaterialEmission(mat, hit.uv);
     if (randomFloat(seed) > mat.metal) {
         // Diffuse reflection with roughness
         direction = normalize(hit.n + randomVec3N(seed));
@@ -31,9 +31,9 @@ void sampleLambertian(Material mat, Ray ray, HitRecord hit, uint seed,
 
         // Metals tint their reflections
         vec3 specularTint = mix(vec3(1.0), albedo, metallic);
-        result.albedo = specularTint;
+        result.albedo = albedo;
     }
-
+    result.emission = emission;
     result.ray = createRay(hit.p + hit.n * EPSILON, direction);
 }
 
@@ -85,11 +85,12 @@ void sampleDielectric(Material mat, Ray ray, HitRecord hit, uint seed,
 void sampleEmissive(Material mat, Ray ray, HitRecord hit, uint seed,
                     inout MaterialSample result) {
     result.isEmissive = true;
-    result.albedo = getMaterialAlbedo(mat, hit.uv) * mat.emission;
+    result.emission = getMaterialEmission(mat, hit.uv);
 }
 
 MaterialSample sampleMaterial(Material mat, Ray ray, HitRecord hit, uint seed) {
     MaterialSample result = createMaterialSample();
+    result.emission = vec3(0.0);
 
     switch (int(mat.type)) {
         case 0:
