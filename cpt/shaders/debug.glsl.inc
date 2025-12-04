@@ -59,7 +59,7 @@ vec3 debugDepth(Ray ray, uint seed) {
     ray.direction = normalize(ray.direction);
     intersectScene(ray, record);
     if (record.didHit) {
-        return vec3(record.t / 20.0);  // Assuming max depth of 100 units
+        return vec3(record.t / 20.0);
     }
     return vec3(1.0);
 }
@@ -84,4 +84,40 @@ vec3 debugRayCast(Ray ray, uint seed) {
     }
 
     return sampleSky(ray);
+}
+
+vec3 debugMetallic(Ray ray, uint seed) {
+    HitRecord record;
+    intersectScene(ray, record);
+
+    if (record.didHit) {
+        Material material = getMaterial(record.materialIndex);
+        return vec3(getMaterialMetallic(material, record.uv));
+    }
+
+    return vec3(0.0);
+}
+
+vec3 debugRoughness(Ray ray, uint seed) {
+    HitRecord record;
+    intersectScene(ray, record);
+
+    if (record.didHit) {
+        Material material = getMaterial(record.materialIndex);
+        return vec3(getMaterialRoughness(material, record.uv));
+    }
+
+    return vec3(0.0);
+}
+
+vec3 debugEmission(Ray ray, uint seed) {
+    HitRecord record;
+    intersectScene(ray, record);
+
+    if (record.didHit) {
+        Material material = getMaterial(record.materialIndex);
+        return getMaterialEmission(material, record.uv);
+    }
+
+    return vec3(0.0);
 }

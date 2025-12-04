@@ -1,6 +1,7 @@
 #include "pt_bounding_volume_hierarchy.h"
 
 #include <algorithm>
+#define MAX_DEPTH 32
 
 namespace godot {
 
@@ -105,7 +106,7 @@ namespace godot {
         uint32_t count = end - begin;
 
         // Base case, no splitting. Marks node as leaf
-        if (count <= 12 || depth >= 20) {
+        if (count <= 12 || depth >= MAX_DEPTH) {
             // Make leaf node
             nodes[nodeIndex].is_leaf = true;
             nodes[nodeIndex].left_child_index = 0;

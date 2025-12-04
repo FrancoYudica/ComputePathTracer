@@ -67,7 +67,8 @@ void godot::PTRendererSettings::_bind_methods() {
                  "set_camera_focus_distance", "get_camera_focus_distance");
     // Render mode as enum
     ADD_PROPERTY(PropertyInfo(Variant::INT, "render_mode", PROPERTY_HINT_ENUM,
-                              "Path Trace,Ray Cast,BVH, Normals, Depth, UVs"),
+                              "Path Trace,Ray Cast,BVH, Normals, Depth, UVs, "
+                              "Metal, Roughness, Emission"),
                  "set_render_mode", "get_render_mode");
 
     BIND_ENUM_CONSTANT(RENDER_MODE_PATH_TRACE);

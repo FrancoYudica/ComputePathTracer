@@ -190,6 +190,18 @@ void main() {
             case 5:
                 frameColor = debugUV(ray, baseSeed);
                 break;
+
+            case 6:
+                frameColor = debugMetallic(ray, baseSeed);
+                break;
+
+            case 7:
+                frameColor = debugRoughness(ray, baseSeed);
+                break;
+
+            case 8:
+                frameColor = debugEmission(ray, baseSeed);
+                break;
         }
     }
 
