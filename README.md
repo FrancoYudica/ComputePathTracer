@@ -8,7 +8,7 @@ A compute shader based path tracer implemented in the Godot game engine
 
 **Path Tracer**: A compute shader based path tracer, implemented from scratch with progressive accumulation for noise reduction across frames.
 
-**Materials**: Multiple material types supported:
+**Materials**: Multiple material and texture types supported:
 
 - Lambertian (diffuse) with metallic-roughness workflow
 - Metallic materials with roughness-based reflections
@@ -42,7 +42,9 @@ The project uses C++ with the GDExtension API and SCons as the build system.  Fo
 
 ## Future work
 - Physically-Based BRDFs: Implement industry-standard BRDFs (e.g., GGX/Trowbridge-Reitz microfacet model).
-- Support for loading and sampling albedo, normal, roughness, and metallic texture maps with proper UV coordinate handling.
+
+- Support for normal texture maps.
+
 - Implement Surface Area Heuristic (SAH) for BVH building to achieve better ray traversal performance and reduce intersection tests..
 
 - Post processing pipeline: Bloom and glare effects, tonemapping operators (ACES, Reinhard), exposure control.
@@ -54,6 +56,8 @@ The project uses C++ with the GDExtension API and SCons as the build system.  Fo
 - Instancing support
 
 ## Samples
+![](imgs/sample4.png)
+![](imgs/sample5.png)
 ![](imgs/sample3.png)
 ![](imgs/sample1.png)
 ![](imgs/sample2.png)

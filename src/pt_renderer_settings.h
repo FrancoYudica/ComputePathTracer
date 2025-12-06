@@ -11,7 +11,10 @@ namespace godot {
         RENDER_MODE_BVH = 2,
         RENDER_MODE_NORMALS = 3,
         RENDER_MODE_DEPTH = 4,
-        RENDER_MODE_UV = 5
+        RENDER_MODE_UV = 5,
+        RENDER_MODE_METAL = 6,
+        RENDER_MODE_ROUGHNESS = 7,
+        RENDER_MODE_EMISSION = 8,
     };
 
     class PTRendererSettings : public Resource {

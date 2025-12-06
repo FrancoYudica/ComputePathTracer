@@ -77,6 +77,9 @@ void godot::PTRendererSettings::_bind_methods() {
     BIND_ENUM_CONSTANT(RENDER_MODE_NORMALS);
     BIND_ENUM_CONSTANT(RENDER_MODE_DEPTH);
     BIND_ENUM_CONSTANT(RENDER_MODE_UV);
+    BIND_ENUM_CONSTANT(RENDER_MODE_METAL);
+    BIND_ENUM_CONSTANT(RENDER_MODE_EMISSION);
+    BIND_ENUM_CONSTANT(RENDER_MODE_ROUGHNESS);
 }
 
 void godot::PTRendererSettings::set_samples_per_pixel(uint32_t p_spp) {
