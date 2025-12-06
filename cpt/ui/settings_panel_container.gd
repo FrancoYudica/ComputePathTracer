@@ -1,7 +1,6 @@
 extends PanelContainer
 
 @export var rasterized_panel: Control
-@export var pt_renderer: PTRenderer
 @export var rendered_sub_viewport_container: SubViewportContainer
 @export var sub_viewport: SubViewport
 @export var camera_controller: Node
@@ -12,13 +11,12 @@ extends PanelContainer
 @export var focal_distance_slider: Slider
 @export var vsync_check_box: CheckBox
 
-
 func _ready() -> void:
 	save_file_dialog.file_selected.connect(_file_saved)
-	samples_spin.value = pt_renderer.renderer_settings.samples_per_pixel
-	bounces_spin.value = pt_renderer.renderer_settings.max_bounces
-	aperture_slider.value = pt_renderer.renderer_settings.camera_aperture
-	focal_distance_slider.value = pt_renderer.renderer_settings.camera_focus_distance
+	samples_spin.value = PTRenderer.renderer_settings.samples_per_pixel
+	bounces_spin.value = PTRenderer.renderer_settings.max_bounces
+	aperture_slider.value = PTRenderer.renderer_settings.camera_aperture
+	focal_distance_slider.value = PTRenderer.renderer_settings.camera_focus_distance
 	vsync_check_box.button_pressed = DisplayServer.window_get_vsync_mode() == DisplayServer.VSyncMode.VSYNC_ENABLED
 	_set_vsync_mode(vsync_check_box.button_pressed)
 
@@ -26,10 +24,10 @@ func _on_rasterized_check_box_toggled(toggled_on: bool) -> void:
 	rasterized_panel.visible = toggled_on
 
 func _on_samples_spin_box_value_changed(value: float) -> void:
-	pt_renderer.renderer_settings.samples_per_pixel = int(value)
+	PTRenderer.renderer_settings.samples_per_pixel = int(value)
 
 func _on_render_scale_slider_value_changed(value: float) -> void:
-	pt_renderer.renderer_settings.render_scale = value / 100.0
+	PTRenderer.renderer_settings.render_scale = value / 100.0
 
 func _on_fov_h_slider_value_changed(value: float) -> void:
 	camera_controller.fov = value
@@ -47,13 +45,13 @@ func _file_saved(file):
 		print("Saved screenshot at: %s" % file)
 
 func _on_aperture_h_slider_value_changed(value: float) -> void:
-	pt_renderer.renderer_settings.camera_aperture = value
+	PTRenderer.renderer_settings.camera_aperture = value
 
 func _on_focal_length_h_slider_value_changed(value: float) -> void:
-	pt_renderer.renderer_settings.camera_focus_distance = value
+	PTRenderer.renderer_settings.camera_focus_distance = value
 
 func _on_bounces_spin_box_value_changed(value: float) -> void:
-	pt_renderer.renderer_settings.max_bounces = int(value)
+	PTRenderer.renderer_settings.max_bounces = int(value)
 
 func _on_v_sync_check_box_toggled(toggled_on: bool) -> void:
 	_set_vsync_mode(toggled_on)
@@ -67,7 +65,7 @@ func _set_vsync_mode(toggled_on: bool):
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 
 func _on_mode_option_button_item_selected(index: int) -> void:
-	pt_renderer.renderer_settings.render_mode = index
+	PTRenderer.renderer_settings.render_mode = index
 
 func _on_update_scene_button_pressed() -> void:
-	pt_renderer.update_scene()
+	PTRenderer.update_scene()

@@ -1,23 +1,11 @@
-[gd_scene load_steps=26 format=4 uid="uid://b8nsm2ngx4xuu"]
+[gd_scene load_steps=22 format=4 uid="uid://b8nsm2ngx4xuu"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_bh135"]
-[ext_resource type="Texture2D" uid="uid://yb1mjsl6mrdk" path="res://sky/black.png" id="2_t1xvb"]
 [ext_resource type="Texture2D" uid="uid://bt5o0sr6peltq" path="res://models/gdquest_gobot/model/gobot_gobot_diffuse.png" id="3_p5fyn"]
 [ext_resource type="Texture2D" uid="uid://cgkj45d67dalm" path="res://models/gdquest_gobot/model/gobot_gobot_roughness.png" id="4_2nx3v"]
 [ext_resource type="Texture2D" uid="uid://d28w5bql3g21l" path="res://models/gdquest_gobot/model/gobot_gobot_normal.png" id="5_gh8h5"]
 [ext_resource type="Texture2D" uid="uid://dq675fmt1rg8c" path="res://models/gdquest_gobot/textures/open_eye.png" id="6_cunhb"]
 [ext_resource type="Material" uid="uid://div0enqs04w5j" path="res://models/gdquest_gobot/materials/eye_mat.tres" id="7_mwfgj"]
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_m33i1"]
-panorama = ExtResource("2_t1xvb")
-energy_multiplier = 0.25
-
-[sub_resource type="Sky" id="Sky_jnsp1"]
-sky_material = SubResource("PanoramaSkyMaterial_m33i1")
-
-[sub_resource type="Environment" id="Environment_c2ufa"]
-background_mode = 2
-sky = SubResource("Sky_jnsp1")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hevby"]
 emission_enabled = true
@@ -204,12 +192,7 @@ texture_repeat = false
 
 [node name="CornellBoxGobotScene" instance=ExtResource("1_bh135")]
 
-[node name="Camera3D" parent="." index="0"]
-transform = Transform3D(1, 0, 0, 0, 0.9585218, 0.28501928, 0, -0.28501928, 0.9585218, 0, 2.094009, 3)
-environment = SubResource("Environment_c2ufa")
-fov = 54.381317
-
-[node name="CornellNode3D" type="Node3D" parent="." index="1"]
+[node name="CornellNode3D" type="Node3D" parent="." index="0"]
 
 [node name="PTNode" type="MeshInstance3D" parent="CornellNode3D" index="0"]
 mesh = SubResource("PlaneMesh_wfw7y")
@@ -234,7 +217,7 @@ mesh = SubResource("PlaneMesh_wfw7y")
 transform = Transform3D(0.49704203, 3.0199175e-08, 4.5662187e-08, 7.505126e-08, -0.20000008, 4.5662187e-08, 4.34528e-08, -1.7484558e-08, -0.52231455, 0, 1.998, 0)
 mesh = SubResource("PlaneMesh_53siw")
 
-[node name="Gobot" type="MeshInstance3D" parent="." index="2"]
+[node name="Gobot" type="MeshInstance3D" parent="." index="1"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.41352987)
 material_overlay = SubResource("StandardMaterial3D_1saxw")
 mesh = SubResource("ArrayMesh_fdge7")
@@ -242,7 +225,7 @@ skin = SubResource("Skin_kulhs")
 surface_material_override/1 = SubResource("StandardMaterial3D_4r786")
 surface_material_override/2 = ExtResource("7_mwfgj")
 
-[node name="Gobot2" type="MeshInstance3D" parent="." index="3"]
+[node name="Gobot2" type="MeshInstance3D" parent="." index="2"]
 transform = Transform3D(0.2715433, 0, -0.41983837, 0, 0.5, 0, 0.41983837, 0, 0.2715433, 0.49983722, 0, 0.48976207)
 material_overlay = SubResource("StandardMaterial3D_1saxw")
 mesh = SubResource("ArrayMesh_fdge7")
@@ -250,7 +233,7 @@ skin = SubResource("Skin_kulhs")
 surface_material_override/1 = SubResource("StandardMaterial3D_4r786")
 surface_material_override/2 = ExtResource("7_mwfgj")
 
-[node name="Gobot3" type="MeshInstance3D" parent="." index="4"]
+[node name="Gobot3" type="MeshInstance3D" parent="." index="3"]
 transform = Transform3D(0.43648234, 0, 0.24389172, 0, 0.5, 0, -0.24389172, 0, 0.43648234, -0.6876995, 0, 0.68145096)
 material_overlay = SubResource("StandardMaterial3D_1saxw")
 mesh = SubResource("ArrayMesh_fdge7")

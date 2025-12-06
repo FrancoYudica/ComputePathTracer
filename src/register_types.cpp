@@ -3,12 +3,14 @@
 #include <gdextension_interface.h>
 
 #include <godot_cpp/core/defs.hpp>
+#include <godot_cpp/classes/engine.hpp>
 #include <godot_cpp/godot.hpp>
 
 #include "pt_analytical_geometry.h"
 #include "pt_renderer_settings.h"
 #include "pt_renderer.h"
 #include "pt_renderer_stats.h"
+#include "pt_camera.h"
 
 using namespace godot;
 
@@ -21,6 +23,12 @@ void initialize_module(ModuleInitializationLevel p_level) {
     GDREGISTER_RUNTIME_CLASS(PTRendererSettings);
     GDREGISTER_RUNTIME_CLASS(PTRendererStats);
     GDREGISTER_RUNTIME_CLASS(PTRenderer);
+    GDREGISTER_RUNTIME_CLASS(PTCamera);
+
+    // Register PTRenderer as a singleton
+    PTRenderer* singleton = memnew(PTRenderer);
+    // singleton->init();
+    Engine::get_singleton()->register_singleton("PTRenderer", singleton);
 }
 
 void uninitialize_module(ModuleInitializationLevel p_level) {

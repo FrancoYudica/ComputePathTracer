@@ -8,6 +8,10 @@ void intersectScene(Ray ray, out HitRecord record) {
         sphereIntersection(ray, spheres[i], record);
     }
 
+    if (triangleCount == 0) {
+        return;
+    }
+
     // Triangle triangle;
     // for (int i = 0; i < int(triangleCount); i++) {
     //   triangle = triangles[i];

@@ -28,7 +28,7 @@ namespace godot {
     class PTSceneDataManager {
     private:
         RenderingDevice* _rd;
-        SceneTree* _tree;
+        Node* _root;
         PTResourceManager* _resource_manager;
 
         std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
@@ -53,10 +53,10 @@ namespace godot {
         PTSceneDataManager();
         ~PTSceneDataManager();
 
-        void initialize(RenderingDevice* p_rd, SceneTree* p_tree,
+        void initialize(RenderingDevice* p_rd,
                         PTResourceManager* resource_manager);
 
-        void update_buffers(Ref<PTRendererStats> stats);
+        void update_buffers(Ref<PTRendererStats> stats, Node* root);
 
     private:
         void _update_spheres_buffer(

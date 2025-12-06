@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://xpfm7su0rbtr"]
+[gd_scene load_steps=13 format=3 uid="uid://xpfm7su0rbtr"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_nyy6r"]
 [ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
 [ext_resource type="PackedScene" uid="uid://dre5rg7eu6uk1" path="res://models/police/mech_robotic_police_3d_model_w_scifi_gun.glb" id="3_so2qy"]
+[ext_resource type="PackedScene" uid="uid://cfubdyvkrkefg" path="res://models/car/cyberpunk_car.glb" id="4_ngss8"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_so2qy"]
 load_path = "res://.godot/imported/qwantani_dusk_2_puresky_4k.exr-24876fe99d487e223e954dd1b6e1b6d7.bptc.ctex"
@@ -82,3 +83,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06739837, 1.1201751, 0.716
 visible = false
 
 [node name="Sketchfab_Scene" parent="." index="3" instance=ExtResource("3_ngss8")]
+visible = false
+
+[node name="Sketchfab_Scene3" parent="." index="4" instance=ExtResource("4_ngss8")]

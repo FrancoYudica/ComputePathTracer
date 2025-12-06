@@ -1,23 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://jcpevkroeckp"]
+[gd_scene load_steps=2 format=3 uid="uid://jcpevkroeckp"]
 
 [ext_resource type="Script" uid="uid://dxemjae1s3lg6" path="res://scenes/base_scene.gd" id="1_gf1bn"]
-[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://sky/qwantani_dusk_2_puresky_4k.exr" id="1_ou4n4"]
 
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_gf1bn"]
-panorama = ExtResource("1_ou4n4")
-energy_multiplier = 0.25
-
-[sub_resource type="Sky" id="Sky_ha2ph"]
-sky_material = SubResource("PanoramaSkyMaterial_gf1bn")
-
-[sub_resource type="Environment" id="Environment_osw8o"]
-background_mode = 2
-sky = SubResource("Sky_ha2ph")
-
-[node name="BaseScene" type="Node3D" node_paths=PackedStringArray("camera")]
+[node name="BaseScene" type="Node3D"]
 script = ExtResource("1_gf1bn")
-camera = NodePath("Camera3D")
-
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.66575694, 0)
-environment = SubResource("Environment_osw8o")

@@ -44,19 +44,19 @@ blend_shape_mode = 0
 
 [node name="PBRScene" instance=ExtResource("1_vc0qs")]
 
-[node name="Sketchfab_Scene" parent="." index="1" instance=ExtResource("2_6jwkq")]
+[node name="Sketchfab_Scene" parent="." index="0" instance=ExtResource("2_6jwkq")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
 visible = false
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="2"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
 transform = Transform3D(3.8624744, 0, 0, 0, 1, 0, 0, 0, 3.0109408, 0, 0, 0)
 mesh = SubResource("PlaneMesh_0rjh5")
 
-[node name="Sketchfab_Scene2" parent="." index="3" instance=ExtResource("3_6jwkq")]
+[node name="Sketchfab_Scene2" parent="." index="2" instance=ExtResource("3_6jwkq")]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0.5980342, 0)
 visible = false
 
-[node name="grip_low_001_M_WP_Revolver_0" type="MeshInstance3D" parent="." index="4"]
+[node name="grip_low_001_M_WP_Revolver_0" type="MeshInstance3D" parent="." index="3"]
 transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0.73752075, 0)
 mesh = SubResource("ArrayMesh_b0ywa")
 skeleton = NodePath("")

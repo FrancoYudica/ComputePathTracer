@@ -1,10 +1,14 @@
 #include "pt_renderer.h"
 #include "pt_utils.h"
 #include <godot_cpp/classes/rendering_server.hpp>
+#include <godot_cpp/classes/viewport.hpp>
 
 namespace godot {
 
     void PTRenderer::_bind_methods() {
+        ClassDB::bind_method(D_METHOD("init"), &PTRenderer::init);
+        ClassDB::bind_method(D_METHOD("destroy"), &PTRenderer::destroy);
+
         ClassDB::bind_method(D_METHOD("queue_clear"), &PTRenderer::queue_clear);
         ClassDB::bind_method(D_METHOD("get_texture_rid"),
                              &PTRenderer::get_texture_rid);
@@ -37,7 +41,12 @@ namespace godot {
                               PropertyInfo(Variant::RID, "texture_rid")));
     }
 
-    void PTRenderer::_ready() {
+    void PTRenderer::init() {
+        if (_initialized) {
+            ERR_PRINT("PTRenderer is already initialized.");
+            return;
+        }
+
         if (!_renderer_settings.is_valid()) {
             _renderer_settings =
                 Ref<PTRendererSettings>(memnew(PTRendererSettings));
@@ -50,9 +59,11 @@ namespace godot {
         update_scene();
 
         _renderer_settings->connect("changed", Callable(this, "queue_clear"));
+
+        _initialized = true;
     }
 
-    void PTRenderer::_exit_tree() { _cleanup(); }
+    void PTRenderer::destroy() { _cleanup(); }
 
     RID PTRenderer::get_texture_rid() const {
         return _resource_manager.get_output_texture();
@@ -84,7 +95,10 @@ namespace godot {
 
     void PTRenderer::queue_clear() { _clear_buffer = true; }
 
-    void PTRenderer::update_scene() { _update_scene = true; }
+    void PTRenderer::update_scene() {
+        _update_scene = true;
+        queue_clear();
+    }
 
     void PTRenderer::_cleanup() { _resource_manager.cleanup(); }
 
@@ -120,7 +134,8 @@ namespace godot {
 
         if (_update_scene) {
             _stats->reset();
-            _scene_data_manager.update_buffers(_stats);
+            Node* root = Node::cast_to<Node>(camera->get_viewport());
+            _scene_data_manager.update_buffers(_stats, root);
             _update_scene = false;
         }
 
@@ -165,7 +180,7 @@ namespace godot {
         _resource_manager.initialize(_rd, "res://shaders/pathtracer.glsl",
                                      get_render_width(), get_render_height());
 
-        _scene_data_manager.initialize(_rd, get_tree(), &_resource_manager);
+        _scene_data_manager.initialize(_rd, &_resource_manager);
     }
 
     PackedByteArray PTRenderer::_get_push_constant_bytes() {

@@ -1,24 +1,12 @@
-[gd_scene load_steps=31 format=4 uid="uid://j4h1pyrgc37a"]
+[gd_scene load_steps=27 format=4 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_218p2"]
-[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://sky/qwantani_dusk_2_puresky_4k.exr" id="2_ajtdg"]
 [ext_resource type="Texture2D" uid="uid://bt5o0sr6peltq" path="res://models/gdquest_gobot/model/gobot_gobot_diffuse.png" id="3_ssvt4"]
 [ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
 [ext_resource type="Texture2D" uid="uid://cgkj45d67dalm" path="res://models/gdquest_gobot/model/gobot_gobot_roughness.png" id="4_kj211"]
 [ext_resource type="Texture2D" uid="uid://d28w5bql3g21l" path="res://models/gdquest_gobot/model/gobot_gobot_normal.png" id="5_ajtdg"]
 [ext_resource type="Texture2D" uid="uid://dq675fmt1rg8c" path="res://models/gdquest_gobot/textures/open_eye.png" id="6_kj211"]
 [ext_resource type="Material" uid="uid://div0enqs04w5j" path="res://models/gdquest_gobot/materials/eye_mat.tres" id="7_ajtdg"]
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ttxly"]
-panorama = ExtResource("2_ajtdg")
-energy_multiplier = 0.25
-
-[sub_resource type="Sky" id="Sky_6atvq"]
-sky_material = SubResource("PanoramaSkyMaterial_ttxly")
-
-[sub_resource type="Environment" id="Environment_wp5dv"]
-background_mode = 2
-sky = SubResource("Sky_6atvq")
 
 [sub_resource type="SphereMesh" id="SphereMesh_6atvq"]
 radial_segments = 10
@@ -245,55 +233,51 @@ texture_repeat = false
 [node name="TriangulatedTestScene" instance=ExtResource("1_218p2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7.1525574e-07, 0)
 
-[node name="Camera3D" parent="." index="0"]
-transform = Transform3D(-0.58453286, 0, -0.81137, 0, 1, 0, 0.81137, 0, -0.58453286, -1.9659795, 0.56565464, -2.3887377)
-environment = SubResource("Environment_wp5dv")
-
-[node name="PTNode" type="MeshInstance3D" parent="." index="1"]
+[node name="PTNode" type="MeshInstance3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6285791, 1.4295664)
 visible = false
 mesh = SubResource("SphereMesh_6atvq")
 
-[node name="PTNode2" type="MeshInstance3D" parent="." index="2"]
+[node name="PTNode2" type="MeshInstance3D" parent="." index="1"]
 transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 2.6155887, 0, -1.9867525)
 mesh = SubResource("ArrayMesh_kj211")
 
-[node name="PTNode6" type="MeshInstance3D" parent="." index="3"]
+[node name="PTNode6" type="MeshInstance3D" parent="." index="2"]
 transform = Transform3D(9.6, 0, 0, 0, 9.6, 0, 0, 0, 9.6, 4.6155887, 0, 0.01324749)
 
-[node name="PTNode3" type="MeshInstance3D" parent="." index="4"]
+[node name="PTNode3" type="MeshInstance3D" parent="." index="3"]
 transform = Transform3D(-0.321803, 0, -0.94680667, 0, 1, 0, 0.94680667, 0, -0.321803, 0, 0, -2.2816675)
 mesh = ExtResource("4_ajtdg")
 
-[node name="PTNodeGround" type="MeshInstance3D" parent="." index="5"]
+[node name="PTNodeGround" type="MeshInstance3D" parent="." index="4"]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0)
 mesh = SubResource("PlaneMesh_ssvt4")
 
-[node name="PTNodeGround2" type="MeshInstance3D" parent="." index="6"]
+[node name="PTNodeGround2" type="MeshInstance3D" parent="." index="5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -1)
 mesh = SubResource("BoxMesh_vop1m")
 
-[node name="PTNodeGround5" type="MeshInstance3D" parent="." index="7"]
+[node name="PTNodeGround5" type="MeshInstance3D" parent="." index="6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3, 2)
 visible = false
 mesh = SubResource("BoxMesh_vop1m")
 
-[node name="PTNodeGround3" type="MeshInstance3D" parent="." index="8"]
+[node name="PTNodeGround3" type="MeshInstance3D" parent="." index="7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1)
 mesh = SubResource("BoxMesh_ttxly")
 
-[node name="PTNodeGround4" type="MeshInstance3D" parent="." index="9"]
+[node name="PTNodeGround4" type="MeshInstance3D" parent="." index="8"]
 visible = false
 mesh = SubResource("SphereMesh_h0881")
 
-[node name="PTNode4" type="MeshInstance3D" parent="." index="10"]
+[node name="PTNode4" type="MeshInstance3D" parent="." index="9"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7546864, 4.654127, 1.1500149)
 mesh = SubResource("BoxMesh_h0881")
 
-[node name="PTNode5" type="MeshInstance3D" parent="." index="11"]
+[node name="PTNode5" type="MeshInstance3D" parent="." index="10"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.1163602)
 
-[node name="Gobot" type="MeshInstance3D" parent="." index="12"]
+[node name="Gobot" type="MeshInstance3D" parent="." index="11"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.270632, 0, 2.9305334)
 material_overlay = SubResource("StandardMaterial3D_ttxly")
 mesh = SubResource("ArrayMesh_6atvq")

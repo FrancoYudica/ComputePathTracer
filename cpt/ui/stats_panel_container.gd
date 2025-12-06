@@ -1,6 +1,5 @@
 extends PanelContainer
 
-@export var renderer: PTRenderer
 @export var fps_label: Label
 @export var samples_label: Label
 @export var sphere_count_label: Label
@@ -10,11 +9,10 @@ extends PanelContainer
 @export var texture_count_label: Label
 @export var bvh_node_count_label: Label
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
 	fps_label.text = "FPS: %s" % roundf(1.0 / _delta)
-	var stats = renderer.get_stats()
+	var stats = PTRenderer.get_stats()
 	samples_label.text = "Samples: %s" % stats.get_samples()
 	sphere_count_label.text = "Spheres: %s" % stats.get_sphere_count()
 	triangle_count_label.text = "Triangles: %s" % stats.get_triangle_count()

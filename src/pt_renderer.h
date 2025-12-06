@@ -38,15 +38,16 @@ namespace godot {
 
         Ref<PTRendererStats> _stats;
 
+        bool _initialized = false;
+
     protected:
         static void _bind_methods();
 
     public:
         PTRenderer() {}
         ~PTRenderer() {}
-
-        void _ready() override;
-        void _exit_tree() override;
+        void init();
+        void destroy();
 
         RID get_texture_rid() const;
         uint32_t get_render_width() const;

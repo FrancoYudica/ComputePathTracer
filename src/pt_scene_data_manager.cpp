@@ -17,27 +17,27 @@
 
 godot::PTSceneDataManager::PTSceneDataManager()
     : _rd(nullptr),
-      _tree(nullptr),
+      _root(nullptr),
       _frame_materials({}),
       _frame_materials_list({}) {}
 
 godot::PTSceneDataManager::~PTSceneDataManager() {}
 
 void godot::PTSceneDataManager::initialize(
-    RenderingDevice* p_rd, SceneTree* p_tree,
-    PTResourceManager* resource_manager) {
+    RenderingDevice* p_rd, PTResourceManager* resource_manager) {
     _rd = p_rd;
-    _tree = p_tree;
     _resource_manager = resource_manager;
     // Create default texture
     _default_texture =
         ResourceLoader::get_singleton()->load("res://textures/white.png");
 }
 
-void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats) {
+void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats,
+                                               Node* root) {
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
 
     _stats = stats;
+    _root = root;
 
     _frame_materials.clear();
     _frame_materials_list.clear();
@@ -51,7 +51,7 @@ void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats) {
     _push_texture(_default_texture);
 
     TypedArray<PTAnalyticalGeometry> all_analytical =
-        PTUtils::gather_nodes_of_type<PTAnalyticalGeometry>(_tree->get_root());
+        PTUtils::gather_nodes_of_type<PTAnalyticalGeometry>(_root);
 
     TypedArray<PTAnalyticalGeometry> spheres;
     for (const Variant& analytical_variant : all_analytical) {
@@ -70,7 +70,7 @@ void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats) {
     _update_spheres_buffer(spheres);
 
     TypedArray<MeshInstance3D> mesh_instances =
-        PTUtils::gather_nodes_of_type<MeshInstance3D>(_tree->get_root());
+        PTUtils::gather_nodes_of_type<MeshInstance3D>(_root);
     _update_triangles_buffer(mesh_instances);
 
     _update_materials_buffer();
