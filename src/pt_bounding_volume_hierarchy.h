@@ -36,7 +36,7 @@ namespace godot {
 
         void build(const std::vector<PTVertex>& vertices,
                    std::vector<PTTriangle>& triangles);
-        void split(uint32_t nodeIndex, const std::vector<PTVertex>& vertices,
+        void split(uint32_t node_index, const std::vector<PTVertex>& vertices,
                    std::vector<PTTriangle>& triangles, uint32_t begin,
                    uint32_t end, uint32_t depth);
     };

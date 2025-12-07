@@ -14,31 +14,108 @@ vec3 heatMapColor(float value, float maxValue) {
 }
 
 vec3 debugTraceBVH(Ray ray, uint seed) {
-    int nodeStack[16];
-    nodeStack[0] = 0;
-    int stackIndex = 0;
-
     int intersections = 0;
 
+    int nodeStack[MAX_BVH_DEPTH];
+    float nodeDistanceStack[MAX_BVH_DEPTH];
+    nodeStack[0] = 0;
+    nodeDistanceStack[0] = 0.0;
+    int stackIndex = 0;
+    float closestT = MAX_FLOAT;
+
     while (stackIndex >= 0) {
-        // Pop node from stack
-        int pendingNodeIndex = nodeStack[stackIndex--];
+        // Pop node and its distance from stack
+        int pendingNodeIndex = nodeStack[stackIndex];
+        float nodeDistance = nodeDistanceStack[stackIndex];
+        stackIndex--;
+
+        // Early rejection: skip nodes farther than closest hit
+        if (nodeDistance >= closestT) {
+            continue;
+        }
+
+        intersections++;
+
         BVHNode node = bvhNodes[pendingNodeIndex];
 
-        if (aabbIntersection(ray, node.aabb)) {
-            intersections++;
+        // Check if this is a leaf node
+        if (node.primitiveCount > 0) {
+            // Test all primitives in this leaf
+            for (int i = 0; i < int(node.primitiveCount); i++) {
+                int primitiveIndex = int(node.primitiveStartIndex) + i;
+                Triangle triangle = triangles[primitiveIndex];
+                Vertex v0 = vertices[int(triangle.indices.x)];
+                Vertex v1 = vertices[int(triangle.indices.y)];
+                Vertex v2 = vertices[int(triangle.indices.z)];
 
+                HitRecord record = createHitRecord();
+                bool hit = triangleIntersection(ray, v0, v1, v2,
+                                                triangle.materialIndex, record);
+
+                if (hit && record.t < closestT) {
+                    // Update closest t when we find a closer hit
+                    closestT = record.t;
+                }
+            }
+        } else {
+            // Internal node - test and push children
             int right = int(node.rightChildIndex);
             int left = int(node.leftChildIndex);
 
-            // 0 means no child. Also, avoids overflowing the stack
-            if (right != 0 && stackIndex < 15) {
-                nodeStack[++stackIndex] = right;
+            float tLeft, tRight;
+            bool hitLeft =
+                (left != 0) &&
+                aabbIntersection(ray, bvhNodes[left].aabb, closestT, tLeft);
+            bool hitRight =
+                (right != 0) &&
+                aabbIntersection(ray, bvhNodes[right].aabb, closestT, tRight);
+
+            // Push farther child first, then closer (so closer is popped first)
+            if (hitLeft && hitRight) {
+                // Pushes left and then right (pops right first)
+                if (tLeft > tRight) {
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = left;
+                        nodeDistanceStack[stackIndex] = tLeft;
+                    }
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = right;
+                        nodeDistanceStack[stackIndex] = tRight;
+                    }
+                }
+                // Pushes right and then left (pops left first)
+                else {
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = right;
+                        nodeDistanceStack[stackIndex] = tRight;
+                    }
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = left;
+                        nodeDistanceStack[stackIndex] = tLeft;
+                    }
+                }
             }
-            if (left != 0 && stackIndex < 15) {
-                nodeStack[++stackIndex] = left;
+            // Pushes left child only
+            else if (hitLeft && stackIndex < MAX_BVH_NODE_INDEX) {
+                stackIndex++;
+                nodeStack[stackIndex] = left;
+                nodeDistanceStack[stackIndex] = tLeft;
+            }
+            // Pushes right child only
+            else if (hitRight && stackIndex < MAX_BVH_NODE_INDEX) {
+                stackIndex++;
+                nodeStack[stackIndex] = right;
+                nodeDistanceStack[stackIndex] = tRight;
             }
         }
+    }
+
+    if (intersections > 50) {
+        return vec3(1.0);
     }
 
     return heatMapColor(float(intersections), 50.0);

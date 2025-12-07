@@ -1,3 +1,6 @@
+#define MAX_BVH_DEPTH 32
+#define MAX_BVH_NODE_INDEX (MAX_BVH_DEPTH - 1)
+
 /**
 Iterates through all the scene and finds the closest intersection.
 */
@@ -12,53 +15,96 @@ void intersectScene(Ray ray, out HitRecord record) {
         return;
     }
 
-    // Triangle triangle;
-    // for (int i = 0; i < int(triangleCount); i++) {
-    //   triangle = triangles[i];
-    //   vec3 v0 = vertices[int(triangle.indices.x)];
-    //   vec3 v1 = vertices[int(triangle.indices.y)];
-    //   vec3 v2 = vertices[int(triangle.indices.z)];
-    //   bool h =
-    //       triangleIntersection(ray, v0, v1, v2, triangle.materialIndex,
-    //       record);
-    //   if (h && (record.t < nearestHit.t || nearestHit.t < 0.0)) {
-    //     nearestHit = record;
-    //     didHit = true;
-    //   }
-    // }
-
-    int nodeStack[32];
+    int nodeStack[MAX_BVH_DEPTH];
+    float nodeDistanceStack[MAX_BVH_DEPTH];
     nodeStack[0] = 0;
+    nodeDistanceStack[0] = 0.0;
     int stackIndex = 0;
+    float closestT = MAX_FLOAT;
 
     while (stackIndex >= 0) {
-        // Pop node from stack
-        int pendingNodeIndex = nodeStack[stackIndex--];
+        // Pop node and its distance from stack
+        int pendingNodeIndex = nodeStack[stackIndex];
+        float nodeDistance = nodeDistanceStack[stackIndex];
+        stackIndex--;
+
+        // Early rejection: skip nodes farther than closest hit
+        if (nodeDistance >= closestT) {
+            continue;
+        }
+
         BVHNode node = bvhNodes[pendingNodeIndex];
 
-        // Test intersection with AABB
-        if (aabbIntersection(ray, node.aabb)) {
-            // Iterate through all its primitives and test intersections
+        // Check if this is a leaf node
+        if (node.primitiveCount > 0) {
+            // Test all primitives in this leaf
             for (int i = 0; i < int(node.primitiveCount); i++) {
-                int primitiveIndex = i + int(node.primitiveStartIndex);
-
+                int primitiveIndex = int(node.primitiveStartIndex) + i;
                 Triangle triangle = triangles[primitiveIndex];
                 Vertex v0 = vertices[int(triangle.indices.x)];
                 Vertex v1 = vertices[int(triangle.indices.y)];
                 Vertex v2 = vertices[int(triangle.indices.z)];
-                triangleIntersection(ray, v0, v1, v2, triangle.materialIndex,
-                                     record);
-            }
+                bool hit = triangleIntersection(ray, v0, v1, v2,
+                                                triangle.materialIndex, record);
 
+                if (hit && record.t < closestT) {
+                    // Update closest t when we find a closer hit
+                    closestT = record.t;
+                }
+            }
+        } else {
+            // Internal node - test and push children
             int right = int(node.rightChildIndex);
             int left = int(node.leftChildIndex);
 
-            // 0 means no child. Also, avoids overflowing the stack
-            if (right != 0 && stackIndex < 31) {
-                nodeStack[++stackIndex] = right;
+            float tLeft, tRight;
+            bool hitLeft =
+                (left != 0) &&
+                aabbIntersection(ray, bvhNodes[left].aabb, closestT, tLeft);
+            bool hitRight =
+                (right != 0) &&
+                aabbIntersection(ray, bvhNodes[right].aabb, closestT, tRight);
+
+            // Push farther child first, then closer (so closer is popped first)
+            if (hitLeft && hitRight) {
+                // Pushes left and then right (pops right first)
+                if (tLeft > tRight) {
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = left;
+                        nodeDistanceStack[stackIndex] = tLeft;
+                    }
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = right;
+                        nodeDistanceStack[stackIndex] = tRight;
+                    }
+                }
+                // Pushes right and then left (pops left first)
+                else {
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = right;
+                        nodeDistanceStack[stackIndex] = tRight;
+                    }
+                    if (stackIndex < MAX_BVH_NODE_INDEX) {
+                        stackIndex++;
+                        nodeStack[stackIndex] = left;
+                        nodeDistanceStack[stackIndex] = tLeft;
+                    }
+                }
             }
-            if (left != 0 && stackIndex < 31) {
-                nodeStack[++stackIndex] = left;
+            // Pushes left child only
+            else if (hitLeft && stackIndex < MAX_BVH_NODE_INDEX) {
+                stackIndex++;
+                nodeStack[stackIndex] = left;
+                nodeDistanceStack[stackIndex] = tLeft;
+            }
+            // Pushes right child only
+            else if (hitRight && stackIndex < MAX_BVH_NODE_INDEX) {
+                stackIndex++;
+                nodeStack[stackIndex] = right;
+                nodeDistanceStack[stackIndex] = tRight;
             }
         }
     }

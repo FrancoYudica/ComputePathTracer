@@ -57,27 +57,26 @@ bool sphereIntersection(Ray ray, Sphere sphere, inout HitRecord record) {
     return true;
 }
 
-// Ray-AABB intersection test, by the slab method.
-bool aabbIntersection(Ray ray, AABB aabb) {
+bool aabbIntersection(Ray ray, AABB aabb, float maxT, out float tNear) {
     float tx1 = (aabb.min.x - ray.origin.x) * ray.invDirection.x;
     float tx2 = (aabb.max.x - ray.origin.x) * ray.invDirection.x;
-
     float tmin = min(tx1, tx2);
     float tmax = max(tx1, tx2);
 
     float ty1 = (aabb.min.y - ray.origin.y) * ray.invDirection.y;
     float ty2 = (aabb.max.y - ray.origin.y) * ray.invDirection.y;
-
     tmin = max(tmin, min(ty1, ty2));
     tmax = min(tmax, max(ty1, ty2));
 
     float tz1 = (aabb.min.z - ray.origin.z) * ray.invDirection.z;
     float tz2 = (aabb.max.z - ray.origin.z) * ray.invDirection.z;
-
     tmin = max(tmin, min(tz1, tz2));
     tmax = min(tmax, max(tz1, tz2));
 
-    return tmax >= max(0.0, tmin);
+    tNear = tmin;
+
+    // Check if intersection is valid and closer than current closest hit
+    return tmax >= max(0.0, tmin) && tmin < maxT;
 }
 
 bool triangleIntersectionFlat(Ray ray, Vertex v0, Vertex v1, Vertex v2,
@@ -128,7 +127,7 @@ bool triangleIntersectionFlat(Ray ray, Vertex v0, Vertex v1, Vertex v2,
     return true;
 }
 
-void triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
+bool triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
                           float materialIndex, inout HitRecord record) {
     vec3 edge1 = v1.position - v0.position;
     vec3 edge2 = v2.position - v0.position;
@@ -137,25 +136,25 @@ void triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
     float a = dot(edge1, h);
 
     // Check if ray is parallel to triangle
-    if (abs(a) < 1e-8) return;
+    if (abs(a) < 1e-8) return false;
 
     float f = 1.0 / a;
     vec3 s = ray.origin - v0.position;
     float u = f * dot(s, h);
 
     // Check u bounds
-    if (u < 0.0 || u > 1.0) return;
+    if (u < 0.0 || u > 1.0) return false;
 
     vec3 q = cross(s, edge1);
     float v = f * dot(ray.direction, q);
 
     // Check v bounds and u+v
-    if (v < 0.0 || u + v > 1.0) return;
+    if (v < 0.0 || u + v > 1.0) return false;
 
     float t = f * dot(edge2, q);
 
     // Check if intersection is valid
-    if (t <= EPSILON || t >= record.t) return;
+    if (t <= EPSILON || t >= record.t) return false;
 
     // Valid intersection
     record.t = t;
@@ -175,6 +174,8 @@ void triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
     if (!record.frontFace) {
         record.n = -record.n;
     }
+
+    return true;
 }
 
 /**

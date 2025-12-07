@@ -334,7 +334,7 @@ render_target_update_mode = 0
 
 [node name="PTCamera" type="PTCamera" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
 target_texture_path = NodePath("../../../SubViewportContainerPathTracer/SubViewport/TextureRect")
-transform = Transform3D(0.22245044, 0, 0.974944, 0, 1, 0, -0.974944, 0, 0.22245044, 3.6568213, 0, 0)
+transform = Transform3D(0.99761367, 0, -0.06904267, 0.020841965, 0.9533489, 0.3011504, 0.06582175, -0.30187073, 0.9510739, -0.101733685, 0.35138273, 1.8094299)
 environment = SubResource("Environment_82xsv")
 
 [node name="CornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_w48qg")]
@@ -345,8 +345,6 @@ visible = false
 
 [node name="MetalRoughnessTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_vivmo")]
 visible = false
-size = 5
-radius = 1.0
 
 [node name="TriangulatedTestScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("9_efxa6")]
 transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)

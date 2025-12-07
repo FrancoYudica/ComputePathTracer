@@ -98,7 +98,7 @@ namespace godot {
         return split_axis;
     }
 
-    void PTBoundingVolumeHierarchy::split(uint32_t nodeIndex,
+    void PTBoundingVolumeHierarchy::split(uint32_t node_index,
                                           const std::vector<PTVertex>& vertices,
                                           std::vector<PTTriangle>& triangles,
                                           uint32_t begin, uint32_t end,
@@ -108,12 +108,12 @@ namespace godot {
         // Base case, no splitting. Marks node as leaf
         if (count <= 12 || depth >= MAX_DEPTH) {
             // Make leaf node
-            nodes[nodeIndex].is_leaf = true;
-            nodes[nodeIndex].left_child_index = 0;
-            nodes[nodeIndex].right_child_index = 0;
-            nodes[nodeIndex].primitive_start_index = begin;
-            nodes[nodeIndex].primitive_count = count;
-            nodes[nodeIndex].aabb =
+            nodes[node_index].is_leaf = true;
+            nodes[node_index].left_child_index = 0;
+            nodes[node_index].right_child_index = 0;
+            nodes[node_index].primitive_start_index = begin;
+            nodes[node_index].primitive_count = count;
+            nodes[node_index].aabb =
                 compute_aabb(vertices, triangles, begin, end);
             return;
         }
@@ -139,13 +139,13 @@ namespace godot {
         // Set up current node as internal node
         // Access node data after recursive calls to avoid reference
         // invalidation
-        nodes[nodeIndex].left_child_index = left_node_index;
-        nodes[nodeIndex].right_child_index = right_node_index;
-        nodes[nodeIndex].primitive_count = 0;
-        nodes[nodeIndex].primitive_start_index = 0;
-        nodes[nodeIndex].aabb =
+        nodes[node_index].left_child_index = left_node_index;
+        nodes[node_index].right_child_index = right_node_index;
+        nodes[node_index].primitive_count = 0;
+        nodes[node_index].primitive_start_index = 0;
+        nodes[node_index].aabb =
             nodes[left_node_index].aabb.merge(nodes[right_node_index].aabb);
-        nodes[nodeIndex].is_leaf = false;
+        nodes[node_index].is_leaf = false;
     }
 
 }  // namespace godot
