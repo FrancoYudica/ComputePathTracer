@@ -24,6 +24,8 @@ layout(std430, set = 1, binding = 0) buffer Settings {
         3: visualize depth
     */
     float debugMode;
+    float debugBVHBoxIntersectionsThreshold;
+    float debugBVHTriangleIntersectionsThreshold;
 }
 settings;
 

@@ -32,8 +32,9 @@ void godot::PTSceneDataManager::initialize(
         ResourceLoader::get_singleton()->load("res://textures/white.png");
 }
 
-void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats,
-                                               Node* root) {
+void godot::PTSceneDataManager::update_buffers(
+    Ref<PTRendererStats> stats, Node* root,
+    const Ref<PTRendererSettings> render_settings) {
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
 
     _stats = stats;
@@ -71,7 +72,7 @@ void godot::PTSceneDataManager::update_buffers(Ref<PTRendererStats> stats,
 
     TypedArray<MeshInstance3D> mesh_instances =
         PTUtils::gather_nodes_of_type<MeshInstance3D>(_root);
-    _update_triangles_buffer(mesh_instances);
+    _update_triangles_buffer(mesh_instances, render_settings);
 
     _update_materials_buffer();
 
@@ -115,7 +116,8 @@ void godot::PTSceneDataManager::_update_spheres_buffer(
 }
 
 void godot::PTSceneDataManager::_update_triangles_buffer(
-    const TypedArray<MeshInstance3D>& meshes) {
+    const TypedArray<MeshInstance3D>& meshes,
+    const Ref<PTRendererSettings> render_settings) {
     std::vector<PTTriangle> triangles;
     std::vector<PTVertex> vertices;
 
@@ -171,39 +173,44 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     // Build BVH
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     PTBoundingVolumeHierarchy bvh;
-    bvh.build(vertices, triangles);
+
+    print_line("Building BVH with max depth: " +
+               String::num_int64(render_settings->get_bvh_max_depth()));
+    bvh.build(vertices, triangles, render_settings->get_bvh_max_depth());
+
     uint64_t end_t = Time::get_singleton()->get_ticks_msec();
     print_line("BVH creation time: " + String::num_int64(end_t - start_t));
     print_line("BVH with " + String::num_int64(bvh.get_nodes().size()) +
                " nodes");
 
-    // std::vector<uint32_t> nodeIndices;
-    // nodeIndices.push_back(0);
+    std::vector<uint32_t> nodeIndices;
+    nodeIndices.push_back(0);
 
-    // while (nodeIndices.size() > 0) {
-    //     uint32_t nodeIndex = nodeIndices.at(0);
-    //     nodeIndices.erase(nodeIndices.begin());
-    //     const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
+    while (nodeIndices.size() > 0) {
+        uint32_t nodeIndex = nodeIndices.at(0);
+        nodeIndices.erase(nodeIndices.begin());
+        const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
 
-    //     if (!node.is_leaf) {
-    //         nodeIndices.push_back(node.left_child_index);
-    //         nodeIndices.push_back(node.right_child_index);
-    //     }
+        if (!node.is_leaf) {
+            nodeIndices.push_back(node.left_child_index);
+            nodeIndices.push_back(node.right_child_index);
+        }
 
-    //     print_line(
-    //         "Node " + String::num_int64(nodeIndex) + ". Min(" +
-    //         String::num_real(node.aabb.min.x) + ", " +
-    //         String::num_real(node.aabb.min.y) + ", " +
-    //         String::num_real(node.aabb.min.z) + ") " + ", Max(" +
-    //         String::num_real(node.aabb.max.x) + ", " +
-    //         String::num_real(node.aabb.max.y) + ", " +
-    //         String::num_real(node.aabb.max.z) + ") " + ", Left child index: "
-    //         + String::num_int64(node.left_child_index) + ", Right child
-    //         index: " + String::num_int64(node.right_child_index) + ",
-    //         Primitive start: " +
-    //         String::num_int64(node.primitive_start_index) +
-    //         ", Primitive count: " + String::num_int64(node.primitive_count));
-    // }
+        print_line(
+            "Node " + String::num_int64(nodeIndex) + ". Min(" +
+            String::num_real(node.aabb.min.x) + ", " +
+            String::num_real(node.aabb.min.y) + ", " +
+            String::num_real(node.aabb.min.z) + ") " + ", Max(" +
+            String::num_real(node.aabb.max.x) + ", " +
+            String::num_real(node.aabb.max.y) + ", " +
+            String::num_real(node.aabb.max.z) + ") " +
+            ", Left child index: " + String::num_int64(node.left_child_index) +
+            ", Right child index : " +
+            String::num_int64(node.right_child_index) +
+            ",  Primitive start : " +
+            String::num_int64(node.primitive_start_index) +
+            ", Primitive count: " + String::num_int64(node.primitive_count));
+    }
 
     PackedFloat32Array sorted_triangles;
     sorted_triangles.resize(triangles.size() * 4);

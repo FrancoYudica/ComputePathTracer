@@ -135,7 +135,8 @@ namespace godot {
         if (_update_scene) {
             _stats->reset();
             Node* root = Node::cast_to<Node>(camera->get_viewport());
-            _scene_data_manager.update_buffers(_stats, root);
+            _scene_data_manager.update_buffers(_stats, root,
+                                               _renderer_settings);
             _update_scene = false;
         }
 
@@ -215,8 +216,12 @@ namespace godot {
         settings_data.push_back(
             static_cast<float>(_renderer_settings->get_render_mode()));
 
-        settings_data.push_back(0.0f);  // Padding
-        settings_data.push_back(0.0f);  // Padding
+        settings_data.push_back(
+            _renderer_settings->get_debug_bvh_box_intersections_threshold());
+
+        settings_data.push_back(
+            _renderer_settings
+                ->get_debug_bvh_triangle_intersections_threshold());
 
         PackedByteArray settings_bytes = settings_data.to_byte_array();
         _rd->buffer_update(_resource_manager.get_settings_storage_buffer(), 0,

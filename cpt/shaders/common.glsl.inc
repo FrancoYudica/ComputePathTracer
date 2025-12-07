@@ -198,11 +198,13 @@ Material getMaterial(float materialIndex) {
 }
 
 vec3 getMaterialAlbedo(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
     if (mat.albedoTextureIndex > 0) {
         return mat.albedo *
                texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex))
                    .rgb;
     }
+#endif
     return mat.albedo;
 }
 
@@ -226,30 +228,36 @@ float sampleChannel(sampler2DArray tex, vec3 uvw, uint channel) {
 }
 
 float getMaterialMetallic(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
     if (mat.metallicTextureIndex > 0) {
         float texMetallic =
             sampleChannel(textureArray, vec3(uv, mat.metallicTextureIndex),
                           uint(mat.metallicTextureChannel));
         return mat.metal * texMetallic;
     }
+#endif
     return mat.metal;
 }
 
 float getMaterialRoughness(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
     if (mat.roughnessTextureIndex > 0) {
         float texRoughness =
             sampleChannel(textureArray, vec3(uv, mat.roughnessTextureIndex),
                           uint(mat.roughnessTextureChannel));
         return mat.roughness * texRoughness;
     }
+#endif
     return mat.roughness;
 }
 
 vec3 getMaterialEmission(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
     if (mat.emissionTextureIndex > 0) {
         vec3 emission =
             texture(textureArray, vec3(uv, mat.emissionTextureIndex)).rgb;
         return mat.emissionEnergyMultiplier * (emission + mat.emission);
     }
+#endif
     return mat.emission;
 }

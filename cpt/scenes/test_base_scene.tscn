@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://xpfm7su0rbtr"]
+[gd_scene load_steps=11 format=3 uid="uid://xpfm7su0rbtr"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_nyy6r"]
 [ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
@@ -19,6 +19,8 @@ emission = Color(1, 1, 1, 1)
 material = SubResource("StandardMaterial3D_so2qy")
 
 [sub_resource type="BoxMesh" id="BoxMesh_ngss8"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_ngss8"]
 
 [node name="TestBaseScene" instance=ExtResource("1_nyy6r")]
 
@@ -63,6 +65,7 @@ skeleton = NodePath("../..")
 
 [node name="Sketchfab_Scene2" parent="." index="1" instance=ExtResource("3_so2qy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06739837, 1.1201751, 0.7169976)
+visible = false
 
 [node name="Sketchfab_Scene" parent="." index="2" instance=ExtResource("3_ngss8")]
 visible = false
@@ -72,20 +75,17 @@ visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." index="4"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.91380924, 0.4137008, 0)
-visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." index="5"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0861907, 1.4137008, 0)
-visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." index="6"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0861907, 2.4137008, 3)
-visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." index="7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.511, 3.074, 2.605)
 visible = false
-mesh = SubResource("BoxMesh_ngss8")
+mesh = SubResource("SphereMesh_ngss8")

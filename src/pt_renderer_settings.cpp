@@ -39,6 +39,27 @@ void godot::PTRendererSettings::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_render_scale"),
                          &PTRendererSettings::get_render_scale);
 
+    ClassDB::bind_method(D_METHOD("set_bvh_max_depth", "bvh_max_depth"),
+                         &PTRendererSettings::set_bvh_max_depth);
+    ClassDB::bind_method(D_METHOD("get_bvh_max_depth"),
+                         &PTRendererSettings::get_bvh_max_depth);
+
+    ClassDB::bind_method(
+        D_METHOD("set_debug_bvh_box_intersections_threshold",
+                 "debug_bvh_box_intersections_threshold"),
+        &PTRendererSettings::set_debug_bvh_box_intersections_threshold);
+    ClassDB::bind_method(
+        D_METHOD("get_debug_bvh_box_intersections_threshold"),
+        &PTRendererSettings::get_debug_bvh_box_intersections_threshold);
+
+    ClassDB::bind_method(
+        D_METHOD("set_debug_bvh_triangle_intersections_threshold",
+                 "debug_bvh_triangle_intersections_threshold"),
+        &PTRendererSettings::set_debug_bvh_triangle_intersections_threshold);
+    ClassDB::bind_method(
+        D_METHOD("get_debug_bvh_triangle_intersections_threshold"),
+        &PTRendererSettings::get_debug_bvh_triangle_intersections_threshold);
+
     // Export properties for edit on the inspector
     // Render scale in range [0.1, 1.0]
     ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "render_scale",
@@ -114,5 +135,22 @@ void godot::PTRendererSettings::set_render_mode(PTRenderMode p_mode) {
 
 void godot::PTRendererSettings::set_render_scale(float p_scale) {
     render_scale = p_scale;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_bvh_max_depth(uint32_t p_depth) {
+    bvh_max_depth = p_depth;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_debug_bvh_box_intersections_threshold(
+    float p_threshold) {
+    debug_bvh_box_intersections_threshold = p_threshold;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_debug_bvh_triangle_intersections_threshold(
+    float p_threshold) {
+    debug_bvh_triangle_intersections_threshold = p_threshold;
     emit_changed();
 }

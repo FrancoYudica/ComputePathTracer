@@ -28,6 +28,10 @@ namespace godot {
         PTRenderMode render_mode = RENDER_MODE_PATH_TRACE;
         float render_scale = 1.0f;
 
+        uint32_t bvh_max_depth = 32;
+        float debug_bvh_box_intersections_threshold = 100.0f;
+        float debug_bvh_triangle_intersections_threshold = 100.0f;
+
     protected:
         static void _bind_methods();
 
@@ -44,6 +48,13 @@ namespace godot {
         }
         PTRenderMode get_render_mode() const { return render_mode; }
         float get_render_scale() const { return render_scale; }
+        uint32_t get_bvh_max_depth() const { return bvh_max_depth; }
+        float get_debug_bvh_box_intersections_threshold() const {
+            return debug_bvh_box_intersections_threshold;
+        }
+        float get_debug_bvh_triangle_intersections_threshold() const {
+            return debug_bvh_triangle_intersections_threshold;
+        }
 
         void set_samples_per_pixel(uint32_t p_spp);
         void set_max_bounces(uint32_t p_bounces);
@@ -52,6 +63,9 @@ namespace godot {
         void set_camera_focus_distance(float p_distance);
         void set_render_mode(PTRenderMode p_mode);
         void set_render_scale(float p_scale);
+        void set_bvh_max_depth(uint32_t p_depth);
+        void set_debug_bvh_box_intersections_threshold(float p_threshold);
+        void set_debug_bvh_triangle_intersections_threshold(float p_threshold);
 
     private:
     };

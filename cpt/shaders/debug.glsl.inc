@@ -14,7 +14,8 @@ vec3 heatMapColor(float value, float maxValue) {
 }
 
 vec3 debugTraceBVH(Ray ray, uint seed) {
-    int intersections = 0;
+    int boxIntersections = 1;
+    int triangleIntersections = 0;
 
     int nodeStack[MAX_BVH_DEPTH];
     float nodeDistanceStack[MAX_BVH_DEPTH];
@@ -33,8 +34,6 @@ vec3 debugTraceBVH(Ray ray, uint seed) {
         if (nodeDistance >= closestT) {
             continue;
         }
-
-        intersections++;
 
         BVHNode node = bvhNodes[pendingNodeIndex];
 
@@ -56,6 +55,7 @@ vec3 debugTraceBVH(Ray ray, uint seed) {
                     // Update closest t when we find a closer hit
                     closestT = record.t;
                 }
+                triangleIntersections++;
             }
         } else {
             // Internal node - test and push children
@@ -69,6 +69,8 @@ vec3 debugTraceBVH(Ray ray, uint seed) {
             bool hitRight =
                 (right != 0) &&
                 aabbIntersection(ray, bvhNodes[right].aabb, closestT, tRight);
+
+            boxIntersections += 2;
 
             // Push farther child first, then closer (so closer is popped first)
             if (hitLeft && hitRight) {
@@ -114,11 +116,17 @@ vec3 debugTraceBVH(Ray ray, uint seed) {
         }
     }
 
-    if (intersections > 50) {
+    float boxValue =
+        float(boxIntersections) / settings.debugBVHBoxIntersectionsThreshold;
+    float triangleValue = float(triangleIntersections) /
+                          settings.debugBVHTriangleIntersectionsThreshold;
+
+    if (max(boxValue, triangleValue) > 1.0) {
         return vec3(1.0);
     }
 
-    return heatMapColor(float(intersections), 50.0);
+    return vec3(triangleValue, 0.0, boxValue);
+    // return heatMapColor(float(boxIntersections), 100.0);
 }
 
 vec3 debugNormal(Ray ray, uint seed) {

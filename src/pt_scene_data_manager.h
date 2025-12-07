@@ -17,6 +17,7 @@
 #include "pt_types.h"
 #include "pt_resource_manager.h"
 #include "pt_renderer_stats.h"
+#include "pt_renderer_settings.h"
 
 namespace godot {
 
@@ -56,12 +57,15 @@ namespace godot {
         void initialize(RenderingDevice* p_rd,
                         PTResourceManager* resource_manager);
 
-        void update_buffers(Ref<PTRendererStats> stats, Node* root);
+        void update_buffers(Ref<PTRendererStats> stats, Node* root,
+                            const Ref<PTRendererSettings> render_settings);
 
     private:
         void _update_spheres_buffer(
             const TypedArray<PTAnalyticalGeometry>& spheres);
-        void _update_triangles_buffer(const TypedArray<MeshInstance3D>& meshes);
+        void _update_triangles_buffer(
+            const TypedArray<MeshInstance3D>& meshes,
+            const Ref<PTRendererSettings> render_settings);
 
         void _update_materials_buffer();
         void _update_textures_buffer();

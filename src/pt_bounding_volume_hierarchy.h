@@ -21,7 +21,8 @@ namespace godot {
 
     class PTBoundingVolumeHierarchy {
     private:
-        std::vector<PTBoundingVolumeNode> nodes;
+        std::vector<PTBoundingVolumeNode> _nodes;
+        uint32_t _max_depth = 32;
 
     protected:
         static void _bind_methods();
@@ -31,11 +32,11 @@ namespace godot {
         ~PTBoundingVolumeHierarchy();
 
         const std::vector<PTBoundingVolumeNode>& get_nodes() const {
-            return nodes;
+            return _nodes;
         }
 
         void build(const std::vector<PTVertex>& vertices,
-                   std::vector<PTTriangle>& triangles);
+                   std::vector<PTTriangle>& triangles, uint32_t max_depth);
         void split(uint32_t node_index, const std::vector<PTVertex>& vertices,
                    std::vector<PTTriangle>& triangles, uint32_t begin,
                    uint32_t end, uint32_t depth);

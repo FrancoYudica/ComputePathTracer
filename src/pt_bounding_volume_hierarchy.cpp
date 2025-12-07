@@ -1,7 +1,6 @@
 #include "pt_bounding_volume_hierarchy.h"
 
 #include <algorithm>
-#define MAX_DEPTH 32
 
 namespace godot {
 
@@ -12,13 +11,15 @@ namespace godot {
     PTBoundingVolumeHierarchy::~PTBoundingVolumeHierarchy() {}
 
     void PTBoundingVolumeHierarchy::build(const std::vector<PTVertex>& vertices,
-                                          std::vector<PTTriangle>& triangles) {
+                                          std::vector<PTTriangle>& triangles,
+                                          uint32_t max_depth) {
+        _max_depth = max_depth;
         // Pre-allocate space to avoid reallocations during build
-        // A binary tree with N leaves has at most 2N-1 nodes
+        // A binary tree with N leaves has at most 2N-1 _nodes
         size_t estimated_nodes = triangles.size() / 10 * 2;  // Rough estimate
-        nodes.reserve(estimated_nodes);
+        _nodes.reserve(estimated_nodes);
 
-        nodes.push_back(PTBoundingVolumeNode{});
+        _nodes.push_back(PTBoundingVolumeNode{});
         split(0, vertices, triangles, 0, uint32_t(triangles.size()), 0);
     }
 
@@ -106,14 +107,13 @@ namespace godot {
         uint32_t count = end - begin;
 
         // Base case, no splitting. Marks node as leaf
-        if (count <= 12 || depth >= MAX_DEPTH) {
-            // Make leaf node
-            nodes[node_index].is_leaf = true;
-            nodes[node_index].left_child_index = 0;
-            nodes[node_index].right_child_index = 0;
-            nodes[node_index].primitive_start_index = begin;
-            nodes[node_index].primitive_count = count;
-            nodes[node_index].aabb =
+        if (count <= 12 || depth >= _max_depth) {
+            _nodes[node_index].is_leaf = true;
+            _nodes[node_index].left_child_index = 0;
+            _nodes[node_index].right_child_index = 0;
+            _nodes[node_index].primitive_start_index = begin;
+            _nodes[node_index].primitive_count = count;
+            _nodes[node_index].aabb =
                 compute_aabb(vertices, triangles, begin, end);
             return;
         }
@@ -124,10 +124,10 @@ namespace godot {
         // Split in the middle
         uint32_t split_index = begin + count / 2;
 
-        // Allocate child nodes together
-        uint32_t left_node_index = nodes.size();
-        nodes.push_back(PTBoundingVolumeNode{});
-        nodes.push_back(PTBoundingVolumeNode{});
+        // Allocate child _nodes together
+        uint32_t left_node_index = _nodes.size();
+        _nodes.push_back(PTBoundingVolumeNode{});
+        _nodes.push_back(PTBoundingVolumeNode{});
         uint32_t right_node_index = left_node_index + 1;
 
         // Recursively split children
@@ -139,13 +139,13 @@ namespace godot {
         // Set up current node as internal node
         // Access node data after recursive calls to avoid reference
         // invalidation
-        nodes[node_index].left_child_index = left_node_index;
-        nodes[node_index].right_child_index = right_node_index;
-        nodes[node_index].primitive_count = 0;
-        nodes[node_index].primitive_start_index = 0;
-        nodes[node_index].aabb =
-            nodes[left_node_index].aabb.merge(nodes[right_node_index].aabb);
-        nodes[node_index].is_leaf = false;
+        _nodes[node_index].left_child_index = left_node_index;
+        _nodes[node_index].right_child_index = right_node_index;
+        _nodes[node_index].primitive_count = 0;
+        _nodes[node_index].primitive_start_index = 0;
+        _nodes[node_index].aabb =
+            _nodes[left_node_index].aabb.merge(_nodes[right_node_index].aabb);
+        _nodes[node_index].is_leaf = false;
     }
 
 }  // namespace godot

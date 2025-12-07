@@ -331,28 +331,28 @@ namespace godot {
         }
         {
             PackedByteArray triangles_bytes = PackedByteArray();
-            triangles_bytes.resize(32 * 1024 * 1024);  // 32 MB initial size
+            triangles_bytes.resize(256 * 1024 * 1024);  // 256 MB initial size
             _scene_triangles_storage_buffer = _rd->storage_buffer_create(
                 triangles_bytes.size(), triangles_bytes);
             _scene_triangles_uniform->add_id(_scene_triangles_storage_buffer);
         }
         {
             PackedByteArray vertex_bytes = PackedByteArray();
-            vertex_bytes.resize(32 * 1024 * 1024);  // 32 MB initial size
+            vertex_bytes.resize(256 * 1024 * 1024);  // 256 MB initial size
             _scene_vertex_storage_buffer =
                 _rd->storage_buffer_create(vertex_bytes.size(), vertex_bytes);
             _scene_vertex_uniform->add_id(_scene_vertex_storage_buffer);
         }
         {
             PackedByteArray materials_bytes = PackedByteArray();
-            materials_bytes.resize(2 * 1024 * 1024);  // 2 MB initial size
+            materials_bytes.resize(16 * 1024 * 1024);  // 16 MB initial size
             _scene_materials_storage_buffer = _rd->storage_buffer_create(
                 materials_bytes.size(), materials_bytes);
             _scene_materials_uniform->add_id(_scene_materials_storage_buffer);
         }
         {
             PackedByteArray bvh_bytes = PackedByteArray();
-            bvh_bytes.resize(2 * 1024 * 1024);  // 2 MB initial size
+            bvh_bytes.resize(64 * 1024 * 1024);  // 64 MB initial size
             _scene_bvh_storage_buffer =
                 _rd->storage_buffer_create(bvh_bytes.size(), bvh_bytes);
             _scene_bvh_uniform->add_id(_scene_bvh_storage_buffer);

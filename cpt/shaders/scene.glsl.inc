@@ -1,5 +1,4 @@
-#define MAX_BVH_DEPTH 32
-#define MAX_BVH_NODE_INDEX (MAX_BVH_DEPTH - 1)
+
 
 /**
 Iterates through all the scene and finds the closest intersection.
