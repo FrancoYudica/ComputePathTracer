@@ -41,13 +41,6 @@ namespace godot {
 
         Ref<Texture2D> _default_texture;
 
-        RID _spheres_storage_buffer;
-        RID _triangles_storage_buffer;
-        RID _vertices_storage_buffer;
-        RID _materials_storage_buffer;
-        RID _textures_storage_buffer;
-        RID _bvh_storage_buffer;
-
         Ref<PTRendererStats> _stats;
 
     public:

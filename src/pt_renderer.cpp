@@ -155,6 +155,9 @@ namespace godot {
         _update_settings_storage_buffer();
         _update_camera_storage_buffer(camera);
 
+        // Updates resource manager
+        _resource_manager.flush_pending_updates();
+
         int64_t compute_list = _rd->compute_list_begin();
         _rd->compute_list_bind_compute_pipeline(
             compute_list, _resource_manager.get_pipeline());
@@ -224,15 +227,13 @@ namespace godot {
                 ->get_debug_bvh_triangle_intersections_threshold());
 
         PackedByteArray settings_bytes = settings_data.to_byte_array();
-        _rd->buffer_update(_resource_manager.get_settings_storage_buffer(), 0,
-                           settings_bytes.size(), settings_bytes);
+        _resource_manager.update_storage_buffer("settings", settings_bytes);
     }
 
     void PTRenderer::_update_camera_storage_buffer(Camera3D* camera) {
         PackedByteArray camera_bytes = PTUtils::get_camera_bytes(
             camera, get_render_width(), get_render_height());
-        _rd->buffer_update(_resource_manager.get_camera_storage_buffer(), 0,
-                           camera_bytes.size(), camera_bytes);
+        _resource_manager.update_storage_buffer("camera", camera_bytes);
     }
 
 }  // namespace godot

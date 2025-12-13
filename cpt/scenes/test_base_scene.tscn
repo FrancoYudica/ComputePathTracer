@@ -65,13 +65,10 @@ skeleton = NodePath("../..")
 
 [node name="Sketchfab_Scene2" parent="." index="1" instance=ExtResource("3_so2qy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06739837, 1.1201751, 0.7169976)
-visible = false
 
 [node name="Sketchfab_Scene" parent="." index="2" instance=ExtResource("3_ngss8")]
-visible = false
 
 [node name="Sketchfab_Scene3" parent="." index="3" instance=ExtResource("4_ngss8")]
-visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." index="4"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.91380924, 0.4137008, 0)
@@ -87,5 +84,4 @@ mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." index="7"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.511, 3.074, 2.605)
-visible = false
 mesh = SubResource("SphereMesh_ngss8")

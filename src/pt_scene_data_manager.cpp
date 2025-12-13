@@ -109,9 +109,7 @@ void godot::PTSceneDataManager::_update_spheres_buffer(
     }
 
     PackedByteArray spheres_bytes = spheres_data.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_spheres_storage_buffer(), 0,
-                       spheres_bytes.size(), spheres_bytes);
-
+    _resource_manager->update_storage_buffer("spheres", spheres_bytes);
     _stats->set_sphere_count(spheres.size());
 }
 
@@ -154,8 +152,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     triangles_count_data.push_back(0.0);
     triangles_count_data.push_back(0.0);
     PackedByteArray triangle_count_bytes = triangles_count_data.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_triangles_storage_buffer(),
-                       0, triangle_count_bytes.size(), triangle_count_bytes);
+    _resource_manager->update_storage_buffer("triangles", triangle_count_bytes);
 
     if (triangles.size() == 0) {
         print_line("No triangles to process.");
@@ -164,8 +161,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
 
     // Write vertices
     PackedByteArray vertices_bytes = vertices_data.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_vertex_storage_buffer(), 0,
-                       vertices_bytes.size(), vertices_bytes);
+    _resource_manager->update_storage_buffer("vertex", vertices_bytes);
 
     _stats->set_triangle_count(triangles.size());
     _stats->set_vertex_count(vertices_data.size());
@@ -224,9 +220,8 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     }
 
     PackedByteArray sorted_triangles_bytes = sorted_triangles.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_triangles_storage_buffer(),
-                       4 * 4, sorted_triangles_bytes.size(),
-                       sorted_triangles_bytes);
+    _resource_manager->update_storage_buffer(
+        "triangles", sorted_triangles_bytes, 4 * sizeof(float));
 
     PackedFloat32Array bvh_nodes_data;
     constexpr uint32_t floats_per_node = 12;
@@ -255,8 +250,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
         bvh_nodes_data[base + 11] = node.right_child_index;
     }
     PackedByteArray bvh_nodes_byte_array = bvh_nodes_data.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_bvh_storage_buffer(), 0,
-                       bvh_nodes_byte_array.size(), bvh_nodes_byte_array);
+    _resource_manager->update_storage_buffer("bvh", bvh_nodes_byte_array);
 
     _stats->set_bvh_node_count(bvh.get_nodes().size());
 }
@@ -290,9 +284,7 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
-    _rd->buffer_update(_resource_manager->get_scene_materials_storage_buffer(),
-                       0, materials_bytes.size(), materials_bytes);
-
+    _resource_manager->update_storage_buffer("materials", materials_bytes);
     _stats->set_material_count(_frame_materials_list.size());
 }
 

@@ -71,13 +71,12 @@ namespace godot {
         // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
         // created here
         _rd->free_rid(_default_sampler);
-        _rd->free_rid(_settings_storage_buffer);
-        _rd->free_rid(_camera_storage_buffer);
-        _rd->free_rid(_scene_spheres_storage_buffer);
-        _rd->free_rid(_scene_triangles_storage_buffer);
-        _rd->free_rid(_scene_vertex_storage_buffer);
-        _rd->free_rid(_scene_materials_storage_buffer);
-        _rd->free_rid(_scene_bvh_storage_buffer);
+
+        // Frees all storage buffers
+        for (const auto& pair : _storage_buffers) {
+            _rd->free_rid(pair.second);
+        }
+
         _rd->free_rid(_image_uniform_set);
         _rd->free_rid(_settings_uniform_set);
         _rd->free_rid(_camera_uniform_set);
@@ -154,6 +153,47 @@ namespace godot {
             {_output_image_uniform, _accumulation_image_uniform,
              _skybox_image_uniform},
             _shader, 0);
+    }
+
+    void PTResourceManager::flush_pending_updates() {
+        if (_should_update_scene_uniform_set) {
+            _build_scene_uniform_set();
+            _should_update_scene_uniform_set = false;
+        }
+    }
+
+    void PTResourceManager::update_storage_buffer(const std::string& name,
+                                                  const PackedByteArray& data,
+                                                  uint64_t offset) {
+        if (_storage_buffer_sizes.find(name) == _storage_buffer_sizes.end()) {
+            print_line("Storage buffer " + String(name.c_str()) +
+                       " not found.");
+            return;
+        }
+
+        // Resize if needed
+        if (_storage_buffer_sizes[name] < data.size()) {
+            print_line("Resizing storage buffer " + String(name.c_str()) +
+                       " from " +
+                       String::num_uint64(_storage_buffer_sizes[name]) +
+                       " to " + String::num_uint64(data.size()) + " bytes.");
+            // Re-create buffer
+            RID rid = _rd->storage_buffer_create(data.size(), data);
+
+            // Frees previous buffer
+            _rd->free_rid(_storage_buffers[name]);
+
+            // Update maps
+            _storage_buffers[name] = rid;
+            _storage_buffer_sizes[name] = data.size();
+            _should_update_scene_uniform_set = true;
+        }
+
+        // Update buffer data
+        else {
+            _rd->buffer_update(_storage_buffers[name], offset, data.size(),
+                               data);
+        }
     }
 
     void PTResourceManager::_create_viewport_textures(uint32_t width,
@@ -268,95 +308,34 @@ namespace godot {
 
         // Scene uniforms
         {
-            _scene_spheres_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_spheres_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
-            _scene_spheres_uniform->set_binding(0);
-
-            _scene_triangles_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_triangles_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
-            _scene_triangles_uniform->set_binding(1);
-
-            _scene_vertex_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_vertex_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
-            _scene_vertex_uniform->set_binding(2);
-
-            _scene_materials_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_materials_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
-            _scene_materials_uniform->set_binding(3);
-
-            _scene_bvh_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_bvh_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
-            _scene_bvh_uniform->set_binding(4);
-
-            _scene_textures_array_uniform = Ref<RDUniform>(memnew(RDUniform));
-            _scene_textures_array_uniform->set_uniform_type(
-                RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
-            _scene_textures_array_uniform->set_binding(5);
-            _scene_textures_array_uniform->add_id(_default_sampler);
-            _scene_textures_array_uniform->add_id(_texture_array);
         }
     }
 
     void PTResourceManager::_create_storage_buffers() {
         // Settings uniform
         {
-            PackedByteArray settings_bytes = PackedByteArray();
-            settings_bytes.resize(512);
-            _settings_storage_buffer = _rd->storage_buffer_create(
-                settings_bytes.size(), settings_bytes);
-            _settings_uniform->add_id(_settings_storage_buffer);
+            _create_storage_buffer("settings", 512);
+            _settings_uniform->add_id(_storage_buffers["settings"]);
         }
 
         // Camera uniform
         {
-            PackedByteArray camera_bytes = PackedByteArray();
-            camera_bytes.resize(16 * 2 * 4);  // 2 matrices. View/Projection
-            _camera_storage_buffer =
-                _rd->storage_buffer_create(camera_bytes.size(), camera_bytes);
-            _camera_uniform->add_id(_camera_storage_buffer);
+            // 2 matrices (view/proj)
+            _create_storage_buffer("camera", 16 * 2 * 4);
+            _camera_uniform->add_id(_storage_buffers["camera"]);
         }
 
         // Scene storage buffers
-        {
-            PackedByteArray spheres_bytes = PackedByteArray();
-            spheres_bytes.resize(1024 * 1024);  // 1 MB initial size
-            _scene_spheres_storage_buffer =
-                _rd->storage_buffer_create(spheres_bytes.size(), spheres_bytes);
-            _scene_spheres_uniform->add_id(_scene_spheres_storage_buffer);
-        }
-        {
-            PackedByteArray triangles_bytes = PackedByteArray();
-            triangles_bytes.resize(256 * 1024 * 1024);  // 256 MB initial size
-            _scene_triangles_storage_buffer = _rd->storage_buffer_create(
-                triangles_bytes.size(), triangles_bytes);
-            _scene_triangles_uniform->add_id(_scene_triangles_storage_buffer);
-        }
-        {
-            PackedByteArray vertex_bytes = PackedByteArray();
-            vertex_bytes.resize(256 * 1024 * 1024);  // 256 MB initial size
-            _scene_vertex_storage_buffer =
-                _rd->storage_buffer_create(vertex_bytes.size(), vertex_bytes);
-            _scene_vertex_uniform->add_id(_scene_vertex_storage_buffer);
-        }
-        {
-            PackedByteArray materials_bytes = PackedByteArray();
-            materials_bytes.resize(16 * 1024 * 1024);  // 16 MB initial size
-            _scene_materials_storage_buffer = _rd->storage_buffer_create(
-                materials_bytes.size(), materials_bytes);
-            _scene_materials_uniform->add_id(_scene_materials_storage_buffer);
-        }
-        {
-            PackedByteArray bvh_bytes = PackedByteArray();
-            bvh_bytes.resize(64 * 1024 * 1024);  // 64 MB initial size
-            _scene_bvh_storage_buffer =
-                _rd->storage_buffer_create(bvh_bytes.size(), bvh_bytes);
-            _scene_bvh_uniform->add_id(_scene_bvh_storage_buffer);
-        }
+        // 16 MB initial size
+        _create_storage_buffer("spheres", 16 * 1024 * 1024);
+        // 32 MB initial size
+        _create_storage_buffer("triangles", 32 * 1024 * 1024);
+        // 32 MB initial size
+        _create_storage_buffer("vertex", 32 * 1024 * 1024);
+        // 16 MB initial size
+        _create_storage_buffer("materials", 16 * 1024 * 1024);
+        // 32 MB initial size
+        _create_storage_buffer("bvh", 32 * 1024 * 1024);
     }
     void PTResourceManager::_create_uniform_sets() {
         if (!_image_uniform_set.is_valid()) {
@@ -372,11 +351,7 @@ namespace godot {
         _camera_uniform_set =
             _rd->uniform_set_create({_camera_uniform}, _shader, 2);
 
-        _scene_uniform_set = _rd->uniform_set_create(
-            {_scene_spheres_uniform, _scene_triangles_uniform,
-             _scene_vertex_uniform, _scene_materials_uniform,
-             _scene_bvh_uniform, _scene_textures_array_uniform},
-            _shader, 3);
+        _build_scene_uniform_set();
     }
     void PTResourceManager::_create_shader_and_pipeline(String shader_path) {
         // Shader
@@ -404,4 +379,52 @@ namespace godot {
         }
     }
 
+    void PTResourceManager::_create_storage_buffer(const std::string& name,
+                                                   uint64_t size) {
+        if (_storage_buffers.find(name) != _storage_buffers.end()) {
+            print_line("Storage buffer " + String(name.c_str()) +
+                       " already exists.");
+            return;
+        }
+
+        PackedByteArray data = PackedByteArray();
+        data.resize(size);
+
+        RID rid = _rd->storage_buffer_create(size, data);
+        _storage_buffers[name] = rid;
+        _storage_buffer_sizes[name] = size;
+    }
+    void PTResourceManager::_build_scene_uniform_set() {
+        if (_scene_uniform_set.is_valid()) {
+            _rd->free_rid(_scene_uniform_set);
+        }
+
+        TypedArray<Ref<RDUniform>> scene_uniforms;
+        std::array<std::string, 5> ordered_names = {
+            "spheres", "triangles", "vertex", "materials", "bvh"};
+
+        // Creates all the uniforms in order and sets it's storage buffer
+        for (uint32_t i = 0; i < ordered_names.size(); ++i) {
+            auto uniform = Ref<RDUniform>(memnew(RDUniform));
+            uniform->set_uniform_type(
+                RenderingDevice::UNIFORM_TYPE_STORAGE_BUFFER);
+            uniform->set_binding(scene_uniforms.size());
+            uniform->add_id(_storage_buffers[ordered_names[i]]);
+            scene_uniforms.append(uniform);
+        }
+
+        // Creates texture array uniform
+        auto texture_array_uniform = Ref<RDUniform>(memnew(RDUniform));
+        texture_array_uniform->set_uniform_type(
+            RenderingDevice::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE);
+        texture_array_uniform->set_binding(5);
+        texture_array_uniform->add_id(_default_sampler);
+        texture_array_uniform->add_id(_texture_array);
+
+        scene_uniforms.append(texture_array_uniform);
+
+        // Finally, create uniform set
+        _scene_uniform_set =
+            _rd->uniform_set_create(scene_uniforms, _shader, 3);
+    }
 }  // namespace godot
