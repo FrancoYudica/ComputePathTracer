@@ -9,6 +9,12 @@
 
 namespace godot {
 
+    struct BVHSettings {
+        uint32_t max_depth = 32;
+        uint32_t max_triangles_per_leaf = 4;
+        uint32_t sah_bins = 32;
+    };
+
     struct PTBoundingVolumeNode {
         PTAABB aabb;
         bool is_leaf = false;
@@ -22,7 +28,7 @@ namespace godot {
     class PTBoundingVolumeHierarchy {
     private:
         std::vector<PTBoundingVolumeNode> _nodes;
-        uint32_t _max_depth = 32;
+        BVHSettings _settings;
 
     protected:
         static void _bind_methods();
@@ -36,7 +42,8 @@ namespace godot {
         }
 
         void build(const std::vector<PTVertex>& vertices,
-                   std::vector<PTTriangle>& triangles, uint32_t max_depth);
+                   std::vector<PTTriangle>& triangles,
+                   const BVHSettings& settings);
         void split(uint32_t node_index, const std::vector<PTVertex>& vertices,
                    std::vector<PTTriangle>& triangles, uint32_t begin,
                    uint32_t end, uint32_t depth);

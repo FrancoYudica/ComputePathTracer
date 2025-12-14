@@ -25,8 +25,7 @@ material = SubResource("StandardMaterial3D_so2qy")
 [node name="TestBaseScene" instance=ExtResource("1_nyy6r")]
 
 [node name="Node3D" type="Node3D" parent="." index="0"]
-transform = Transform3D(1, 0, 0, 0, -1.82, 1.509958e-07, 0, -2.7481238e-07, -1, 0, 4.0372415, 2)
-visible = false
+transform = Transform3D(1, 0, 0, 0, -1.82, 1.509958e-07, 0, -2.7481238e-07, -1, 0, 4.037, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D" index="0"]
 transform = Transform3D(9.080999, 0, 0, 0, -0.99999994, -2.177824e-06, 0, 2.7481238e-07, -26.249998, 0, 2.2182646, 1.9999993)
@@ -65,23 +64,30 @@ skeleton = NodePath("../..")
 
 [node name="Sketchfab_Scene2" parent="." index="1" instance=ExtResource("3_so2qy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06739837, 1.1201751, 0.7169976)
+visible = false
 
 [node name="Sketchfab_Scene" parent="." index="2" instance=ExtResource("3_ngss8")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.2565601, 0)
 
 [node name="Sketchfab_Scene3" parent="." index="3" instance=ExtResource("4_ngss8")]
+visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." index="4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.91380924, 0.4137008, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.170942, 0.4137008, 0)
+visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." index="5"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0861907, 1.4137008, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.170942, 1.4137008, 0)
+visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." index="6"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0861907, 2.4137008, 3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.170942, 2.4137008, 3)
+visible = false
 mesh = SubResource("BoxMesh_ngss8")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="." index="7"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.511, 3.074, 2.605)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.595751, 3.074, 2.605)
+visible = false
 mesh = SubResource("SphereMesh_ngss8")

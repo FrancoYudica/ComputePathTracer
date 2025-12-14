@@ -29,6 +29,9 @@ namespace godot {
         float render_scale = 1.0f;
 
         uint32_t bvh_max_depth = 32;
+        uint32_t bvh_max_triangles_per_leaf = 4;
+        uint32_t bvh_sah_bins = 32;
+
         float debug_bvh_box_intersections_threshold = 100.0f;
         float debug_bvh_triangle_intersections_threshold = 100.0f;
 
@@ -49,6 +52,10 @@ namespace godot {
         PTRenderMode get_render_mode() const { return render_mode; }
         float get_render_scale() const { return render_scale; }
         uint32_t get_bvh_max_depth() const { return bvh_max_depth; }
+        uint32_t get_bvh_max_triangles_per_leaf() const {
+            return bvh_max_triangles_per_leaf;
+        }
+        uint32_t get_bvh_sah_bins() const { return bvh_sah_bins; }
         float get_debug_bvh_box_intersections_threshold() const {
             return debug_bvh_box_intersections_threshold;
         }
@@ -64,6 +71,8 @@ namespace godot {
         void set_render_mode(PTRenderMode p_mode);
         void set_render_scale(float p_scale);
         void set_bvh_max_depth(uint32_t p_depth);
+        void set_bvh_max_triangles_per_leaf(uint32_t p_triangles);
+        void set_bvh_sah_bins(uint32_t p_bins);
         void set_debug_bvh_box_intersections_threshold(float p_threshold);
         void set_debug_bvh_triangle_intersections_threshold(float p_threshold);
 

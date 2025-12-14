@@ -44,6 +44,17 @@ void godot::PTRendererSettings::_bind_methods() {
     ClassDB::bind_method(D_METHOD("get_bvh_max_depth"),
                          &PTRendererSettings::get_bvh_max_depth);
 
+    ClassDB::bind_method(D_METHOD("set_bvh_sah_bins", "bvh_sah_bins"),
+                         &PTRendererSettings::set_bvh_sah_bins);
+    ClassDB::bind_method(D_METHOD("get_bvh_sah_bins"),
+                         &PTRendererSettings::get_bvh_sah_bins);
+
+    ClassDB::bind_method(D_METHOD("set_bvh_max_triangles_per_leaf",
+                                  "bvh_max_triangles_per_leaf"),
+                         &PTRendererSettings::set_bvh_max_triangles_per_leaf);
+    ClassDB::bind_method(D_METHOD("get_bvh_max_triangles_per_leaf"),
+                         &PTRendererSettings::get_bvh_max_triangles_per_leaf);
+
     ClassDB::bind_method(
         D_METHOD("set_debug_bvh_box_intersections_threshold",
                  "debug_bvh_box_intersections_threshold"),
@@ -91,6 +102,19 @@ void godot::PTRendererSettings::_bind_methods() {
                               "Path Trace,Ray Cast,BVH, Normals, Depth, UVs, "
                               "Metal, Roughness, Emission"),
                  "set_render_mode", "get_render_mode");
+
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "bvh_max_depth",
+                              PROPERTY_HINT_RANGE, "1,128,1"),
+                 "set_bvh_max_depth", "get_bvh_max_depth");
+
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "bvh_sah_bins", PROPERTY_HINT_RANGE,
+                              "1,512,1"),
+                 "set_bvh_sah_bins", "get_bvh_sah_bins");
+
+    ADD_PROPERTY(PropertyInfo(Variant::INT, "bvh_max_triangles_per_leaf",
+                              PROPERTY_HINT_RANGE, "1,64,1"),
+                 "set_bvh_max_triangles_per_leaf",
+                 "get_bvh_max_triangles_per_leaf");
 
     BIND_ENUM_CONSTANT(RENDER_MODE_PATH_TRACE);
     BIND_ENUM_CONSTANT(RENDER_MODE_RAY_CAST);
@@ -140,6 +164,17 @@ void godot::PTRendererSettings::set_render_scale(float p_scale) {
 
 void godot::PTRendererSettings::set_bvh_max_depth(uint32_t p_depth) {
     bvh_max_depth = p_depth;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_bvh_max_triangles_per_leaf(
+    uint32_t p_triangles) {
+    bvh_max_triangles_per_leaf = p_triangles;
+    emit_changed();
+}
+
+void godot::PTRendererSettings::set_bvh_sah_bins(uint32_t p_bins) {
+    bvh_sah_bins = p_bins;
     emit_changed();
 }
 

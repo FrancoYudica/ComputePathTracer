@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=18 format=3 uid="uid://cnli58scmym3d"]
 
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://ui/settings_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://jgmadjtpqtqa" path="res://ui/bvh_settings_panel_container.gd" id="4_w48qg"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
@@ -42,7 +43,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box", "bvh_depth_spin", "box_threshold_spin", "triangle_threshold_spin")]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box")]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 script = ExtResource("2_lquwl")
@@ -56,9 +57,6 @@ bounces_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsP
 aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
 focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
 vsync_check_box = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox")
-bvh_depth_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BVHDepthSpinBox")
-box_threshold_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/DebugBoxThresholdSpinBox")
-triangle_threshold_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/DebugTriangleThresholdSpinBox")
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer"]
 layout_mode = 2
@@ -247,42 +245,92 @@ popup/item_7/id = 7
 popup/item_8/text = "Emission"
 popup/item_8/id = 8
 
-[node name="BVHDepthLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "BVH depth"
+text = "Update scene buffers"
 
-[node name="BVHDepthSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHSettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("depth_spin", "max_leaf_triangles_spin", "sah_bins_spin", "box_threshold_spin", "triangle_threshold_spin")]
+layout_mode = 2
+script = ExtResource("4_w48qg")
+depth_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHDepthSpinBox")
+max_leaf_triangles_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHMaxLeafTrianglesSpinBox")
+sah_bins_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHSAHBinsSpinBox")
+box_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugBoxThresholdSpinBox")
+triangle_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugTriangleThresholdSpinBox")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "BVH SETTINGS"
+
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="BVHDepthLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Depth"
+
+[node name="BVHDepthSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 min_value = 1.0
 max_value = 64.0
 value = 32.0
 rounded = true
 
-[node name="DebugBoxThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHMaxLeafTrianglesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Max leaf triangles"
+
+[node name="BVHMaxLeafTrianglesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 64.0
+value = 32.0
+rounded = true
+
+[node name="BVHSAHBinsLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "SAH bins"
+
+[node name="BVHSAHBinsSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+min_value = 1.0
+max_value = 512.0
+value = 32.0
+rounded = true
+
+[node name="DebugBoxThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Box threshold"
 
-[node name="DebugBoxThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugBoxThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 min_value = 1.0
-max_value = 256.0
+max_value = 512.0
 value = 50.0
 rounded = true
 
-[node name="DebugTriangleThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugTriangleThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Triangle threshold"
 
-[node name="DebugTriangleThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugTriangleThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 min_value = 1.0
 max_value = 256.0
 value = 50.0
 rounded = true
-
-[node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Update scene buffers"
 
 [node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("fps_label", "samples_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
 layout_mode = 2
@@ -427,9 +475,6 @@ camera = NodePath("../../../RasterizedSubViewportContainer/SubViewport/PTCamera"
 [connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_v_sync_check_box_toggled"]
 [connection signal="item_selected" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ModeOptionButton" to="HBoxContainer/SettingsPanelContainer" method="_on_mode_option_button_item_selected"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BVHDepthSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_bvh_depth_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/DebugBoxThresholdSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_debug_box_threshold_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/DebugTriangleThresholdSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_debug_triangle_threshold_spin_box_value_changed"]
 [connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/UpdateSceneButton" to="HBoxContainer/SettingsPanelContainer" method="_on_update_scene_button_pressed"]
 [connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
 [connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]

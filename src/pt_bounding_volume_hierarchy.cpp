@@ -2,6 +2,12 @@
 
 #include <algorithm>
 
+struct SAHSplit {
+    uint32_t axis;
+    uint32_t index;  // Index in the triangle array where the split occurs
+    float cost;
+};
+
 namespace godot {
 
     void PTBoundingVolumeHierarchy::_bind_methods() {}
@@ -12,8 +18,8 @@ namespace godot {
 
     void PTBoundingVolumeHierarchy::build(const std::vector<PTVertex>& vertices,
                                           std::vector<PTTriangle>& triangles,
-                                          uint32_t max_depth) {
-        _max_depth = max_depth;
+                                          const BVHSettings& settings) {
+        _settings = settings;
         // Pre-allocate space to avoid reallocations during build
         // A binary tree with N leaves has at most 2N-1 _nodes
         size_t estimated_nodes = triangles.size() / 10 * 2;  // Rough estimate
@@ -54,49 +60,85 @@ namespace godot {
                3.0f;
     }
 
-    // Choose the best axis and sort in one pass
-    static uint32_t choose_split_axis_and_sort(
-        const std::vector<PTVertex>& vertices,
-        std::vector<PTTriangle>& triangles, uint32_t begin, uint32_t end) {
-        // Compute bounding box of triangle centroids
-        Vector3 min_centroid(1e30f, 1e30f, 1e30f);
-        Vector3 max_centroid(-1e30f, -1e30f, -1e30f);
+    static inline float surface_area(PTAABB& aabb) {
+        Vector3 d = aabb.max - aabb.min;
+        return 2.0f * (d.x * d.y + d.y * d.z + d.z * d.x);
+    }
 
-        for (uint32_t i = begin; i < end; i++) {
-            Vector3 centroid = compute_centroid(vertices, triangles[i]);
+    static SAHSplit find_best_sah_split(const std::vector<PTVertex>& vertices,
+                                        std::vector<PTTriangle>& triangles,
+                                        uint32_t begin, uint32_t end,
+                                        PTAABB& parent_aabb,
+                                        uint32_t num_bins) {
+        uint32_t count = end - begin;
 
-            min_centroid.x = std::min(min_centroid.x, centroid.x);
-            min_centroid.y = std::min(min_centroid.y, centroid.y);
-            min_centroid.z = std::min(min_centroid.z, centroid.z);
+        // Cost constants
+        const float TRAVERSAL_COST = 0.125f;
+        const float INTERSECTION_COST = 1.2f;
 
-            max_centroid.x = std::max(max_centroid.x, centroid.x);
-            max_centroid.y = std::max(max_centroid.y, centroid.y);
-            max_centroid.z = std::max(max_centroid.z, centroid.z);
+        SAHSplit best_split;
+        best_split.cost = 1e30f;  // Large initial cost
+        best_split.axis = 0;
+        best_split.index = begin + count / 2;
+
+        float parent_sa = surface_area(parent_aabb);
+
+        // Try each axis
+        for (uint32_t axis = 0; axis < 3; axis++) {
+            // Sort triangles by centroid along that axis
+            std::sort(triangles.begin() + begin, triangles.begin() + end,
+                      [&](const PTTriangle& a, const PTTriangle& b) {
+                          Vector3 centroid_a = compute_centroid(vertices, a);
+                          Vector3 centroid_b = compute_centroid(vertices, b);
+                          return centroid_a[axis] < centroid_b[axis];
+                      });
+
+            // Number of bins for SAH evaluation
+            const uint32_t bins = num_bins > count ? count : num_bins;
+
+            // Split at regular intervals
+            for (uint32_t bin = 1; bin < bins; bin++) {
+                uint32_t split_index = begin + (count * bin) / bins;
+
+                // Compute AABBs for left and right subsets
+                PTAABB left_aabb =
+                    compute_aabb(vertices, triangles, begin, split_index);
+                PTAABB right_aabb =
+                    compute_aabb(vertices, triangles, split_index, end);
+
+                // Compute SAH cost
+                uint32_t left_count = split_index - begin;
+                uint32_t right_count = end - split_index;
+
+                float left_sa = surface_area(left_aabb);
+                float right_sa = surface_area(right_aabb);
+
+                float sah_cost =
+                    TRAVERSAL_COST +
+                    (left_sa / parent_sa) * left_count * INTERSECTION_COST +
+                    (right_sa / parent_sa) * right_count * INTERSECTION_COST;
+
+                // Update best split if this is better
+                if (sah_cost < best_split.cost) {
+                    best_split.cost = sah_cost;
+                    best_split.axis = axis;
+                    best_split.index = split_index;
+                }
+            }
         }
 
-        // Calculate extent along each axis
-        Vector3 extent = max_centroid - min_centroid;
-
-        // Determine axis with largest extent
-        uint32_t split_axis;
-        if (extent.x > extent.y && extent.x > extent.z) {
-            split_axis = 0;
-        } else if (extent.y > extent.z) {
-            split_axis = 1;
-        } else {
-            split_axis = 2;
+        if (best_split.index != 2) {
+            // Re-sort triangles by best axis
+            std::sort(triangles.begin() + begin, triangles.begin() + end,
+                      [&](const PTTriangle& a, const PTTriangle& b) {
+                          Vector3 centroid_a = compute_centroid(vertices, a);
+                          Vector3 centroid_b = compute_centroid(vertices, b);
+                          return centroid_a[best_split.axis] <
+                                 centroid_b[best_split.axis];
+                      });
         }
 
-        // Sort by the chosen axis (single sort instead of separate function
-        // call)
-        std::sort(triangles.begin() + begin, triangles.begin() + end,
-                  [&](const PTTriangle& a, const PTTriangle& b) {
-                      Vector3 centroid_a = compute_centroid(vertices, a);
-                      Vector3 centroid_b = compute_centroid(vertices, b);
-                      return centroid_a[split_axis] < centroid_b[split_axis];
-                  });
-
-        return split_axis;
+        return best_split;
     }
 
     void PTBoundingVolumeHierarchy::split(uint32_t node_index,
@@ -106,23 +148,39 @@ namespace godot {
                                           uint32_t depth) {
         uint32_t count = end - begin;
 
+        PTAABB node_aabb = compute_aabb(vertices, triangles, begin, end);
+        _nodes[node_index].aabb = node_aabb;
+
         // Base case, no splitting. Marks node as leaf
-        if (count <= 12 || depth >= _max_depth) {
+        if (count <= _settings.max_triangles_per_leaf ||
+            depth >= _settings.max_depth) {
             _nodes[node_index].is_leaf = true;
             _nodes[node_index].left_child_index = 0;
             _nodes[node_index].right_child_index = 0;
             _nodes[node_index].primitive_start_index = begin;
             _nodes[node_index].primitive_count = count;
-            _nodes[node_index].aabb =
-                compute_aabb(vertices, triangles, begin, end);
             return;
         }
 
-        // Choose axis and sort in one operation
-        choose_split_axis_and_sort(vertices, triangles, begin, end);
+        // Find best split using SAH
+        SAHSplit sah_split = find_best_sah_split(
+            vertices, triangles, begin, end, node_aabb, _settings.sah_bins);
+
+        const float INTERSECTION_COST = 1.2f;
+        float no_split_cost = count * INTERSECTION_COST;
+
+        if (sah_split.cost >= no_split_cost) {
+            // No split is better, make leaf
+            _nodes[node_index].is_leaf = true;
+            _nodes[node_index].left_child_index = 0;
+            _nodes[node_index].right_child_index = 0;
+            _nodes[node_index].primitive_start_index = begin;
+            _nodes[node_index].primitive_count = count;
+            return;
+        }
 
         // Split in the middle
-        uint32_t split_index = begin + count / 2;
+        uint32_t split_index = sah_split.index;
 
         // Allocate child _nodes together
         uint32_t left_node_index = _nodes.size();
@@ -143,9 +201,6 @@ namespace godot {
         _nodes[node_index].right_child_index = right_node_index;
         _nodes[node_index].primitive_count = 0;
         _nodes[node_index].primitive_start_index = 0;
-        _nodes[node_index].aabb =
-            _nodes[left_node_index].aabb.merge(_nodes[right_node_index].aabb);
-        _nodes[node_index].is_leaf = false;
     }
 
 }  // namespace godot

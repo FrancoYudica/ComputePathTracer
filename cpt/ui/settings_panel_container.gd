@@ -10,9 +10,6 @@ extends PanelContainer
 @export var aperture_slider: Slider
 @export var focal_distance_slider: Slider
 @export var vsync_check_box: CheckBox
-@export var bvh_depth_spin: SpinBox
-@export var box_threshold_spin: SpinBox
-@export var triangle_threshold_spin: SpinBox
 
 func _ready() -> void:
 	save_file_dialog.file_selected.connect(_file_saved)
@@ -21,9 +18,6 @@ func _ready() -> void:
 	aperture_slider.value = PTRenderer.renderer_settings.camera_aperture
 	focal_distance_slider.value = PTRenderer.renderer_settings.camera_focus_distance
 	vsync_check_box.button_pressed = DisplayServer.window_get_vsync_mode() == DisplayServer.VSyncMode.VSYNC_ENABLED
-	bvh_depth_spin.value = PTRenderer.renderer_settings.get_bvh_max_depth()
-	box_threshold_spin.value = PTRenderer.renderer_settings.get_debug_bvh_box_intersections_threshold()
-	triangle_threshold_spin.value = PTRenderer.renderer_settings.get_debug_bvh_triangle_intersections_threshold()
 	_set_vsync_mode(vsync_check_box.button_pressed)
 
 func _on_rasterized_check_box_toggled(toggled_on: bool) -> void:
@@ -75,12 +69,3 @@ func _on_mode_option_button_item_selected(index: int) -> void:
 
 func _on_update_scene_button_pressed() -> void:
 	PTRenderer.update_scene()
-
-func _on_bvh_depth_spin_box_value_changed(value: float) -> void:
-	PTRenderer.renderer_settings.set_bvh_max_depth(int(value))
-
-func _on_debug_box_threshold_spin_box_value_changed(value: float) -> void:
-	PTRenderer.renderer_settings.set_debug_bvh_box_intersections_threshold(int(value))
-
-func _on_debug_triangle_threshold_spin_box_value_changed(value: float) -> void:
-	PTRenderer.renderer_settings.set_debug_bvh_triangle_intersections_threshold(int(value))

@@ -170,43 +170,43 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     PTBoundingVolumeHierarchy bvh;
 
-    print_line("Building BVH with max depth: " +
-               String::num_int64(render_settings->get_bvh_max_depth()));
-    bvh.build(vertices, triangles, render_settings->get_bvh_max_depth());
+    BVHSettings bvh_settings{
+        .max_depth = render_settings->get_bvh_max_depth(),
+        .max_triangles_per_leaf =
+            render_settings->get_bvh_max_triangles_per_leaf(),
+        .sah_bins = render_settings->get_bvh_sah_bins()};
+
+    bvh.build(vertices, triangles, bvh_settings);
 
     uint64_t end_t = Time::get_singleton()->get_ticks_msec();
     print_line("BVH creation time: " + String::num_int64(end_t - start_t));
     print_line("BVH with " + String::num_int64(bvh.get_nodes().size()) +
                " nodes");
 
-    std::vector<uint32_t> nodeIndices;
-    nodeIndices.push_back(0);
-
-    while (nodeIndices.size() > 0) {
-        uint32_t nodeIndex = nodeIndices.at(0);
-        nodeIndices.erase(nodeIndices.begin());
-        const PTBoundingVolumeNode& node = bvh.get_nodes()[nodeIndex];
-
-        if (!node.is_leaf) {
-            nodeIndices.push_back(node.left_child_index);
-            nodeIndices.push_back(node.right_child_index);
+    uint32_t leaf_node_count = 0;
+    uint32_t total_leaf_primitives = 0;
+    uint32_t max_leaf_primitives = 0;
+    uint32_t min_leaf_primitives = UINT32_MAX;
+    for (auto& node : bvh.get_nodes()) {
+        if (node.is_leaf) {
+            leaf_node_count++;
+            total_leaf_primitives += node.primitive_count;
+            if (node.primitive_count > max_leaf_primitives) {
+                max_leaf_primitives = node.primitive_count;
+            }
+            if (node.primitive_count < min_leaf_primitives) {
+                min_leaf_primitives = node.primitive_count;
+            }
         }
-
-        print_line(
-            "Node " + String::num_int64(nodeIndex) + ". Min(" +
-            String::num_real(node.aabb.min.x) + ", " +
-            String::num_real(node.aabb.min.y) + ", " +
-            String::num_real(node.aabb.min.z) + ") " + ", Max(" +
-            String::num_real(node.aabb.max.x) + ", " +
-            String::num_real(node.aabb.max.y) + ", " +
-            String::num_real(node.aabb.max.z) + ") " +
-            ", Left child index: " + String::num_int64(node.left_child_index) +
-            ", Right child index : " +
-            String::num_int64(node.right_child_index) +
-            ",  Primitive start : " +
-            String::num_int64(node.primitive_start_index) +
-            ", Primitive count: " + String::num_int64(node.primitive_count));
     }
+
+    print_line("BVH leaf nodes: " + String::num_int64(leaf_node_count) +
+               " total primitives in leaves: " +
+               String::num_int64(total_leaf_primitives) + " average: " +
+               String::num_real(float(total_leaf_primitives) /
+                                float(leaf_node_count)) +
+               " min: " + String::num_int64(min_leaf_primitives) +
+               " max: " + String::num_int64(max_leaf_primitives));
 
     PackedFloat32Array sorted_triangles;
     sorted_triangles.resize(triangles.size() * 4);
