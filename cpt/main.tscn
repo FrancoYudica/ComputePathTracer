@@ -1,9 +1,12 @@
-[gd_scene load_steps=18 format=3 uid="uid://cnli58scmym3d"]
+[gd_scene load_steps=23 format=3 uid="uid://cnli58scmym3d"]
 
+[ext_resource type="Theme" uid="uid://uqv3v2o13jf" path="res://ui/themes/main_theme.tres" id="1_2cqfq"]
 [ext_resource type="Script" uid="uid://drehctfnr7csb" path="res://main.gd" id="1_7mycd"]
-[ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://ui/settings_panel_container.gd" id="2_lquwl"]
+[ext_resource type="Script" uid="uid://b7h1hntesd0d2" path="res://ui/main_panel_container.gd" id="2_lquwl"]
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
+[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://ui/themes/title_label_theme.tres" id="3_vivmo"]
 [ext_resource type="Script" uid="uid://jgmadjtpqtqa" path="res://ui/bvh_settings_panel_container.gd" id="4_w48qg"]
+[ext_resource type="Script" uid="uid://bp4nu0w2cip1a" path="res://renderer_settings_panel_container.gd" id="4_yaehf"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
@@ -14,6 +17,35 @@
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
 [ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
 [ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://sky/qwantani_dusk_2_puresky_4k.exr" id="12_yaehf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2cqfq"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yaehf"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 0, 1, 0.7490196)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_074og"]
 panorama = ExtResource("12_yaehf")
@@ -33,6 +65,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+theme = ExtResource("1_2cqfq")
 script = ExtResource("1_7mycd")
 
 [node name="HBoxContainer" type="SplitContainer" parent="."]
@@ -42,92 +75,102 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 4
+theme_override_constants/minimum_grab_thickness = 2
+dragger_visibility = 2
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "rendered_sub_viewport_container", "sub_viewport", "camera_controller", "save_file_dialog", "samples_spin", "bounces_spin", "aperture_slider", "focal_distance_slider", "vsync_check_box")]
-custom_minimum_size = Vector2(300, 0)
+[node name="MainPanelContainer" type="PanelContainer" parent="HBoxContainer" node_paths=PackedStringArray("rasterized_panel", "rendered_sub_viewport_container", "sub_viewport", "save_file_dialog")]
+custom_minimum_size = Vector2(225, 0)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2cqfq")
 script = ExtResource("2_lquwl")
 rasterized_panel = NodePath("../HBoxContainer/RasterizedSubViewportContainer")
 rendered_sub_viewport_container = NodePath("../HBoxContainer/SubViewportContainerPathTracer")
 sub_viewport = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport")
-camera_controller = NodePath("../HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
 save_file_dialog = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/SaveFileDialog")
-samples_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox")
-bounces_spin = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox")
-aperture_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider")
-focal_distance_slider = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider")
-vsync_check_box = NodePath("MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox")
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer"]
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer"]
 layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxFlat_yaehf")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+[node name="SettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("camera_controller", "samples_spin", "bounces_spin", "render_scale", "fov", "aperture_spin", "focal_distance_spin", "vsync_check_box", "mode_option")]
 layout_mode = 2
+script = ExtResource("4_yaehf")
+camera_controller = NodePath("../../../../../HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController")
+samples_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox")
+bounces_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox")
+render_scale = NodePath("MarginContainer/VBoxContainer/GridContainer/RenderScaleControl/RenderScaleSlider")
+fov = NodePath("MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer/FovHSlider")
+aperture_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/ApertureSpinBox")
+focal_distance_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/FocalDistanceSpinBox")
+vsync_check_box = NodePath("MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox")
+mode_option = NodePath("MarginContainer/VBoxContainer/GridContainer/ModeOptionButton")
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="SaveFileDialog" type="FileDialog" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="SaveFileDialog" type="FileDialog" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 filters = PackedStringArray(".png")
 use_native_dialog = true
 
-[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme = ExtResource("3_vivmo")
 text = "RENDERER SETTINGS"
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 columns = 2
 
-[node name="SamplesPerPixelLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="SamplesPerPixelLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Samples"
 
-[node name="SamplesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="SamplesSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 min_value = 1.0
 value = 1.0
 suffix = "spp"
 
-[node name="BouncesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BouncesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Bounces"
 
-[node name="BouncesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BouncesSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 value = 1.0
 
-[node name="RenderScaleLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="RenderScaleLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Render scale"
 
-[node name="RenderScaleControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="RenderScaleControl" type="HBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="RenderScaleSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl"]
+[node name="RenderScaleSlider" type="HSlider" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -136,23 +179,23 @@ step = 10.0
 value = 100.0
 rounded = true
 
-[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl" node_paths=PackedStringArray("slider")]
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl" node_paths=PackedStringArray("slider")]
 custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 script = ExtResource("5_dg77c")
 slider = NodePath("../RenderScaleSlider")
 suffix = "%"
 
-[node name="FovLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FovLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "FOV"
 
-[node name="FovHBoxContainer" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FovHBoxContainer" type="HBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="FovHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer"]
+[node name="FovHSlider" type="HSlider" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -162,67 +205,41 @@ value = 75.0
 rounded = true
 ticks_on_borders = true
 
-[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer" node_paths=PackedStringArray("slider")]
+[node name="SliderValueLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer" node_paths=PackedStringArray("slider")]
 custom_minimum_size = Vector2(42, 0)
 layout_mode = 2
 script = ExtResource("5_dg77c")
 slider = NodePath("../FovHSlider")
 
-[node name="ApertureLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="ApertureLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Aperture"
 
-[node name="ApertureControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="ApertureSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+max_value = 0.25
+step = 0.01
 
-[node name="ApertureHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-max_value = 1.0
-step = 0.001
-
-[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl" node_paths=PackedStringArray("slider")]
-custom_minimum_size = Vector2(42, 0)
-layout_mode = 2
-script = ExtResource("5_dg77c")
-slider = NodePath("../ApertureHSlider")
-
-[node name="FocalDistanceLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FocalDistanceLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Focal length"
 
-[node name="FocalLengthControl" type="HBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="FocalDistanceSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+step = 0.01
 
-[node name="FocalLengthHSlider" type="HSlider" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-step = 0.001
-
-[node name="SliderValueLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl" node_paths=PackedStringArray("slider")]
-custom_minimum_size = Vector2(42, 0)
-layout_mode = 2
-script = ExtResource("5_dg77c")
-slider = NodePath("../FocalLengthHSlider")
-
-[node name="VSyncLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="VSyncLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "VSync"
 
-[node name="VSyncCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="VSyncCheckBox" type="CheckBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 
-[node name="ModeLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="ModeLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Mode"
 
-[node name="ModeOptionButton" type="OptionButton" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="ModeOptionButton" type="OptionButton" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 selected = 0
 item_count = 9
@@ -245,11 +262,7 @@ popup/item_7/id = 7
 popup/item_8/text = "Emission"
 popup/item_8/id = 8
 
-[node name="UpdateSceneButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Update scene buffers"
-
-[node name="BVHSettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("depth_spin", "max_leaf_triangles_spin", "sah_bins_spin", "box_threshold_spin", "triangle_threshold_spin")]
+[node name="BVHSettingsPanelContainer" type="PanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("depth_spin", "max_leaf_triangles_spin", "sah_bins_spin", "box_threshold_spin", "triangle_threshold_spin")]
 layout_mode = 2
 script = ExtResource("4_w48qg")
 depth_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHDepthSpinBox")
@@ -258,81 +271,86 @@ sah_bins_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHSAHBins
 box_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugBoxThresholdSpinBox")
 triangle_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugTriangleThresholdSpinBox")
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme = ExtResource("3_vivmo")
 text = "BVH SETTINGS"
 
-[node name="GridContainer" type="GridContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="GridContainer" type="GridContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 columns = 2
 
-[node name="BVHDepthLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHDepthLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Depth"
 
-[node name="BVHDepthSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHDepthSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 max_value = 64.0
 value = 32.0
 rounded = true
 
-[node name="BVHMaxLeafTrianglesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHMaxLeafTrianglesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Max leaf triangles"
 
-[node name="BVHMaxLeafTrianglesSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHMaxLeafTrianglesSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 max_value = 64.0
 value = 32.0
 rounded = true
 
-[node name="BVHSAHBinsLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHSAHBinsLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "SAH bins"
 
-[node name="BVHSAHBinsSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="BVHSAHBinsSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 max_value = 512.0
 value = 32.0
 rounded = true
 
-[node name="DebugBoxThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugBoxThreshold" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Box threshold"
 
-[node name="DebugBoxThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugBoxThresholdSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 max_value = 512.0
 value = 50.0
 rounded = true
 
-[node name="DebugTriangleThreshold" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugTriangleThreshold" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
 text = "Triangle threshold"
 
-[node name="DebugTriangleThresholdSpinBox" type="SpinBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
+[node name="DebugTriangleThresholdSpinBox" type="SpinBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 1.0
 max_value = 256.0
 value = 50.0
 rounded = true
 
-[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("fps_label", "samples_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
+[node name="StatsPanelContainer" type="PanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("fps_label", "samples_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
 layout_mode = 2
 script = ExtResource("6_dg77c")
 fps_label = NodePath("MarginContainer/VBoxContainer/FPSLabel")
@@ -344,61 +362,67 @@ material_count_label = NodePath("MarginContainer/VBoxContainer/MaterialsLabel")
 texture_count_label = NodePath("MarginContainer/VBoxContainer/TexturesLabel")
 bvh_node_count_label = NodePath("MarginContainer/VBoxContainer/BVHNodesCount")
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="TitleLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme = ExtResource("3_vivmo")
 text = "STATS"
 
-[node name="FPSLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="FPSLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "FPS"
 
-[node name="SamplesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="SamplesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Samples"
 
-[node name="SpheresLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="SpheresLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Triangles"
 
-[node name="TrianglesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="TrianglesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Triangles"
 
-[node name="VerticesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="VerticesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Vertices"
 
-[node name="MaterialsLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="MaterialsLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Material"
 
-[node name="TexturesLabel" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="TexturesLabel" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Texture"
 
-[node name="BVHNodesCount" type="Label" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
+[node name="BVHNodesCount" type="Label" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "BVH Nodes"
 
-[node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+[node name="RasterizedCheckBox" type="CheckBox" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 text = "View rasterized"
 
-[node name="ScreenshotButton" type="Button" parent="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+[node name="UpdateSceneButton" type="Button" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
+layout_mode = 2
+text = "Update scene buffers"
+alignment = 0
+
+[node name="ScreenshotButton" type="Button" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 10
 text = "Screenshot"
+alignment = 0
 
 [node name="HBoxContainer" type="SplitContainer" parent="HBoxContainer"]
 layout_mode = 2
@@ -418,8 +442,9 @@ render_target_update_mode = 0
 
 [node name="PTCamera" type="PTCamera" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport"]
 target_texture_path = NodePath("../../../SubViewportContainerPathTracer/SubViewport/TextureRect")
-transform = Transform3D(0.99761367, 0, -0.06904267, 0.020841965, 0.9533489, 0.3011504, 0.06582175, -0.30187073, 0.9510739, -0.101733685, 0.35138273, 1.8094299)
+transform = Transform3D(-0.7412353, -0.09905682, 0.6638962, 0.019319778, 0.9854933, 0.1686112, -0.67096734, 0.13780689, -0.72856873, 2.7815495, 1.2081053, -3.0634732)
 environment = SubResource("Environment_82xsv")
+fov = 60.0
 
 [node name="CornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("12_w48qg")]
 visible = false
@@ -443,13 +468,14 @@ visible = false
 [node name="TestBaseScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_w48qg")]
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer"]
 handle_input_locally = false
-size = Vector2i(840, 648)
+size = Vector2i(927, 648)
 render_target_update_mode = 4
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport"]
@@ -467,15 +493,7 @@ expand_mode = 1
 script = ExtResource("3_1bvp3")
 camera = NodePath("../../../RasterizedSubViewportContainer/SubViewport/PTCamera")
 
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/SamplesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_samples_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/BouncesSpinBox" to="HBoxContainer/SettingsPanelContainer" method="_on_bounces_spin_box_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/RenderScaleControl/RenderScaleSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_render_scale_slider_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FovHBoxContainer/FovHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_fov_h_slider_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ApertureControl/ApertureHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_aperture_h_slider_value_changed"]
-[connection signal="value_changed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/FocalLengthControl/FocalLengthHSlider" to="HBoxContainer/SettingsPanelContainer" method="_on_focal_length_h_slider_value_changed"]
-[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/VSyncCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_v_sync_check_box_toggled"]
-[connection signal="item_selected" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/GridContainer/ModeOptionButton" to="HBoxContainer/SettingsPanelContainer" method="_on_mode_option_button_item_selected"]
-[connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer/MarginContainer/VBoxContainer/UpdateSceneButton" to="HBoxContainer/SettingsPanelContainer" method="_on_update_scene_button_pressed"]
-[connection signal="toggled" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/SettingsPanelContainer" method="_on_rasterized_check_box_toggled"]
-[connection signal="pressed" from="HBoxContainer/SettingsPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/SettingsPanelContainer" method="_on_screenshot_button_pressed"]
+[connection signal="toggled" from="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/RasterizedCheckBox" to="HBoxContainer/MainPanelContainer" method="_on_rasterized_check_box_toggled"]
+[connection signal="pressed" from="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/UpdateSceneButton" to="HBoxContainer/MainPanelContainer" method="_on_update_scene_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/ScreenshotButton" to="HBoxContainer/MainPanelContainer" method="_on_screenshot_button_pressed"]
 [connection signal="moved" from="HBoxContainer/HBoxContainer/SubViewportContainerPathTracer/SubViewport/CameraController" to="." method="_on_camera_controller_moved"]
