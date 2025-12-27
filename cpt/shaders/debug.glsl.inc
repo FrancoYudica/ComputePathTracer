@@ -126,14 +126,16 @@ vec3 debugTraceBVH(Ray ray, uint seed) {
     }
 
     return vec3(triangleValue, 0.0, boxValue);
-    // return heatMapColor(float(boxIntersections), 100.0);
 }
 
 vec3 debugNormal(Ray ray, uint seed) {
     HitRecord record;
     intersectScene(ray, record);
     if (record.didHit) {
-        return record.n * 0.5 + 0.5;
+        Material hitMaterial = materials[int(record.materialIndex)];
+        vec3 n =
+            normalize(record.TBN * getMaterialNormal(hitMaterial, record.uv));
+        return n * 0.5 + 0.5;
     }
 
     return ray.direction * 0.5 + 0.5;

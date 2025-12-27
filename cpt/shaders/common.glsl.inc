@@ -79,54 +79,6 @@ bool aabbIntersection(Ray ray, AABB aabb, float maxT, out float tNear) {
     return tmax >= max(0.0, tmin) && tmin < maxT;
 }
 
-bool triangleIntersectionFlat(Ray ray, Vertex v0, Vertex v1, Vertex v2,
-                              float materialIndex, inout HitRecord record) {
-    vec3 edge1 = v1.position.xyz - v0.position.xyz;
-    vec3 edge2 = v2.position.xyz - v0.position.xyz;
-    vec3 h = cross(ray.direction, edge2);
-    float a = dot(edge1, h);
-
-    if (abs(a) < EPSILON) {
-        return false;
-    }
-
-    float f = 1.0 / a;
-    vec3 s = ray.origin - v0.position.xyz;
-    float u = f * dot(s, h);
-
-    if (u < 0.0 || u > 1.0) {
-        return false;
-    }
-
-    vec3 q = cross(s, edge1);
-    float v = f * dot(ray.direction, q);
-
-    if (v < 0.0 || u + v > 1.0) {
-        return false;
-    }
-
-    float t = f * dot(edge2, q);
-
-    if (t < EPSILON || t > record.t) {
-        return false;
-    }
-
-    record.t = t;
-    record.p = rayAt(ray, t);
-    record.materialIndex = materialIndex;
-
-    // Use geometric normal (no interpolation)
-    record.n = normalize(cross(edge1, edge2));
-
-    record.frontFace = dot(ray.direction, record.n) < 0.0;
-    if (!record.frontFace) {
-        record.n = -record.n;
-    }
-
-    record.didHit = true;
-    return true;
-}
-
 bool triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
                           float materialIndex, inout HitRecord record) {
     vec3 edge1 = v1.position - v0.position;
@@ -164,17 +116,33 @@ bool triangleIntersection(Ray ray, Vertex v0, Vertex v1, Vertex v2,
 
     // Interpolate normal (u and v are barycentric coords beta and gamma)
     float w = 1.0 - u - v;  // alpha
-    record.n = normalize(w * v0.normal + u * v1.normal + v * v2.normal);
     record.color = w * v0.color + u * v1.color + v * v2.color;
     record.uv = w * v0.uv + u * v1.uv + v * v2.uv;
+
+    // Interpolate normals and tangents
+    vec3 interpolated_n =
+        normalize(w * v0.normal + u * v1.normal + v * v2.normal);
+    vec4 interpolated_t =
+        normalize(w * v0.tangent + u * v1.tangent + v * v2.tangent);
+
+    vec3 tangent, bitangent, normal;
+    normal = interpolated_n;
 
     // Set front face. Uses geometric normal
     vec3 geometricNormal = -cross(edge1, edge2);
     record.frontFace = dot(ray.direction, geometricNormal) < 0.0;
     if (!record.frontFace) {
-        record.n = -record.n;
+        normal = -normal;
     }
 
+    // Re-orthogonalize Tangent to Normal
+    // This removes any component of the tangent that points along the normal
+    tangent = normalize(interpolated_t.xyz -
+                        normal * dot(normal, interpolated_t.xyz));
+
+    bitangent = cross(normal, tangent) * interpolated_t.w;
+
+    record.TBN = mat3(tangent, bitangent, normal);
     return true;
 }
 
@@ -260,4 +228,19 @@ vec3 getMaterialEmission(Material mat, vec2 uv) {
     }
 #endif
     return mat.emission;
+}
+
+vec3 getMaterialNormal(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
+    if (mat.normalTextureIndex > 0) {
+        // Sample normal map
+        vec2 xy = texture(textureArray, vec3(uv, mat.normalTextureIndex)).rg;
+        xy = xy * 2.0 - 1.0;  // Map [0, 1] to [-1, 1]
+
+        /// Compute z component
+        float z = sqrt(1.0 - clamp(xy.x * xy.x + xy.y * xy.y, 0.0, 1.0));
+        return vec3(xy, z);
+    }
+#endif
+    return vec3(0.0, 0.0, 1.0);
 }

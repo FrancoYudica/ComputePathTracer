@@ -133,6 +133,10 @@ vec3 pathTrace(Ray ray, uint seed) {
         // Fetch material
         Material hitMaterial = materials[int(hitRecord.materialIndex)];
 
+        /// Sets the normal using normal mapping
+        vec3 mappedNormal = getMaterialNormal(hitMaterial, hitRecord.uv);
+        hitRecord.n = normalize(hitRecord.TBN * mappedNormal);
+
         // Sample material
         MaterialSample materialSample;
         materialSample = sampleMaterial(hitMaterial, ray, hitRecord, seed);

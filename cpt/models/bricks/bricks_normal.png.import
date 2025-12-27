@@ -2,18 +2,17 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d28w5bql3g21l"
-path.s3tc="res://.godot/imported/gobot_gobot_normal.png-f35b3d7a6c104e6cf384face77f9bf53.s3tc.ctex"
+uid="uid://dpfuuafwakhyp"
+path.s3tc="res://.godot/imported/bricks_normal.png-6648b14512b298e4430d52dab4debd0d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
-generator_parameters={}
 
 [deps]
 
-source_file="res://models/gdquest_gobot/model/gobot_gobot_normal.png"
-dest_files=["res://.godot/imported/gobot_gobot_normal.png-f35b3d7a6c104e6cf384face77f9bf53.s3tc.ctex"]
+source_file="res://models/bricks/bricks_normal.png"
+dest_files=["res://.godot/imported/bricks_normal.png-6648b14512b298e4430d52dab4debd0d.s3tc.ctex"]
 
 [params]
 
@@ -28,7 +27,7 @@ compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=1
-roughness/src_normal="res://gobot_gobot_normal.png"
+roughness/src_normal="res://models/bricks/bricks_normal.png"
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2

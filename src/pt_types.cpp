@@ -20,6 +20,8 @@ namespace godot {
         hash_combine(hash, std::hash<uint32_t>()(albedo_texture_index));
         hash_combine(hash, std::hash<uint32_t>()(metallic_texture_index));
         hash_combine(hash, std::hash<uint32_t>()(roughness_texture_index));
+        hash_combine(hash, std::hash<uint32_t>()(emission_texture_index));
+        hash_combine(hash, std::hash<uint32_t>()(normal_texture_index));
         hash_combine(hash, std::hash<uint32_t>()(metallic_texture_channel));
         hash_combine(hash, std::hash<uint32_t>()(roughness_texture_channel));
         return hash;

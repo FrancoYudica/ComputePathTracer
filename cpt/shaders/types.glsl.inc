@@ -8,6 +8,7 @@ struct HitRecord {
     float t;
     vec3 p;
     vec3 n;
+    mat3 TBN;
     vec2 uv;
     bool frontFace;
     float materialIndex;
@@ -41,6 +42,7 @@ struct Material {
     float metallicTextureIndex;
     float roughnessTextureIndex;
     float emissionTextureIndex;
+    float normalTextureIndex;
 
     // Texture channels
     float metallicTextureChannel;
@@ -72,4 +74,5 @@ struct Vertex {
     vec3 color;
     vec3 normal;
     vec2 uv;
+    vec4 tangent;
 };

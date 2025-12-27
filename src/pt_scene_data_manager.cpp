@@ -8,6 +8,8 @@
 #include <godot_cpp/classes/standard_material3d.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/image.hpp>
+#include <godot_cpp/classes/mesh_data_tool.hpp>
+#include <godot_cpp/classes/surface_tool.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
 #include <unordered_set>
 
@@ -278,9 +280,10 @@ void godot::PTSceneDataManager::_update_materials_buffer() {
         materials_data[base_offset + 11] = material.metallic_texture_index;
         materials_data[base_offset + 12] = material.roughness_texture_index;
         materials_data[base_offset + 13] = material.emission_texture_index;
-        materials_data[base_offset + 14] = material.metallic_texture_channel;
-        materials_data[base_offset + 15] = material.roughness_texture_channel;
-        materials_data[base_offset + 16] = material.emission_energy_multiplier;
+        materials_data[base_offset + 14] = material.normal_texture_index;
+        materials_data[base_offset + 15] = material.metallic_texture_channel;
+        materials_data[base_offset + 16] = material.roughness_texture_channel;
+        materials_data[base_offset + 17] = material.emission_energy_multiplier;
     }
 
     PackedByteArray materials_bytes = materials_data.to_byte_array();
@@ -297,6 +300,7 @@ void godot::PTSceneDataManager::_update_textures_buffer() {
         auto image = _frame_textures[i]->get_image();
         image->clear_mipmaps();
         image->decompress();
+        image->convert(Image::FORMAT_RGBA8);
         image->resize(_resource_manager->get_texture_array_resolution(),
                       _resource_manager->get_texture_array_resolution());
         if (_rd->texture_update(_resource_manager->get_scene_texture_array(), i,
@@ -313,43 +317,71 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
     std::vector<PTTriangle>& triangles) {
     // Iterates through all surfaces of the mesh
     for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
+        // Initialize the SurfaceTool with the existing mesh
+        Ref<SurfaceTool> st;
+        st.instantiate();
+        st->create_from(mesh, i);
+        st->generate_tangents();
+        Ref<ArrayMesh> mesh_with_tangents = st->commit();
+        Array arr = mesh_with_tangents->surface_get_arrays(0);
+
+        // Use MeshDataTool to access tangents
+        Ref<MeshDataTool> mdt;
+        mdt.instantiate();
+        mdt->create_from_surface(mesh_with_tangents, 0);
+
         // Access surface material and parses
         Ref<Material> surface_material = mesh->surface_get_material(i);
         uint32_t mesh_material_index = _parse_material(surface_material);
 
-        Array arr = mesh->surface_get_arrays(i);
         PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
         PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
         PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
         PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
         PackedVector2Array surface_uvs = arr[ArrayMesh::ARRAY_TEX_UV];
-        print_line(
-            "Color count: " + String::num_int64(surface_colors.size()),
-            " Normal count: " + String::num_int64(surface_normals.size()));
 
         // Base offset relative to current vertices size
         uint32_t base_index_offset = uint32_t(vertices.size());
 
         // Add vertices
         for (uint32_t v = 0; v < surface_vertices.size(); ++v) {
-            Vector3 position = surface_vertices[v];
-            Color color = surface_colors.size() > 0 ? surface_colors[v]
-                                                    : Color(1.0, 1.0, 1.0, 1.0);
-
-            Vector3 normal = surface_normals.size() > 0
-                                 ? surface_normals[v]
-                                 : Vector3(0.0, 1.0, 0.0);
-
-            position = mesh_transform.xform(position);
-
-            // TODO: Handle translation/scale properly
-            normal = mesh_transform.basis.xform(normal);
+            Vector3 local_position = surface_vertices[v];
 
             Vector2 uv =
                 surface_uvs.size() > 0 ? surface_uvs[v] : Vector2(0.0, 0.0);
 
-            PTVertex vertex = {position, Vector3(color.r, color.g, color.b),
-                               normal, uv};
+            Vector3 local_normal = surface_normals.size() > 0
+                                       ? surface_normals[v]
+                                       : Vector3(0.0, 1.0, 0.0);
+
+            Vector4 local_tangent = Vector4(mdt->get_vertex_tangent(v).normal.x,
+                                            mdt->get_vertex_tangent(v).normal.y,
+                                            mdt->get_vertex_tangent(v).normal.z,
+                                            mdt->get_vertex_tangent(v).d);
+
+            Color color = surface_colors.size() > 0 ? surface_colors[v]
+                                                    : Color(1.0, 1.0, 1.0, 1.0);
+
+            // Transform Position
+            Vector3 position = mesh_transform.xform(local_position);
+
+            // Transform Normal (Inverse Transpose + Normalize)
+            Basis inv_transpose = mesh_transform.basis.inverse();
+            inv_transpose.transpose();
+            Vector3 normal = inv_transpose.xform(local_normal).normalized();
+
+            // Transform Tangent (Basis + Normalize)
+            Vector3 tangent_raw =
+                Vector3(local_tangent.x, local_tangent.y, local_tangent.z);
+            Vector3 tangent =
+                mesh_transform.basis.xform(tangent_raw).normalized();
+
+            // Preserve the handedness for the bitangent calculation
+            float tangent_w = local_tangent.w;
+
+            PTVertex vertex = {
+                position, Vector3(color.r, color.g, color.b), normal, uv,
+                Vector4(tangent.x, tangent.y, tangent.z, tangent_w)};
 
             vertices_data.push_back(vertex.position.x);
             vertices_data.push_back(vertex.position.y);
@@ -371,6 +403,16 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
             vertices_data.push_back(0.0);  // Padding
             vertices_data.push_back(0.0);  // Padding
 
+            vertices_data.push_back(vertex.tangent.x);
+            vertices_data.push_back(vertex.tangent.y);
+            vertices_data.push_back(vertex.tangent.z);
+            vertices_data.push_back(vertex.tangent.w);
+
+            print_line("Tangent: (" + String::num_real(vertex.tangent.x) +
+                       ", " + String::num_real(vertex.tangent.y) + ", " +
+                       String::num_real(vertex.tangent.z) + ", " +
+                       String::num_real(vertex.tangent.w) + ")");
+
             vertices.push_back(vertex);
         }
 
@@ -382,6 +424,7 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
                 base_index_offset + uint32_t(surface_indices[idx + 1]);
             uint32_t i2 =
                 base_index_offset + uint32_t(surface_indices[idx + 2]);
+
             triangles.push_back({i0, i1, i2, mesh_material_index});
         }
     }
@@ -421,6 +464,8 @@ uint32_t godot::PTSceneDataManager::_parse_material(
             std_material->get_texture(StandardMaterial3D::TEXTURE_ROUGHNESS));
         pt_material.emission_texture_index = _push_texture(
             std_material->get_texture(StandardMaterial3D::TEXTURE_EMISSION));
+        pt_material.normal_texture_index = _push_texture(
+            std_material->get_texture(StandardMaterial3D::TEXTURE_NORMAL));
 
         pt_material.metallic_texture_channel =
             std_material->get_metallic_texture_channel();

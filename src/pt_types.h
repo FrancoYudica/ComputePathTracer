@@ -16,6 +16,7 @@ namespace godot {
         Vector3 color;
         Vector3 normal;
         Vector2 uv;
+        Vector4 tangent;
     };
 
     struct PTAABB {
@@ -50,6 +51,7 @@ namespace godot {
         uint32_t metallic_texture_index = 0;
         uint32_t roughness_texture_index = 0;
         uint32_t emission_texture_index = 0;
+        uint32_t normal_texture_index = 0;
         uint32_t metallic_texture_channel = 0;
         uint32_t roughness_texture_channel = 0;
         float emission_energy_multiplier = 1.0;

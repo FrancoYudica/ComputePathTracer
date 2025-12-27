@@ -1,9 +1,12 @@
-[gd_scene load_steps=11 format=3 uid="uid://xpfm7su0rbtr"]
+[gd_scene load_steps=17 format=3 uid="uid://xpfm7su0rbtr"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://scenes/base_scene.tscn" id="1_nyy6r"]
 [ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
 [ext_resource type="PackedScene" uid="uid://dre5rg7eu6uk1" path="res://models/police/mech_robotic_police_3d_model_w_scifi_gun.glb" id="3_so2qy"]
 [ext_resource type="PackedScene" uid="uid://cfubdyvkrkefg" path="res://models/car/cyberpunk_car.glb" id="4_ngss8"]
+[ext_resource type="PackedScene" uid="uid://kod0awm1ha4o" path="res://models/gdquest_gobot/model/gobot.glb" id="5_me4tr"]
+[ext_resource type="Texture2D" uid="uid://dpfuuafwakhyp" path="res://models/bricks/bricks_normal.png" id="6_i384k"]
+[ext_resource type="PackedScene" uid="uid://hok5ejf3bxy3" path="res://models/ganesh/the_hindu_god_ganesh.glb" id="7_lni0r"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nyy6r"]
 albedo_color = Color(0.92514396, 0.98948544, 0.8904318, 1)
@@ -21,6 +24,17 @@ material = SubResource("StandardMaterial3D_so2qy")
 [sub_resource type="BoxMesh" id="BoxMesh_ngss8"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_ngss8"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_me4tr"]
+load_path = "res://.godot/imported/bricks_albedo.png-505acf3f9acc212e602cc125d4d5b8e3.s3tc.ctex"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lni0r"]
+albedo_texture = SubResource("CompressedTexture2D_me4tr")
+normal_enabled = true
+normal_texture = ExtResource("6_i384k")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_vghtq"]
+material = SubResource("StandardMaterial3D_lni0r")
 
 [node name="TestBaseScene" instance=ExtResource("1_nyy6r")]
 
@@ -63,14 +77,14 @@ transform = Transform3D(-1.7642974e-06, -1.8199995, 2.1855685e-07, -2.7875892e-0
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
-[node name="Sketchfab_Scene2" parent="." index="1" instance=ExtResource("3_so2qy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06739837, 1.1201751, 0.7169976)
+[node name="Police" parent="." index="1" instance=ExtResource("3_so2qy")]
+transform = Transform3D(-0.31119066, 0, 0.9503475, 0, 1, 0, -0.9503475, 0, -0.31119066, 0.07616824, 1.1201751, 2.6655545)
+
+[node name="City" parent="." index="2" instance=ExtResource("3_ngss8")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.2565601, 0)
 visible = false
 
-[node name="Sketchfab_Scene" parent="." index="2" instance=ExtResource("3_ngss8")]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.2565601, 0)
-
-[node name="Sketchfab_Scene3" parent="." index="3" instance=ExtResource("4_ngss8")]
+[node name="Car" parent="." index="3" instance=ExtResource("4_ngss8")]
 visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." index="4"]
@@ -92,3 +106,11 @@ mesh = SubResource("BoxMesh_ngss8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.595751, 3.074, 2.605)
 visible = false
 mesh = SubResource("SphereMesh_ngss8")
+
+[node name="gobot" parent="." index="8" instance=ExtResource("5_me4tr")]
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="." index="9"]
+mesh = SubResource("PlaneMesh_vghtq")
+
+[node name="Sketchfab_Scene4" parent="." index="10" instance=ExtResource("7_lni0r")]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0.046933413, 1.6987128, -0.0286448)

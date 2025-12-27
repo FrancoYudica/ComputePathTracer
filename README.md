@@ -17,7 +17,9 @@ A compute shader based path tracer implemented in the Godot game engine
 
 **HDRI Skybox**: The renderer samples the camera's environment PanoramaSkyMaterial with configurable energy/intensity.
 
-**Bounding Volume Hierarchy (BVH)**: A spatial acceleration structure built on the CPU and traversed on the GPU using an iterative stack-based algorithm, dramatically reducing triangle intersection tests for complex meshes.
+**SAH based Bounding Volume Hierarchy (BVH)**: A spatial acceleration structure built on the CPU and traversed on the GPU using an iterative stack-based algorithm, dramatically reducing triangle intersection tests for complex meshes.
+
+**Texture maps**: Texture mapping support for albedo, metallic, roughness, emission and normal textures.
 
 **Depth of Field**: Physically-based camera model with configurable aperture and focal distance.
 
@@ -42,10 +44,6 @@ The project uses C++ with the GDExtension API and SCons as the build system.  Fo
 
 ## Future work
 - Physically-Based BRDFs: Implement industry-standard BRDFs (e.g., GGX/Trowbridge-Reitz microfacet model).
-
-- Support for normal texture maps.
-
-- Implement Surface Area Heuristic (SAH) for BVH building to achieve better ray traversal performance and reduce intersection tests..
 
 - Post processing pipeline: Bloom and glare effects, tonemapping operators (ACES, Reinhard), exposure control.
 
