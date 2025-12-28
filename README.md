@@ -21,6 +21,8 @@ A compute shader based path tracer implemented in the Godot game engine
 
 **Texture maps**: Texture mapping support for albedo, metallic, roughness, emission and normal textures.
 
+**Alpha masking**: Cutout transparency support using the alpha channel of albedo textures. During ray-triangle intersection, transparent texels are discarded, allowing rays to pass through and find geometry behind them.
+
 **Depth of Field**: Physically-based camera model with configurable aperture and focal distance.
 
 **Vertex Interpolation**: Barycentric coordinate interpolation for smooth shading normals, vertex colors, and support for per-vertex attributes.

@@ -3,11 +3,11 @@
 /**
 Iterates through all the scene and finds the closest intersection.
 */
-void intersectScene(Ray ray, out HitRecord record) {
-    record = createHitRecord();
+void intersectScene(Ray ray, out HitRecord nearestRecord) {
+    nearestRecord = createHitRecord();
 
     for (int i = 0; i < int(sphereCount); i++) {
-        sphereIntersection(ray, spheres[i], record);
+        sphereIntersection(ray, spheres[i], nearestRecord);
     }
 
     if (triangleCount == 0) {
@@ -19,7 +19,6 @@ void intersectScene(Ray ray, out HitRecord record) {
     nodeStack[0] = 0;
     nodeDistanceStack[0] = 0.0;
     int stackIndex = 0;
-    float closestT = MAX_FLOAT;
 
     while (stackIndex >= 0) {
         // Pop node and its distance from stack
@@ -28,7 +27,7 @@ void intersectScene(Ray ray, out HitRecord record) {
         stackIndex--;
 
         // Early rejection: skip nodes farther than closest hit
-        if (nodeDistance >= closestT) {
+        if (nodeDistance >= nearestRecord.t) {
             continue;
         }
 
@@ -36,6 +35,7 @@ void intersectScene(Ray ray, out HitRecord record) {
 
         // Check if this is a leaf node
         if (node.primitiveCount > 0) {
+            HitRecord testRecord = createHitRecord();
             // Test all primitives in this leaf
             for (int i = 0; i < int(node.primitiveCount); i++) {
                 int primitiveIndex = int(node.primitiveStartIndex) + i;
@@ -43,12 +43,19 @@ void intersectScene(Ray ray, out HitRecord record) {
                 Vertex v0 = vertices[int(triangle.indices.x)];
                 Vertex v1 = vertices[int(triangle.indices.y)];
                 Vertex v2 = vertices[int(triangle.indices.z)];
-                bool hit = triangleIntersection(ray, v0, v1, v2,
-                                                triangle.materialIndex, record);
+                bool hit = triangleIntersection(
+                    ray, v0, v1, v2, triangle.materialIndex, testRecord);
 
-                if (hit && record.t < closestT) {
-                    // Update closest t when we find a closer hit
-                    closestT = record.t;
+                // Reached a closer hit
+                if (hit && testRecord.t < nearestRecord.t) {
+                    // Test for alpha masking
+                    float alpha = getMaterialAlpha(
+                        getMaterial(triangle.materialIndex), testRecord.uv);
+
+                    if (alpha > 0.5) {
+                        // Update not discarded by alpha mask
+                        nearestRecord = testRecord;
+                    }
                 }
             }
         } else {
@@ -58,11 +65,11 @@ void intersectScene(Ray ray, out HitRecord record) {
 
             float tLeft, tRight;
             bool hitLeft =
-                (left != 0) &&
-                aabbIntersection(ray, bvhNodes[left].aabb, closestT, tLeft);
+                (left != 0) && aabbIntersection(ray, bvhNodes[left].aabb,
+                                                nearestRecord.t, tLeft);
             bool hitRight =
-                (right != 0) &&
-                aabbIntersection(ray, bvhNodes[right].aabb, closestT, tRight);
+                (right != 0) && aabbIntersection(ray, bvhNodes[right].aabb,
+                                                 nearestRecord.t, tRight);
 
             // Push farther child first, then closer (so closer is popped first)
             if (hitLeft && hitRight) {

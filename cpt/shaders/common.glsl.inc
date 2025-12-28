@@ -165,6 +165,16 @@ Material getMaterial(float materialIndex) {
     return materials[int(materialIndex)];
 }
 
+float getMaterialAlpha(Material mat, vec2 uv) {
+#ifdef TEXTURE_MAPPING
+    if (mat.albedoTextureIndex > 0) {
+        return texture(textureArray, vec3(uv.x, uv.y, mat.albedoTextureIndex))
+            .a;
+    }
+#endif
+    return 1.0;
+}
+
 vec3 getMaterialAlbedo(Material mat, vec2 uv) {
 #ifdef TEXTURE_MAPPING
     if (mat.albedoTextureIndex > 0) {
