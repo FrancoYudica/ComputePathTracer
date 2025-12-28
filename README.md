@@ -1,6 +1,6 @@
 # ComputePathTracer
 
-![](imgs/sample0.png)
+![](imgs/sample-ui.png)
 
 A compute shader based path tracer implemented in the Godot game engine
 

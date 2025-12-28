@@ -17,6 +17,7 @@ material = SubResource("StandardMaterial3D_nyy6r")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_so2qy"]
 emission_enabled = true
 emission = Color(1, 1, 1, 1)
+emission_energy_multiplier = 2.0
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_me4tr"]
 material = SubResource("StandardMaterial3D_so2qy")
@@ -40,45 +41,49 @@ material = SubResource("StandardMaterial3D_lni0r")
 
 [node name="Node3D" type="Node3D" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, -1.82, 1.509958e-07, 0, -2.7481238e-07, -1, 0, 4.037, 0)
-visible = false
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D" index="0"]
+[node name="Floor" type="MeshInstance3D" parent="Node3D" index="0"]
 transform = Transform3D(9.080999, 0, 0, 0, -0.99999994, -2.177824e-06, 0, 2.7481238e-07, -26.249998, 0, 2.2182646, 1.9999993)
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
-[node name="MeshInstance3D7" type="MeshInstance3D" parent="Node3D" index="1"]
-transform = Transform3D(9.080999, 0, 0, 0, 1.0000005, 1.540423e-06, 0, -1.1570302e-07, 44.099995, 0, -0.0065894127, 1.9999999)
-mesh = SubResource("PlaneMesh_ngss8")
+[node name="Light" type="MeshInstance3D" parent="Node3D" index="1"]
+transform = Transform3D(0.9999999, 0, 0, 0, 0.9999999, 7.1054274e-15, 0, -5.684342e-14, 0.9999999, 0, 0, 0)
+mesh = SubResource("PlaneMesh_me4tr")
 skeleton = NodePath("../..")
 
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="Node3D" index="2"]
-transform = Transform3D(0.99999994, 0, 0, 0, 0.99999994, 0, 0, -2.842171e-14, 0.99999994, 0, 0, 0)
-mesh = SubResource("PlaneMesh_me4tr")
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="Node3D" index="2"]
+transform = Transform3D(9.080999, 0, 0, 0, 1.0000005, 1.540423e-06, 0, -1.1570302e-07, 44.099995, 0, -0.0065894127, 1.9999999)
+visible = false
+mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Node3D" index="3"]
 transform = Transform3D(9.080998, 0, 0, 0, -1.0728442e-07, 2.7472522, 0, -1.8199999, -5.36422e-07, 0, 0.5699134, 6.999999)
+visible = false
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
 [node name="MeshInstance3D6" type="MeshInstance3D" parent="Node3D" index="4"]
 transform = Transform3D(-9.080998, 2.3841856e-07, -3.197442e-14, 4.8121893e-14, 1.9470718e-07, 2.7472522, 4.7683713e-07, 1.8199997, -9.735359e-07, 0, 0.56991184, -13)
+visible = false
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="Node3D" index="5"]
 transform = Transform3D(-1.5918603e-06, 1.82, -2.1855688e-07, 3.6916726e-06, 4.37114e-08, 2.7472525, 44.49689, 6.510983e-08, -7.54979e-07, -8.999999, 0.5699129, -1.1920929e-07)
+visible = false
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="Node3D" index="6"]
 transform = Transform3D(-1.7642974e-06, -1.8199995, 2.1855685e-07, -2.7875892e-06, 4.371139e-08, 2.7472522, -33.59969, 1.19209254e-07, -7.5497894e-07, 8.999999, 0.5699129, -1.1920929e-07)
+visible = false
 mesh = SubResource("PlaneMesh_ngss8")
 skeleton = NodePath("../..")
 
 [node name="Police" parent="." index="1" instance=ExtResource("3_so2qy")]
-transform = Transform3D(-0.31119066, 0, 0.9503475, 0, 1, 0, -0.9503475, 0, -0.31119066, 0.07616824, 1.1201751, 2.6655545)
+transform = Transform3D(-0.31119066, 0, 0.9503475, 0, 1, 0, -0.9503475, 0, -0.31119066, 0.07616824, 1.1201751, -0.33444548)
 
 [node name="City" parent="." index="2" instance=ExtResource("3_ngss8")]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.2565601, 0)
@@ -108,9 +113,12 @@ visible = false
 mesh = SubResource("SphereMesh_ngss8")
 
 [node name="gobot" parent="." index="8" instance=ExtResource("5_me4tr")]
+visible = false
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="." index="9"]
+visible = false
 mesh = SubResource("PlaneMesh_vghtq")
 
 [node name="Sketchfab_Scene4" parent="." index="10" instance=ExtResource("7_lni0r")]
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0.046933413, 1.6987128, -0.0286448)
+visible = false

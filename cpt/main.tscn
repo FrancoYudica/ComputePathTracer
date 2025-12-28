@@ -10,13 +10,13 @@
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
+[ext_resource type="Texture2D" uid="uid://don7t6cg36jkh" path="res://sky/811-hdri-skies-com.hdr" id="9_yaehf"]
 [ext_resource type="PackedScene" uid="uid://de64eirl73tqm" path="res://scenes/spheres_scene.tscn" id="10_w48qg"]
 [ext_resource type="PackedScene" uid="uid://xpfm7su0rbtr" path="res://scenes/test_base_scene.tscn" id="11_w48qg"]
 [ext_resource type="PackedScene" uid="uid://b8nsm2ngx4xuu" path="res://scenes/cornell_box_gobot.tscn" id="11_ycdy4"]
 [ext_resource type="PackedScene" uid="uid://caxa1luxbe1eo" path="res://scenes/pbr_scene.tscn" id="12_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://bebv6dlx2oomf" path="res://scenes/metal_roughness_test_scene.tscn" id="12_vivmo"]
 [ext_resource type="PackedScene" uid="uid://dtntoyphirbth" path="res://scenes/cornell_box_scene.tscn" id="12_w48qg"]
-[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://sky/qwantani_dusk_2_puresky_4k.exr" id="12_yaehf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2cqfq"]
 content_margin_left = 0.0
@@ -48,7 +48,7 @@ expand_margin_right = 4.0
 expand_margin_bottom = 4.0
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_074og"]
-panorama = ExtResource("12_yaehf")
+panorama = ExtResource("9_yaehf")
 
 [sub_resource type="Sky" id="Sky_cegan"]
 sky_material = SubResource("PanoramaSkyMaterial_074og")
