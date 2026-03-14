@@ -30,8 +30,8 @@ void godot::PTSceneDataManager::initialize(
     _rd = p_rd;
     _resource_manager = resource_manager;
     // Create default texture
-    _default_texture =
-        ResourceLoader::get_singleton()->load("res://textures/white.png");
+    _default_texture = ResourceLoader::get_singleton()->load(
+        PTUtils::get_project_relative_path("textures/white.png"));
 }
 
 void godot::PTSceneDataManager::update_buffers(

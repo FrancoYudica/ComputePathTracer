@@ -28,7 +28,7 @@ else:
 
 # Define multiple install targets
 # Demo project path
-demo_path = "cpt/bin/"
+demo_path = "cpt/addons/pathtracer/bin/"
 
 # Distribution addon folder
 dist_path = "addon_files/addons/pathtracer/bin/"
@@ -38,6 +38,11 @@ install_targets = [
     env.Install(demo_path, library),
     env.Install(dist_path, library)
 ]
+
+# Add this to your SConstruct to sync to addon
+env.Install(
+    "addon_files/addons/pathtracer/shaders/", 
+    Glob("cpt/addons/pathtracer/shaders/*.glsl*"))
 
 # Make these the default action when you run 'scons'
 Default(library)

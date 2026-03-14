@@ -2,6 +2,12 @@
 
 namespace godot {
 
+    godot::String PTUtils::get_project_relative_path(
+        const godot::String& addon_relative_path) {
+        static const godot::String base_path = "res://addons/pathtracer/";
+        return base_path + addon_relative_path;
+    }
+
     PackedFloat32Array PTUtils::transform3d_to_float32_array(
         const Transform3D& transform) {
         auto origin = transform.origin;
@@ -54,4 +60,5 @@ namespace godot {
 
         return camera_data.to_byte_array();
     }
+
 }  // namespace godot

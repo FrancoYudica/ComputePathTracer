@@ -181,8 +181,9 @@ namespace godot {
 
     void PTRenderer::_initialize_compute() {
         _rd = RenderingServer::get_singleton()->get_rendering_device();
-        _resource_manager.initialize(_rd, "res://shaders/pathtracer.glsl",
-                                     get_render_width(), get_render_height());
+        _resource_manager.initialize(
+            _rd, PTUtils::get_project_relative_path("shaders/pathtracer.glsl"),
+            get_render_width(), get_render_height());
 
         _scene_data_manager.initialize(_rd, &_resource_manager);
     }

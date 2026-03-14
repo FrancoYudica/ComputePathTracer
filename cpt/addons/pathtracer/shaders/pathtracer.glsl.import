@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://blyk2cpulve2p"
+path="res://.godot/imported/pathtracer.glsl-159306ba9e19ca9111b3c680bd4967dd.res"
+
+[deps]
+
+source_file="res://addons/pathtracer/shaders/pathtracer.glsl"
+dest_files=["res://.godot/imported/pathtracer.glsl-159306ba9e19ca9111b3c680bd4967dd.res"]
+
+[params]
+

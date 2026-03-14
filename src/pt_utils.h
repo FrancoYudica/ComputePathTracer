@@ -9,6 +9,13 @@
 namespace godot {
 
     namespace PTUtils {
+
+        /**
+         * Gets the project-relative path for a given addon-relative path
+         */
+        godot::String get_project_relative_path(
+            const godot::String& addon_relative_path);
+
         /**
          * Gathers all nodes of type T from the provided all_nodes array.
          * Uses a depth-first search to traverse the entire node hierarchy.
@@ -43,6 +50,7 @@ namespace godot {
 
         PackedByteArray get_camera_bytes(Camera3D* camera, uint32_t width,
                                          uint32_t height);
+
     }  // namespace PTUtils
 
 }  // namespace godot
