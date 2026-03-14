@@ -18,6 +18,7 @@
 #include "pt_resource_manager.h"
 #include "pt_renderer_stats.h"
 #include "pt_renderer_settings.h"
+#include "pt_material_library.h"
 
 namespace godot {
 
@@ -32,14 +33,7 @@ namespace godot {
         Node* _root;
         PTResourceManager* _resource_manager;
 
-        std::unordered_map<size_t, uint32_t> _frame_materials;  // Maps material
-                                                                // hash to index
-        std::vector<PTMaterial> _frame_materials_list;          // Stores frames
-                                                                // materials
-
-        std::vector<Ref<Texture2D>> _frame_textures;
-
-        Ref<Texture2D> _default_texture;
+        PTMaterialLibrary _material_lib;
 
         Ref<PTRendererStats> _stats;
 
@@ -66,10 +60,6 @@ namespace godot {
                                  std::vector<PTVertex>& vertices,
                                  PackedFloat32Array& vertices_data,
                                  std::vector<PTTriangle>& triangles);
-
-        uint32_t _push_material(const PTMaterial& material);
-        uint32_t _parse_material(const Ref<Material>& material);
-        uint32_t _push_texture(const Ref<Texture2D>& texture);
     };
 
 }  // namespace godot

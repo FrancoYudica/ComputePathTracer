@@ -449,7 +449,6 @@ fov = 60.0
 visible = false
 
 [node name="GobotCornellBoxScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_ycdy4")]
-visible = false
 
 [node name="SpheresScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("10_w48qg")]
 visible = false
@@ -462,6 +461,7 @@ transform = Transform3D(1, 0, 0, 0, 0.99999994, 0, 0, 0, 0.99999994, 0, 0, 0)
 visible = false
 
 [node name="TestBaseScene" parent="HBoxContainer/HBoxContainer/RasterizedSubViewportContainer/SubViewport" instance=ExtResource("11_w48qg")]
+visible = false
 
 [node name="SubViewportContainerPathTracer" type="SubViewportContainer" parent="HBoxContainer/HBoxContainer"]
 custom_minimum_size = Vector2(64, 64)
