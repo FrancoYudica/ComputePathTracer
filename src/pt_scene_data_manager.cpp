@@ -241,39 +241,9 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
 }
 
 void godot::PTSceneDataManager::_update_materials_buffer() {
-    PackedFloat32Array materials_data;
-
-    constexpr uint32_t MATERIAL_FLOATS = 20;
-
-    const std::vector<PTMaterial>& materials = _material_lib.get_materials();
-
-    materials_data.resize(materials.size() * MATERIAL_FLOATS);
-    for (uint32_t i = 0; i < materials.size(); ++i) {
-        const PTMaterial& material = materials[i];
-        uint32_t base_offset = i * MATERIAL_FLOATS;
-        materials_data[base_offset + 0] = material.color.r;
-        materials_data[base_offset + 1] = material.color.g;
-        materials_data[base_offset + 2] = material.color.b;
-        materials_data[base_offset + 3] = float(material.material_type);
-        materials_data[base_offset + 4] = material.emission.x;
-        materials_data[base_offset + 5] = material.emission.y;
-        materials_data[base_offset + 6] = material.emission.z;
-        materials_data[base_offset + 7] = material.metallic;
-        materials_data[base_offset + 8] = material.roughness;
-        materials_data[base_offset + 9] = material.refraction_index;
-        materials_data[base_offset + 10] = material.albedo_texture_index;
-        materials_data[base_offset + 11] = material.metallic_texture_index;
-        materials_data[base_offset + 12] = material.roughness_texture_index;
-        materials_data[base_offset + 13] = material.emission_texture_index;
-        materials_data[base_offset + 14] = material.normal_texture_index;
-        materials_data[base_offset + 15] = material.metallic_texture_channel;
-        materials_data[base_offset + 16] = material.roughness_texture_channel;
-        materials_data[base_offset + 17] = material.emission_energy_multiplier;
-    }
-
-    PackedByteArray materials_bytes = materials_data.to_byte_array();
+    PackedByteArray materials_bytes = _material_lib.get_byte_array();
     _resource_manager->update_storage_buffer("materials", materials_bytes);
-    _stats->set_material_count(materials.size());
+    _stats->set_material_count(_material_lib.get_materials().size());
 }
 
 void godot::PTSceneDataManager::_update_textures_buffer() {

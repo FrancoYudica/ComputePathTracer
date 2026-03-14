@@ -29,6 +29,7 @@ namespace godot {
         uint32_t get_or_push_texture(const Ref<Texture2D>& texture);
         const std::vector<PTMaterial>& get_materials();
         const std::vector<Ref<Texture2D>>& get_textures();
+        PackedByteArray get_byte_array() const;
 
     private:
         /**

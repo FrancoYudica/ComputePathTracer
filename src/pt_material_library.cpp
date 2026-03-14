@@ -47,6 +47,41 @@ namespace godot {
         return _frame_textures;
     }
 
+    PackedByteArray PTMaterialLibrary::get_byte_array() const {
+        PackedFloat32Array materials_data;
+
+        constexpr uint32_t MATERIAL_FLOATS = 20;
+
+        materials_data.resize(_frame_materials_list.size() * MATERIAL_FLOATS);
+        for (uint32_t i = 0; i < _frame_materials_list.size(); ++i) {
+            const PTMaterial& material = _frame_materials_list[i];
+            uint32_t base_offset = i * MATERIAL_FLOATS;
+            materials_data[base_offset + 0] = material.color.r;
+            materials_data[base_offset + 1] = material.color.g;
+            materials_data[base_offset + 2] = material.color.b;
+            materials_data[base_offset + 3] = float(material.material_type);
+            materials_data[base_offset + 4] = material.emission.x;
+            materials_data[base_offset + 5] = material.emission.y;
+            materials_data[base_offset + 6] = material.emission.z;
+            materials_data[base_offset + 7] = material.metallic;
+            materials_data[base_offset + 8] = material.roughness;
+            materials_data[base_offset + 9] = material.refraction_index;
+            materials_data[base_offset + 10] = material.albedo_texture_index;
+            materials_data[base_offset + 11] = material.metallic_texture_index;
+            materials_data[base_offset + 12] = material.roughness_texture_index;
+            materials_data[base_offset + 13] = material.emission_texture_index;
+            materials_data[base_offset + 14] = material.normal_texture_index;
+            materials_data[base_offset + 15] =
+                material.metallic_texture_channel;
+            materials_data[base_offset + 16] =
+                material.roughness_texture_channel;
+            materials_data[base_offset + 17] =
+                material.emission_energy_multiplier;
+        }
+
+        return materials_data.to_byte_array();
+    }
+
     uint32_t PTMaterialLibrary::_parse_material(const Ref<Material>& material) {
         const Color BLACK_COLOR = Color{0.0, 0.0, 0.0, 1.0};
         const float DEFAULT_REFRACTION_SCALE = 0.05f;
