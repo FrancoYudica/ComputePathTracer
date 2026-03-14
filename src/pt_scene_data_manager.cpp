@@ -408,11 +408,6 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
             vertices_data.push_back(vertex.tangent.z);
             vertices_data.push_back(vertex.tangent.w);
 
-            print_line("Tangent: (" + String::num_real(vertex.tangent.x) +
-                       ", " + String::num_real(vertex.tangent.y) + ", " +
-                       String::num_real(vertex.tangent.z) + ", " +
-                       String::num_real(vertex.tangent.w) + ")");
-
             vertices.push_back(vertex);
         }
 
@@ -491,8 +486,6 @@ uint32_t godot::PTSceneDataManager::_parse_material(
             float refractionIndex =
                 1.0 / (1.0 - std_material->get_refraction());
             materialType = MATERIAL_TYPE_DIELECTRIC;
-            print_line("Found dielectric material. Refraction index: " +
-                       String::num_real(std_material->get_refraction()));
 
             pt_material.refraction_index = refractionIndex;
         }

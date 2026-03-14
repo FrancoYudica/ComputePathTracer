@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://scenes/camera_controller.gd" id="3_1bvp3"]
 [ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://ui/themes/title_label_theme.tres" id="3_vivmo"]
 [ext_resource type="Script" uid="uid://jgmadjtpqtqa" path="res://ui/bvh_settings_panel_container.gd" id="4_w48qg"]
-[ext_resource type="Script" uid="uid://bp4nu0w2cip1a" path="res://renderer_settings_panel_container.gd" id="4_yaehf"]
+[ext_resource type="Script" uid="uid://bp4nu0w2cip1a" path="res://ui/renderer_settings_panel_container.gd" id="4_yaehf"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://ui/slider_value_label.gd" id="5_dg77c"]
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://ui/stats_panel_container.gd" id="6_dg77c"]
 [ext_resource type="PackedScene" uid="uid://j4h1pyrgc37a" path="res://scenes/triangulated_test_scene.tscn" id="9_efxa6"]
