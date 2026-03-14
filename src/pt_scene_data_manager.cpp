@@ -143,8 +143,9 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
         }
 
         Transform3D mesh_transform = mesh_instance_ptr->get_global_transform();
-        _load_mesh_surfaces(mesh, mesh_transform, vertices, vertices_data,
-                            triangles);
+
+        _load_mesh_surfaces(mesh_instance_ptr, mesh, mesh_transform, vertices,
+                            vertices_data, triangles);
     }
 
     // Write triangle count
@@ -312,10 +313,30 @@ void godot::PTSceneDataManager::_update_textures_buffer() {
 }
 
 void godot::PTSceneDataManager::_load_mesh_surfaces(
-    const Ref<Mesh> mesh, Transform3D& mesh_transform,
-    std::vector<PTVertex>& vertices, PackedFloat32Array& vertices_data,
-    std::vector<PTTriangle>& triangles) {
-    // Iterates through all surfaces of the mesh
+    const MeshInstance3D* mesh_instance, const Ref<Mesh> mesh,
+    Transform3D& mesh_transform, std::vector<PTVertex>& vertices,
+    PackedFloat32Array& vertices_data, std::vector<PTTriangle>& triangles) {
+    // First, loads the materials of the surfaces
+    std::vector<uint32_t> surface_material_indices;
+
+    for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
+        Ref<Material> surface_material;
+
+        // If there is a material override for the surface, use that instead
+        if (mesh_instance->get_surface_override_material(i).is_valid()) {
+            surface_material = mesh_instance->get_surface_override_material(i);
+
+        }
+        // Otherwise, just use the default surface material
+        else {
+            surface_material = mesh->surface_get_material(i);
+        }
+
+        uint32_t material_index = _parse_material(surface_material);
+        surface_material_indices.push_back(material_index);
+    }
+
+    // Loads per surface vertices
     for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
         // Initialize the SurfaceTool with the existing mesh
         Ref<SurfaceTool> st;
@@ -331,8 +352,7 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
         mdt->create_from_surface(mesh_with_tangents, 0);
 
         // Access surface material and parses
-        Ref<Material> surface_material = mesh->surface_get_material(i);
-        uint32_t mesh_material_index = _parse_material(surface_material);
+        uint32_t mesh_material_index = surface_material_indices[i];
 
         PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
         PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];

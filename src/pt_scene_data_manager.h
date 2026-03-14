@@ -62,7 +62,8 @@ namespace godot {
 
         void _update_materials_buffer();
         void _update_textures_buffer();
-        void _load_mesh_surfaces(const Ref<Mesh> mesh,
+        void _load_mesh_surfaces(const MeshInstance3D* mesh_instance,
+                                 const Ref<Mesh> mesh,
                                  Transform3D& mesh_transform,
                                  std::vector<PTVertex>& vertices,
                                  PackedFloat32Array& vertices_data,

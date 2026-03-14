@@ -21,7 +21,7 @@ window/stretch/aspect="ignore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/pathtracer/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdquest_model_viewer_3d/plugin.cfg", "res://addons/pathtracer/plugin.cfg")
 
 [input]
 

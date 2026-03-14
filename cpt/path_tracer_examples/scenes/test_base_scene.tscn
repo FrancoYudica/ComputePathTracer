@@ -1,10 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://xpfm7su0rbtr"]
+[gd_scene load_steps=16 format=3 uid="uid://xpfm7su0rbtr"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://path_tracer_examples/scenes/base_scene.tscn" id="1_nyy6r"]
 [ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://path_tracer_examples/models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
 [ext_resource type="PackedScene" uid="uid://dre5rg7eu6uk1" path="res://path_tracer_examples/models/police/mech_robotic_police_3d_model_w_scifi_gun.glb" id="3_so2qy"]
 [ext_resource type="PackedScene" uid="uid://cfubdyvkrkefg" path="res://path_tracer_examples/models/car/cyberpunk_car.glb" id="4_ngss8"]
-[ext_resource type="PackedScene" uid="uid://kod0awm1ha4o" path="res://path_tracer_examples/models/gdquest_gobot/model/gobot.glb" id="5_me4tr"]
 [ext_resource type="Texture2D" uid="uid://dpfuuafwakhyp" path="res://path_tracer_examples/models/bricks/bricks_normal.png" id="6_i384k"]
 [ext_resource type="PackedScene" uid="uid://hok5ejf3bxy3" path="res://path_tracer_examples/models/ganesh/the_hindu_god_ganesh.glb" id="7_lni0r"]
 
@@ -112,13 +111,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.595751, 3.074, 2.605)
 visible = false
 mesh = SubResource("SphereMesh_ngss8")
 
-[node name="gobot" parent="." index="8" instance=ExtResource("5_me4tr")]
-visible = false
-
-[node name="MeshInstance3D5" type="MeshInstance3D" parent="." index="9"]
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="." index="8"]
 visible = false
 mesh = SubResource("PlaneMesh_vghtq")
 
-[node name="Sketchfab_Scene4" parent="." index="10" instance=ExtResource("7_lni0r")]
+[node name="Sketchfab_Scene4" parent="." index="9" instance=ExtResource("7_lni0r")]
 transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0.046933413, 1.6987128, -0.0286448)
 visible = false
