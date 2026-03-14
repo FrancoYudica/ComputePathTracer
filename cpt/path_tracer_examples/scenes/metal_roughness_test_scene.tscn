@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://bebv6dlx2oomf"]
+
+[ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://path_tracer_examples/scenes/base_scene.tscn" id="1_ge8mg"]
+[ext_resource type="Script" uid="uid://2tu85pmmq26l" path="res://path_tracer_examples/scenes/metal_roughness_test_scene.gd" id="2_6n7px"]
+
+[node name="MetalRoughnessTestScene" instance=ExtResource("1_ge8mg")]
+script = ExtResource("2_6n7px")
+size = null
+radius = null
+
+[node name="LightsNode3D" type="Node3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4766798, 0)
+
+[node name="PTNode" type="PTAnalyticalGeometry" parent="LightsNode3D" index="0"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 1, 0, 1)
+
+[node name="PTNode2" type="PTAnalyticalGeometry" parent="LightsNode3D" index="1"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, -1, 0, 1)
+
+[node name="PTNode3" type="PTAnalyticalGeometry" parent="LightsNode3D" index="2"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, -1, 0, -1)
+
+[node name="PTNode4" type="PTAnalyticalGeometry" parent="LightsNode3D" index="3"]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 1, 0, -1)
