@@ -11,6 +11,7 @@
 #include <godot_cpp/classes/mesh_data_tool.hpp>
 #include <godot_cpp/classes/surface_tool.hpp>
 #include <godot_cpp/classes/resource_loader.hpp>
+#include <godot_cpp/classes/skin.hpp>
 #include <unordered_set>
 
 #include "pt_bounding_volume_hierarchy.h"
@@ -142,10 +143,8 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
             continue;
         }
 
-        Transform3D mesh_transform = mesh_instance_ptr->get_global_transform();
-
-        _load_mesh_surfaces(mesh_instance_ptr, mesh, mesh_transform, vertices,
-                            vertices_data, triangles);
+        _load_mesh_surfaces(mesh_instance_ptr, vertices, vertices_data,
+                            triangles);
     }
 
     // Write triangle count
@@ -313,13 +312,65 @@ void godot::PTSceneDataManager::_update_textures_buffer() {
 }
 
 void godot::PTSceneDataManager::_load_mesh_surfaces(
-    const MeshInstance3D* mesh_instance, const Ref<Mesh> mesh,
-    Transform3D& mesh_transform, std::vector<PTVertex>& vertices,
+    MeshInstance3D* mesh_instance, std::vector<PTVertex>& vertices,
     PackedFloat32Array& vertices_data, std::vector<PTTriangle>& triangles) {
-    // First, loads the materials of the surfaces
+    // 1. Get the source mesh
+    Ref<Mesh> base_mesh = mesh_instance->get_mesh();
+    if (base_mesh.is_null()) return;
+
+    Ref<ArrayMesh> process_mesh;
+
+    // 2. Ensure we are working with an ArrayMesh (Convert if it's a Plane/Box)
+    Ref<ArrayMesh> am_check = base_mesh;
+    if (am_check.is_null()) {
+        Ref<SurfaceTool> st_convert;
+        st_convert.instantiate();
+        st_convert->create_from(base_mesh, 0);
+        process_mesh = st_convert->commit();
+    } else {
+        // We need a UNIQUE copy so we don't modify the original resource
+        process_mesh = base_mesh->duplicate();
+    }
+
+    // 3. Bake the Deformations. Only possible if it's ArrayMesh
+    if (base_mesh->is_class("ArrayMesh")) {
+        // Only if there are blend shapes applied
+        if (mesh_instance->get_blend_shape_count() > 0) {
+            mesh_instance->bake_mesh_from_current_blend_shape_mix(process_mesh);
+        }
+
+        // We check if the MeshInstance is actually skinned
+        if (!mesh_instance->get_skeleton_path().is_empty() &&
+            mesh_instance->get_skin().is_valid()) {
+            mesh_instance->bake_mesh_from_current_skeleton_pose(process_mesh);
+        }
+    }
+    // 4. Generate Tangents
+    Ref<ArrayMesh> final_mesh;
+    final_mesh.instantiate();
+
+    for (int j = 0; j < process_mesh->get_surface_count(); j++) {
+        Ref<SurfaceTool> st;
+        st.instantiate();
+
+        // 1. Initialize with the specific surface
+        st->begin(Mesh::PRIMITIVE_TRIANGLES);
+        st->append_from(process_mesh, j, Transform3D());
+
+        // 2. Generate tangents for this specific surface
+        st->generate_tangents();
+
+        // 3. Commit this surface to our final result
+        // This preserves the surface index (j) and its associated material
+        final_mesh = st->commit(final_mesh);
+    }
+
+    process_mesh = final_mesh;
+
+    // Loads the materials of the surfaces
     std::vector<uint32_t> surface_material_indices;
 
-    for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
+    for (uint32_t i = 0; i < base_mesh->get_surface_count(); ++i) {
         Ref<Material> surface_material;
 
         // If there is a material override for the surface, use that instead
@@ -329,7 +380,7 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
         }
         // Otherwise, just use the default surface material
         else {
-            surface_material = mesh->surface_get_material(i);
+            surface_material = base_mesh->surface_get_material(i);
         }
 
         uint32_t material_index = _parse_material(surface_material);
@@ -337,19 +388,15 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
     }
 
     // Loads per surface vertices
-    for (uint32_t i = 0; i < mesh->get_surface_count(); ++i) {
-        // Initialize the SurfaceTool with the existing mesh
-        Ref<SurfaceTool> st;
-        st.instantiate();
-        st->create_from(mesh, i);
-        st->generate_tangents();
-        Ref<ArrayMesh> mesh_with_tangents = st->commit();
-        Array arr = mesh_with_tangents->surface_get_arrays(0);
+    Transform3D mesh_transform = mesh_instance->get_global_transform();
+
+    for (uint32_t i = 0; i < process_mesh->get_surface_count(); ++i) {
+        Array arr = process_mesh->surface_get_arrays(i);
 
         // Use MeshDataTool to access tangents
         Ref<MeshDataTool> mdt;
         mdt.instantiate();
-        mdt->create_from_surface(mesh_with_tangents, 0);
+        mdt->create_from_surface(process_mesh, i);
 
         // Access surface material and parses
         uint32_t mesh_material_index = surface_material_indices[i];
@@ -359,6 +406,7 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
         PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
         PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
         PackedVector2Array surface_uvs = arr[ArrayMesh::ARRAY_TEX_UV];
+        PackedVector3Array surface_tangents = arr[ArrayMesh::ARRAY_TANGENT];
 
         // Base offset relative to current vertices size
         uint32_t base_index_offset = uint32_t(vertices.size());
