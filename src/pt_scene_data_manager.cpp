@@ -91,7 +91,8 @@ void godot::PTSceneDataManager::_update_spheres_buffer(
         spheres_data[base_offset + 2] = sphere->get_global_position().z;
         spheres_data[base_offset + 3] =
             sphere->get_global_transform().basis[0].x * 0.5;  // radius
-        uint32_t material_index = _material_lib.push(sphere->get_material());
+        uint32_t material_index =
+            _material_lib.get_or_push_material(sphere->get_material());
         print_line("Sphere material index: " +
                    String::num_int64(material_index));
         spheres_data[base_offset + material_offset] = float(material_index);
@@ -373,7 +374,8 @@ void godot::PTSceneDataManager::_load_mesh_surfaces(
             surface_material = base_mesh->surface_get_material(i);
         }
 
-        uint32_t material_index = _material_lib.push(surface_material);
+        uint32_t material_index =
+            _material_lib.get_or_push_material(surface_material);
         surface_material_indices.push_back(material_index);
     }
 

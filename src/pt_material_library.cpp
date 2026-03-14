@@ -19,15 +19,17 @@ namespace godot {
 
         // Pushes default material and texture
         PTMaterial default_material;
-        push(default_material);
-        push_texture(_default_texture);
+        get_or_push_material(default_material);
+        get_or_push_texture(_default_texture);
     }
 
-    uint32_t PTMaterialLibrary::push(const Ref<Material>& material) {
+    uint32_t PTMaterialLibrary::get_or_push_material(
+        const Ref<Material>& material) {
         return _parse_material(material);
     }
 
-    uint32_t PTMaterialLibrary::push(const PTMaterial& material) {
+    uint32_t PTMaterialLibrary::get_or_push_material(
+        const PTMaterial& material) {
         size_t hash = material.get_hash();
         if (!_frame_materials.count(hash)) {
             uint32_t index = uint32_t(_frame_materials_list.size());
@@ -58,18 +60,18 @@ namespace godot {
                 Ref<StandardMaterial3D>(material);
 
             PTMaterial pt_material;
-            pt_material.albedo_texture_index = push_texture(
+            pt_material.albedo_texture_index = get_or_push_texture(
                 std_material->get_texture(StandardMaterial3D::TEXTURE_ALBEDO));
             pt_material.metallic_texture_index =
-                push_texture(std_material->get_texture(
+                get_or_push_texture(std_material->get_texture(
                     StandardMaterial3D::TEXTURE_METALLIC));
             pt_material.roughness_texture_index =
-                push_texture(std_material->get_texture(
+                get_or_push_texture(std_material->get_texture(
                     StandardMaterial3D::TEXTURE_ROUGHNESS));
             pt_material.emission_texture_index =
-                push_texture(std_material->get_texture(
+                get_or_push_texture(std_material->get_texture(
                     StandardMaterial3D::TEXTURE_EMISSION));
-            pt_material.normal_texture_index = push_texture(
+            pt_material.normal_texture_index = get_or_push_texture(
                 std_material->get_texture(StandardMaterial3D::TEXTURE_NORMAL));
 
             pt_material.metallic_texture_channel =
@@ -107,7 +109,7 @@ namespace godot {
             pt_material.metallic = std_material->get_metallic();
             pt_material.roughness = std_material->get_roughness();
 
-            return push(pt_material);
+            return get_or_push_material(pt_material);
         }
 
         else {
@@ -117,7 +119,7 @@ namespace godot {
         return 0;
     }
 
-    uint32_t godot::PTMaterialLibrary::push_texture(
+    uint32_t godot::PTMaterialLibrary::get_or_push_texture(
         const Ref<Texture2D>& texture) {
         if (texture.is_null()) {
             return 0;  // Default texture index

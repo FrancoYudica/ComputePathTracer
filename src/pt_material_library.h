@@ -24,9 +24,9 @@ namespace godot {
          * Loads a new material into the library. Also checks
          * if the material is already loaded, to avoid duplicates
          */
-        uint32_t push(const Ref<Material>& material);
-        uint32_t push(const PTMaterial& material);
-        uint32_t push_texture(const Ref<Texture2D>& texture);
+        uint32_t get_or_push_material(const Ref<Material>& material);
+        uint32_t get_or_push_material(const PTMaterial& material);
+        uint32_t get_or_push_texture(const Ref<Texture2D>& texture);
         const std::vector<PTMaterial>& get_materials();
         const std::vector<Ref<Texture2D>>& get_textures();
 
