@@ -19,6 +19,7 @@
 #include "pt_renderer_stats.h"
 #include "pt_renderer_settings.h"
 #include "pt_material_library.h"
+#include "pt_geometry_processor.h"
 
 namespace godot {
 
@@ -34,6 +35,7 @@ namespace godot {
         PTResourceManager* _resource_manager;
 
         PTMaterialLibrary _material_lib;
+        PTGeometryProcessor _geometry_processor;
 
         Ref<PTRendererStats> _stats;
 
@@ -56,10 +58,6 @@ namespace godot {
 
         void _update_materials_buffer();
         void _update_textures_buffer();
-        void _load_mesh_surfaces(MeshInstance3D* mesh_instance,
-                                 std::vector<PTVertex>& vertices,
-                                 PackedFloat32Array& vertices_data,
-                                 std::vector<PTTriangle>& triangles);
     };
 
 }  // namespace godot

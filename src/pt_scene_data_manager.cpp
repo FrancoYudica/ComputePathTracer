@@ -4,14 +4,8 @@
 #include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/classes/ref.hpp>
 #include <godot_cpp/classes/material.hpp>
-#include <godot_cpp/classes/base_material3d.hpp>
-#include <godot_cpp/classes/standard_material3d.hpp>
 #include <godot_cpp/classes/window.hpp>
 #include <godot_cpp/classes/image.hpp>
-#include <godot_cpp/classes/mesh_data_tool.hpp>
-#include <godot_cpp/classes/surface_tool.hpp>
-#include <godot_cpp/classes/resource_loader.hpp>
-#include <godot_cpp/classes/skin.hpp>
 #include <unordered_set>
 
 #include "pt_bounding_volume_hierarchy.h"
@@ -61,6 +55,7 @@ void godot::PTSceneDataManager::update_buffers(
 
     TypedArray<MeshInstance3D> mesh_instances =
         PTUtils::gather_nodes_of_type<MeshInstance3D>(_root);
+
     _update_triangles_buffer(mesh_instances, render_settings);
 
     _update_materials_buffer();
@@ -106,55 +101,56 @@ void godot::PTSceneDataManager::_update_spheres_buffer(
 void godot::PTSceneDataManager::_update_triangles_buffer(
     const TypedArray<MeshInstance3D>& meshes,
     const Ref<PTRendererSettings> render_settings) {
-    std::vector<PTTriangle> triangles;
-    std::vector<PTVertex> vertices;
-
-    PackedFloat32Array vertices_data;
-
-    for (const Variant mesh_instance : meshes) {
-        MeshInstance3D* mesh_instance_ptr =
-            Object::cast_to<MeshInstance3D>(mesh_instance);
-
-        if (mesh_instance_ptr == nullptr) {
-            continue;
-        }
-
-        if (!mesh_instance_ptr->is_visible_in_tree()) {
-            continue;
-        }
-
-        const Ref<Mesh> mesh = mesh_instance_ptr->get_mesh();
-
-        // Ignore when null
-        if (mesh.is_null()) {
-            continue;
-        }
-
-        _load_mesh_surfaces(mesh_instance_ptr, vertices, vertices_data,
-                            triangles);
-    }
+    PTGeometryResult result =
+        _geometry_processor.process_scene_geometry(meshes, &_material_lib);
 
     // Write triangle count
     PackedFloat32Array triangles_count_data;
-    triangles_count_data.push_back(float(triangles.size()));
+    triangles_count_data.push_back(float(result.triangles.size()));
     triangles_count_data.push_back(0.0);
     triangles_count_data.push_back(0.0);
     triangles_count_data.push_back(0.0);
     PackedByteArray triangle_count_bytes = triangles_count_data.to_byte_array();
     _resource_manager->update_storage_buffer("triangles", triangle_count_bytes);
 
-    if (triangles.size() == 0) {
+    if (result.triangles.size() == 0) {
         print_line("No triangles to process.");
         return;
     }
 
     // Write vertices
-    PackedByteArray vertices_bytes = vertices_data.to_byte_array();
+    PackedFloat32Array vertex_buffer;
+    for (PTVertex& vertex : result.vertices) {
+        vertex_buffer.push_back(vertex.position.x);
+        vertex_buffer.push_back(vertex.position.y);
+        vertex_buffer.push_back(vertex.position.z);
+        vertex_buffer.push_back(0.0);  // Padding
+
+        vertex_buffer.push_back(vertex.color.x);
+        vertex_buffer.push_back(vertex.color.y);
+        vertex_buffer.push_back(vertex.color.z);
+        vertex_buffer.push_back(0.0);  // Padding
+
+        vertex_buffer.push_back(vertex.normal.x);
+        vertex_buffer.push_back(vertex.normal.y);
+        vertex_buffer.push_back(vertex.normal.z);
+        vertex_buffer.push_back(0.0);  // Padding
+
+        vertex_buffer.push_back(vertex.uv.x);
+        vertex_buffer.push_back(vertex.uv.y);
+        vertex_buffer.push_back(0.0);  // Padding
+        vertex_buffer.push_back(0.0);  // Padding
+
+        vertex_buffer.push_back(vertex.tangent.x);
+        vertex_buffer.push_back(vertex.tangent.y);
+        vertex_buffer.push_back(vertex.tangent.z);
+        vertex_buffer.push_back(vertex.tangent.w);
+    }
+    PackedByteArray vertices_bytes = vertex_buffer.to_byte_array();
     _resource_manager->update_storage_buffer("vertex", vertices_bytes);
 
-    _stats->set_triangle_count(triangles.size());
-    _stats->set_vertex_count(vertices_data.size());
-
+    _stats->set_triangle_count(result.triangles.size());
+    _stats->set_vertex_count(vertex_buffer.size());
     // Build BVH
     uint64_t start_t = Time::get_singleton()->get_ticks_msec();
     PTBoundingVolumeHierarchy bvh;
@@ -165,7 +161,7 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
             render_settings->get_bvh_max_triangles_per_leaf(),
         .sah_bins = render_settings->get_bvh_sah_bins()};
 
-    bvh.build(vertices, triangles, bvh_settings);
+    bvh.build(result.vertices, result.triangles, bvh_settings);
 
     uint64_t end_t = Time::get_singleton()->get_ticks_msec();
     print_line("BVH creation time: " + String::num_int64(end_t - start_t));
@@ -198,10 +194,10 @@ void godot::PTSceneDataManager::_update_triangles_buffer(
                " max: " + String::num_int64(max_leaf_primitives));
 
     PackedFloat32Array sorted_triangles;
-    sorted_triangles.resize(triangles.size() * 4);
+    sorted_triangles.resize(result.triangles.size() * 4);
 
-    for (uint32_t i = 0; i < triangles.size(); i++) {
-        PTTriangle& triangle = triangles[i];
+    for (uint32_t i = 0; i < result.triangles.size(); i++) {
+        PTTriangle& triangle = result.triangles[i];
         sorted_triangles[i * 4 + 0] = triangle.i0;
         sorted_triangles[i * 4 + 1] = triangle.i1;
         sorted_triangles[i * 4 + 2] = triangle.i2;
@@ -298,189 +294,6 @@ void godot::PTSceneDataManager::_update_textures_buffer() {
                                 image->get_data()) != Error::OK) {
             ERR_PRINT("Failed to update texture array layer index: " +
                       String::num_int64(i));
-        }
-    }
-}
-
-void godot::PTSceneDataManager::_load_mesh_surfaces(
-    MeshInstance3D* mesh_instance, std::vector<PTVertex>& vertices,
-    PackedFloat32Array& vertices_data, std::vector<PTTriangle>& triangles) {
-    // 1. Get the source mesh
-    Ref<Mesh> base_mesh = mesh_instance->get_mesh();
-    if (base_mesh.is_null()) return;
-
-    Ref<ArrayMesh> process_mesh;
-
-    // 2. Ensure we are working with an ArrayMesh (Convert if it's a Plane/Box)
-    Ref<ArrayMesh> am_check = base_mesh;
-    if (am_check.is_null()) {
-        Ref<SurfaceTool> st_convert;
-        st_convert.instantiate();
-        st_convert->create_from(base_mesh, 0);
-        process_mesh = st_convert->commit();
-    } else {
-        // We need a UNIQUE copy so we don't modify the original resource
-        process_mesh = base_mesh->duplicate();
-    }
-
-    // 3. Bake the Deformations. Only possible if it's ArrayMesh
-    if (base_mesh->is_class("ArrayMesh")) {
-        // Only if there are blend shapes applied
-        if (mesh_instance->get_blend_shape_count() > 0) {
-            mesh_instance->bake_mesh_from_current_blend_shape_mix(process_mesh);
-        }
-
-        // We check if the MeshInstance is actually skinned
-        if (!mesh_instance->get_skeleton_path().is_empty() &&
-            mesh_instance->get_skin().is_valid()) {
-            mesh_instance->bake_mesh_from_current_skeleton_pose(process_mesh);
-        }
-    }
-    // 4. Generate Tangents
-    Ref<ArrayMesh> final_mesh;
-    final_mesh.instantiate();
-
-    for (int j = 0; j < process_mesh->get_surface_count(); j++) {
-        Ref<SurfaceTool> st;
-        st.instantiate();
-
-        // 1. Initialize with the specific surface
-        st->begin(Mesh::PRIMITIVE_TRIANGLES);
-        st->append_from(process_mesh, j, Transform3D());
-
-        // 2. Generate tangents for this specific surface
-        st->generate_tangents();
-
-        // 3. Commit this surface to our final result
-        // This preserves the surface index (j) and its associated material
-        final_mesh = st->commit(final_mesh);
-    }
-
-    process_mesh = final_mesh;
-
-    // Loads the materials of the surfaces
-    std::vector<uint32_t> surface_material_indices;
-
-    for (uint32_t i = 0; i < base_mesh->get_surface_count(); ++i) {
-        Ref<Material> surface_material;
-
-        // If there is a material override for the surface, use that instead
-        if (mesh_instance->get_surface_override_material(i).is_valid()) {
-            surface_material = mesh_instance->get_surface_override_material(i);
-
-        }
-        // Otherwise, just use the default surface material
-        else {
-            surface_material = base_mesh->surface_get_material(i);
-        }
-
-        uint32_t material_index =
-            _material_lib.get_or_push_material(surface_material);
-        surface_material_indices.push_back(material_index);
-    }
-
-    // Loads per surface vertices
-    Transform3D mesh_transform = mesh_instance->get_global_transform();
-
-    for (uint32_t i = 0; i < process_mesh->get_surface_count(); ++i) {
-        Array arr = process_mesh->surface_get_arrays(i);
-
-        // Use MeshDataTool to access tangents
-        Ref<MeshDataTool> mdt;
-        mdt.instantiate();
-        mdt->create_from_surface(process_mesh, i);
-
-        // Access surface material and parses
-        uint32_t mesh_material_index = surface_material_indices[i];
-
-        PackedVector3Array surface_vertices = arr[ArrayMesh::ARRAY_VERTEX];
-        PackedInt32Array surface_indices = arr[ArrayMesh::ARRAY_INDEX];
-        PackedColorArray surface_colors = arr[ArrayMesh::ARRAY_COLOR];
-        PackedVector3Array surface_normals = arr[ArrayMesh::ARRAY_NORMAL];
-        PackedVector2Array surface_uvs = arr[ArrayMesh::ARRAY_TEX_UV];
-        PackedVector3Array surface_tangents = arr[ArrayMesh::ARRAY_TANGENT];
-
-        // Base offset relative to current vertices size
-        uint32_t base_index_offset = uint32_t(vertices.size());
-
-        // Add vertices
-        for (uint32_t v = 0; v < surface_vertices.size(); ++v) {
-            Vector3 local_position = surface_vertices[v];
-
-            Vector2 uv =
-                surface_uvs.size() > 0 ? surface_uvs[v] : Vector2(0.0, 0.0);
-
-            Vector3 local_normal = surface_normals.size() > 0
-                                       ? surface_normals[v]
-                                       : Vector3(0.0, 1.0, 0.0);
-
-            Vector4 local_tangent = Vector4(mdt->get_vertex_tangent(v).normal.x,
-                                            mdt->get_vertex_tangent(v).normal.y,
-                                            mdt->get_vertex_tangent(v).normal.z,
-                                            mdt->get_vertex_tangent(v).d);
-
-            Color color = surface_colors.size() > 0 ? surface_colors[v]
-                                                    : Color(1.0, 1.0, 1.0, 1.0);
-
-            // Transform Position
-            Vector3 position = mesh_transform.xform(local_position);
-
-            // Transform Normal (Inverse Transpose + Normalize)
-            Basis inv_transpose = mesh_transform.basis.inverse();
-            inv_transpose.transpose();
-            Vector3 normal = inv_transpose.xform(local_normal).normalized();
-
-            // Transform Tangent (Basis + Normalize)
-            Vector3 tangent_raw =
-                Vector3(local_tangent.x, local_tangent.y, local_tangent.z);
-            Vector3 tangent =
-                mesh_transform.basis.xform(tangent_raw).normalized();
-
-            // Preserve the handedness for the bitangent calculation
-            float tangent_w = local_tangent.w;
-
-            PTVertex vertex = {
-                position, Vector3(color.r, color.g, color.b), normal, uv,
-                Vector4(tangent.x, tangent.y, tangent.z, tangent_w)};
-
-            vertices_data.push_back(vertex.position.x);
-            vertices_data.push_back(vertex.position.y);
-            vertices_data.push_back(vertex.position.z);
-            vertices_data.push_back(0.0);  // Padding
-
-            vertices_data.push_back(vertex.color.x);
-            vertices_data.push_back(vertex.color.y);
-            vertices_data.push_back(vertex.color.z);
-            vertices_data.push_back(0.0);  // Padding
-
-            vertices_data.push_back(vertex.normal.x);
-            vertices_data.push_back(vertex.normal.y);
-            vertices_data.push_back(vertex.normal.z);
-            vertices_data.push_back(0.0);  // Padding
-
-            vertices_data.push_back(vertex.uv.x);
-            vertices_data.push_back(vertex.uv.y);
-            vertices_data.push_back(0.0);  // Padding
-            vertices_data.push_back(0.0);  // Padding
-
-            vertices_data.push_back(vertex.tangent.x);
-            vertices_data.push_back(vertex.tangent.y);
-            vertices_data.push_back(vertex.tangent.z);
-            vertices_data.push_back(vertex.tangent.w);
-
-            vertices.push_back(vertex);
-        }
-
-        // Add triangles
-        for (uint32_t idx = 0; idx < surface_indices.size(); idx += 3) {
-            uint32_t i0 =
-                base_index_offset + uint32_t(surface_indices[idx + 0]);
-            uint32_t i1 =
-                base_index_offset + uint32_t(surface_indices[idx + 1]);
-            uint32_t i2 =
-                base_index_offset + uint32_t(surface_indices[idx + 2]);
-
-            triangles.push_back({i0, i1, i2, mesh_material_index});
         }
     }
 }
