@@ -39,11 +39,13 @@ install_targets = [
     env.Install(dist_path, library)
 ]
 
-# Add this to your SConstruct to sync to addon
-env.Install(
-    "addon_files/addons/pathtracer/shaders/", 
-    Glob("cpt/addons/pathtracer/shaders/*.glsl*"))
+# Grab all files in the shader directory and filter the .import files
+all_shader_files = Glob("cpt/addons/pathtracer/shaders/*")
+shader_sources = [f for f in all_shader_files if not str(f).endswith(".import")]
+shader_dest = "addon_files/addons/pathtracer/shaders/"
+install_shaders = env.Install(shader_dest, shader_sources)
 
 # Make these the default action when you run 'scons'
 Default(library)
 Default(install_targets)
+Default(install_shaders)
