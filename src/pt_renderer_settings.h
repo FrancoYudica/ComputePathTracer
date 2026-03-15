@@ -76,6 +76,8 @@ namespace godot {
         void set_debug_bvh_box_intersections_threshold(float p_threshold);
         void set_debug_bvh_triangle_intersections_threshold(float p_threshold);
 
+        PackedByteArray get_byte_array() const;
+
     private:
     };
 

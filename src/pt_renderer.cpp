@@ -202,32 +202,7 @@ namespace godot {
     }
 
     void PTRenderer::_update_settings_storage_buffer() {
-        PackedFloat32Array settings_data;
-
-        settings_data.push_back(
-            static_cast<float>(_renderer_settings->get_samples_per_pixel()));
-
-        settings_data.push_back(
-            static_cast<float>(_renderer_settings->get_max_bounces()));
-
-        settings_data.push_back(_renderer_settings->get_environment_energy());
-
-        settings_data.push_back(_renderer_settings->get_camera_aperture());
-
-        settings_data.push_back(
-            _renderer_settings->get_camera_focus_distance());
-
-        settings_data.push_back(
-            static_cast<float>(_renderer_settings->get_render_mode()));
-
-        settings_data.push_back(
-            _renderer_settings->get_debug_bvh_box_intersections_threshold());
-
-        settings_data.push_back(
-            _renderer_settings
-                ->get_debug_bvh_triangle_intersections_threshold());
-
-        PackedByteArray settings_bytes = settings_data.to_byte_array();
+        PackedByteArray settings_bytes = _renderer_settings->get_byte_array();
         _resource_manager.update_storage_buffer("settings", settings_bytes);
     }
 

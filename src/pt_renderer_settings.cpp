@@ -189,3 +189,19 @@ void godot::PTRendererSettings::set_debug_bvh_triangle_intersections_threshold(
     debug_bvh_triangle_intersections_threshold = p_threshold;
     emit_changed();
 }
+
+godot::PackedByteArray godot::PTRendererSettings::get_byte_array() const {
+    PackedFloat32Array settings_data;
+
+    settings_data.push_back(static_cast<float>(get_samples_per_pixel()));
+    settings_data.push_back(static_cast<float>(get_max_bounces()));
+    settings_data.push_back(get_environment_energy());
+    settings_data.push_back(get_camera_aperture());
+    settings_data.push_back(get_camera_focus_distance());
+    settings_data.push_back(static_cast<float>(get_render_mode()));
+    settings_data.push_back(get_debug_bvh_box_intersections_threshold());
+    settings_data.push_back(get_debug_bvh_triangle_intersections_threshold());
+
+    PackedByteArray settings_bytes = settings_data.to_byte_array();
+    return settings_bytes;
+}
