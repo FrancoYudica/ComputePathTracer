@@ -4,9 +4,15 @@ extends PanelContainer
 @export var rendered_sub_viewport_container: SubViewportContainer
 @export var sub_viewport: SubViewport
 @export var save_file_dialog: FileDialog
+@export var settings_panel: Node
+@export var bvh_settings_panel: Node
+@export var stats_panel: Node
 
 func _ready() -> void:
 	save_file_dialog.file_selected.connect(_file_saved)
+	settings_panel.set_renderer_settings(PTRenderer.renderer_settings)
+	bvh_settings_panel.set_renderer_settings(PTRenderer.renderer_settings)
+	stats_panel.set_stats(PTRenderer.get_stats())
 	
 func _on_rasterized_check_box_toggled(toggled_on: bool) -> void:
 	rasterized_panel.visible = toggled_on

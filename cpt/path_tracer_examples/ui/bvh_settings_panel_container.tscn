@@ -1,0 +1,91 @@
+[gd_scene load_steps=3 format=3 uid="uid://d186ysmmc0hnj"]
+
+[ext_resource type="Script" uid="uid://jgmadjtpqtqa" path="res://path_tracer_examples/ui/bvh_settings_panel_container.gd" id="1_7nfon"]
+[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://path_tracer_examples/ui/themes/title_label_theme.tres" id="2_sy0by"]
+
+[node name="BVHSettingsPanelContainer" type="PanelContainer" node_paths=PackedStringArray("depth_spin", "max_leaf_triangles_spin", "sah_bins_spin", "box_threshold_spin", "triangle_threshold_spin")]
+script = ExtResource("1_7nfon")
+depth_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHDepthSpinBox")
+max_leaf_triangles_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHMaxLeafTrianglesSpinBox")
+sah_bins_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/BVHSAHBinsSpinBox")
+box_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugBoxThresholdSpinBox")
+triangle_threshold_spin = NodePath("MarginContainer/VBoxContainer/GridContainer/DebugTriangleThresholdSpinBox")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_sy0by")
+text = "BVH SETTINGS"
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="BVHDepthLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Depth"
+
+[node name="BVHDepthSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 64.0
+value = 32.0
+rounded = true
+
+[node name="BVHMaxLeafTrianglesLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Max leaf triangles"
+
+[node name="BVHMaxLeafTrianglesSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 64.0
+value = 32.0
+rounded = true
+
+[node name="BVHSAHBinsLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "SAH bins"
+
+[node name="BVHSAHBinsSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 512.0
+value = 32.0
+rounded = true
+
+[node name="DebugBoxThreshold" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Box threshold"
+
+[node name="DebugBoxThresholdSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 512.0
+value = 50.0
+rounded = true
+
+[node name="DebugTriangleThreshold" type="Label" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+text = "Triangle threshold"
+
+[node name="DebugTriangleThresholdSpinBox" type="SpinBox" parent="MarginContainer/VBoxContainer/GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 256.0
+value = 50.0
+rounded = true

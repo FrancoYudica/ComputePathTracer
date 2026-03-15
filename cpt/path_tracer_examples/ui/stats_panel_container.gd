@@ -9,14 +9,34 @@ extends PanelContainer
 @export var texture_count_label: Label
 @export var bvh_node_count_label: Label
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	fps_label.text = "FPS: %s" % roundf(1.0 / _delta)
-	var stats = PTRenderer.get_stats()
-	samples_label.text = "Samples: %s" % stats.get_samples()
-	sphere_count_label.text = "Spheres: %s" % stats.get_sphere_count()
-	triangle_count_label.text = "Triangles: %s" % stats.get_triangle_count()
-	vertex_count_label.text = "Vertices: %s" % stats.get_vertex_count()
-	material_count_label.text = "Materials: %s" % stats.get_material_count()
-	texture_count_label.text = "Textures: %s" % stats.get_texture_count()
-	bvh_node_count_label.text = "BVH Nodes: %s" % stats.get_bvh_node_count()
+var _current_stats: PTRendererStats
+
+func _process(delta: float) -> void:
+	fps_label.text = "FPS: %d" % roundi(1.0 / delta)
+
+## Call this to set or swap the stats object
+func set_stats(stats: PTRendererStats) -> void:
+	# Cleanup previous connection
+	if _current_stats != null and _current_stats.changed.is_connected(_update_ui):
+		_current_stats.changed.disconnect(_update_ui)
+	
+	_current_stats = stats
+	
+	if _current_stats != null:
+		# Connect to the "changed" signal (emitted by C++ side)
+		_current_stats.changed.connect(_update_ui)
+		# Initial update
+		_update_ui()
+
+## Named method for updating all labels at once
+func _update_ui() -> void:
+	if _current_stats == null:
+		return
+		
+	samples_label.text = "Samples: %d" % _current_stats.get_samples()
+	sphere_count_label.text = "Spheres: %d" % _current_stats.get_sphere_count()
+	triangle_count_label.text = "Triangles: %d" % _current_stats.get_triangle_count()
+	vertex_count_label.text = "Vertices: %d" % _current_stats.get_vertex_count()
+	material_count_label.text = "Materials: %d" % _current_stats.get_material_count()
+	texture_count_label.text = "Textures: %d" % _current_stats.get_texture_count()
+	bvh_node_count_label.text = "BVH Nodes: %d" % _current_stats.get_bvh_node_count()
