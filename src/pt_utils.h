@@ -48,8 +48,8 @@ namespace godot {
         PackedFloat32Array transform3d_to_float32_array(
             const Transform3D& transform);
 
-        PackedByteArray get_camera_bytes(Camera3D* camera, uint32_t width,
-                                         uint32_t height);
+        PackedByteArray get_camera_byte_array(Camera3D* camera, uint32_t width,
+                                              uint32_t height);
 
     }  // namespace PTUtils
 

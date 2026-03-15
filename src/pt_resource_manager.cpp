@@ -61,13 +61,17 @@ namespace godot {
         _create_storage_buffers();
         load_skybox_from_camera(nullptr);
         _create_uniform_sets();
-
-        print_line("PTResourceManager initialized.");
     }
     void PTResourceManager::cleanup() {
-        _rd->free_rid(_output_texture);
-        _rd->free_rid(_accumulation_texture);
-        _rd->free_rid(_texture_array);
+        if (_output_texture.is_valid()) {
+            _rd->free_rid(_output_texture);
+        }
+        if (_accumulation_texture.is_valid()) {
+            _rd->free_rid(_accumulation_texture);
+        }
+        if (_texture_array.is_valid()) {
+            _rd->free_rid(_texture_array);
+        }
         // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
         // created here
         _rd->free_rid(_default_sampler);
@@ -162,6 +166,12 @@ namespace godot {
         }
     }
 
+    RID PTResourceManager::extract_output_texture() {
+        RID tex = _output_texture;
+        _output_texture = RID();  // The manager no longer "owns" this
+        return tex;
+    }
+
     void PTResourceManager::update_storage_buffer(const std::string& name,
                                                   const PackedByteArray& data,
                                                   uint64_t offset) {
@@ -198,6 +208,8 @@ namespace godot {
 
     void PTResourceManager::_create_viewport_textures(uint32_t width,
                                                       uint32_t height) {
+        _current_textures_width = width;
+        _current_textures_height = height;
         // LDR output texture
         _output_texture =
             create_texture(_rd, width, height,

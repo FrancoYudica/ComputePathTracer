@@ -35,8 +35,9 @@ namespace godot {
 
         return arr;
     }
-    PackedByteArray PTUtils::get_camera_bytes(Camera3D* camera, uint32_t width,
-                                              uint32_t height) {
+    PackedByteArray PTUtils::get_camera_byte_array(Camera3D* camera,
+                                                   uint32_t width,
+                                                   uint32_t height) {
         auto view = camera->get_global_transform().affine_inverse();
         auto projection = camera->get_camera_projection();
 

@@ -10,12 +10,6 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("destroy"), &PTRenderer::destroy);
 
         ClassDB::bind_method(D_METHOD("queue_clear"), &PTRenderer::queue_clear);
-        ClassDB::bind_method(D_METHOD("get_texture_rid"),
-                             &PTRenderer::get_texture_rid);
-        ClassDB::bind_method(D_METHOD("get_render_width"),
-                             &PTRenderer::get_render_width);
-        ClassDB::bind_method(D_METHOD("get_render_height"),
-                             &PTRenderer::get_render_height);
         ClassDB::bind_method(D_METHOD("update_scene"),
                              &PTRenderer::update_scene);
 
@@ -26,11 +20,36 @@ namespace godot {
                              &PTRenderer::get_renderer_settings);
         ClassDB::bind_method(D_METHOD("get_stats"), &PTRenderer::get_stats);
 
-        ClassDB::bind_method(D_METHOD("draw", "camera", "width", "height"),
-                             &PTRenderer::draw);
-
         ClassDB::bind_method(D_METHOD("_resize", "width", "height"),
                              &PTRenderer::_resize);
+
+        ClassDB::bind_method(
+            D_METHOD("_resize_task", "task", "width", "height"),
+            &PTRenderer::_resize_task);
+
+        ClassDB::bind_method(D_METHOD("pause_task", "task"),
+                             &PTRenderer::pause_task);
+        ClassDB::bind_method(D_METHOD("resume_task", "task"),
+                             &PTRenderer::resume_task);
+        ClassDB::bind_method(D_METHOD("kill_task", "task"),
+                             &PTRenderer::kill_task);
+        ClassDB::bind_method(D_METHOD("get_task_output", "task"),
+                             &PTRenderer::get_task_output);
+
+        ClassDB::bind_method(
+            D_METHOD("submit_one_shot_task", "camera", "settings"),
+            &PTRenderer::submit_one_shot_task);
+
+        ClassDB::bind_method(
+            D_METHOD("submit_continuous_task", "camera", "settings"),
+            &PTRenderer::submit_continuous_task);
+
+        ClassDB::bind_method(D_METHOD("_process_tasks"),
+                             &PTRenderer::_process_tasks);
+
+        ADD_SIGNAL(MethodInfo("task_completed",
+                              PropertyInfo(Variant::OBJECT, "task")));
+
         // Export in inspector
         ADD_PROPERTY(
             PropertyInfo(Variant::OBJECT, "renderer_settings",
@@ -55,18 +74,101 @@ namespace godot {
         _stats = Ref<PTRendererStats>(memnew(PTRendererStats));
         _stats->reset();
 
-        _initialize_compute();
+        _scene.instantiate();
+
+        _rd = RenderingServer::get_singleton()->get_rendering_device();
+        _scene->initialize(_rd);
+
         update_scene();
 
         _renderer_settings->connect("changed", Callable(this, "queue_clear"));
+
+        // The task processing is done on pre draw
+        RenderingServer::get_singleton()->connect(
+            "frame_pre_draw", Callable(this, "_process_tasks"));
 
         _initialized = true;
     }
 
     void PTRenderer::destroy() { _cleanup(); }
 
+    void PTRenderer::pause_task(Ref<PTRenderTask> task) {
+        if (task.is_valid()) task->status = STATUS_PAUSED;
+    }
+
+    void PTRenderer::resume_task(Ref<PTRenderTask> task) {
+        if (task.is_valid()) task->status = STATUS_RENDERING;
+    }
+
+    void PTRenderer::kill_task(Ref<PTRenderTask> task) {
+        if (task.is_null()) return;
+
+        for (int i = 0; i < _tasks.size(); ++i) {
+            if (_tasks[i] == task) {
+                _tasks.erase(_tasks.begin() + i);
+                break;
+            }
+        }
+    }
+
+    RID PTRenderer::get_task_output(Ref<PTRenderTask> task) {
+        if (task.is_null()) return RID();
+
+        if (task->type == RenderTaskType::ONE_SHOT) {
+            // Gets the output texture if the task is completed and kills the
+            // task
+            if (task->status == STATUS_COMPLETED) {
+                RID output_rid = task->scene->get_resource_manager()
+                                     ->extract_output_texture();
+
+                kill_task(task);
+                return output_rid;
+            }
+
+            return RID();
+        }
+
+        // TODO: See how to manage this for continuous tasks
+        return RID();
+    }
+
+    Ref<PTRenderTask> PTRenderer::_create_render_task(
+        Camera3D* camera, Ref<PTRendererSettings> settings,
+        RenderTaskType type) {
+        Ref<PTRenderTask> task;
+        task.instantiate();
+        task->status = RenderTaskStatus::STATUS_CREATED;
+        task->type = type;
+        task->camera = camera;
+        task->settings = settings;
+        task->stats.instantiate();
+        task->scene.instantiate();
+        task->scene->initialize(_rd);
+        task->frame_count = 1;
+        task->should_update_scene = true;
+        task->should_clear_textures = true;
+        return task;
+    }
+
+    Ref<PTRenderTask> PTRenderer::submit_one_shot_task(
+        Camera3D* camera, Ref<PTRendererSettings> settings) {
+        Ref<PTRenderTask> task =
+            _create_render_task(camera, settings, RenderTaskType::ONE_SHOT);
+        _tasks.push_back(task);
+        return task;
+    }
+
+    Ref<PTRenderTask> PTRenderer::submit_continuous_task(
+        Camera3D* camera, Ref<PTRendererSettings> settings) {
+        Ref<PTRenderTask> task =
+            _create_render_task(camera, settings, RenderTaskType::CONTINUOUS);
+        _tasks.push_back(task);
+        return task;
+    }
+
     RID PTRenderer::get_texture_rid() const {
-        return _resource_manager.get_output_texture();
+        PTResourceManager* rm = _scene->get_resource_manager();
+        return rm->get_output_texture();
     }
 
     uint32_t PTRenderer::get_render_width() const {
@@ -100,17 +202,34 @@ namespace godot {
         queue_clear();
     }
 
-    void PTRenderer::_cleanup() { _resource_manager.cleanup(); }
+    void PTRenderer::_process_tasks() {
+        for (int i = 0; i < _tasks.size(); ++i) {
+            Ref<PTRenderTask> task = _tasks[i];
 
-    void PTRenderer::_resize(uint32_t width, uint32_t height) {
-        _resource_manager.resize(get_render_width(), get_render_height());
-        emit_signal("texture_changed", get_texture_rid());
-        queue_clear();
+            if (task.is_null() || task->status == STATUS_PAUSED ||
+                task->status == STATUS_COMPLETED)
+                continue;
+
+            // Start rendering if it's new
+            if (task->status == STATUS_CREATED) task->status = STATUS_RENDERING;
+
+            _render_task(task);
+
+            if (task->type == RenderTaskType::ONE_SHOT) {
+                task->status = STATUS_COMPLETED;
+                // Notify the user
+                emit_signal("task_completed", task);
+            }
+        }
     }
 
-    void PTRenderer::_clear_accumulated_buffer() {
-        _frame_count = 1;
-        _stats->set_samples(0);
+    void PTRenderer::_cleanup() { _scene->cleanup(); }
+
+    void PTRenderer::_resize(uint32_t width, uint32_t height) {
+        PTResourceManager* rm = _scene->get_resource_manager();
+        rm->resize(get_render_width(), get_render_height());
+        emit_signal("texture_changed", get_texture_rid());
+        queue_clear();
     }
 
     void PTRenderer::draw(Camera3D* camera, uint32_t width, uint32_t height) {
@@ -128,21 +247,23 @@ namespace godot {
         }
 
         if (_clear_buffer) {
-            _clear_accumulated_buffer();
+            _frame_count = 1;
+            _stats->set_samples(0);
             _clear_buffer = false;
         }
 
         if (_update_scene) {
             _stats->reset();
             Node* root = Node::cast_to<Node>(camera->get_viewport());
-            _scene_data_manager.update_buffers(_stats, root,
-                                               _renderer_settings);
+            _scene->update(root, _renderer_settings);
             _update_scene = false;
         }
 
-        _resource_manager.load_skybox_from_camera(camera);
+        PTResourceManager* rm = _scene->get_resource_manager();
+        rm->load_skybox_from_camera(camera);
 
-        PackedByteArray push_constant_bytes = _get_push_constant_bytes();
+        PackedByteArray push_constant_bytes = _get_push_constant_bytes(
+            get_render_width(), get_render_height(), _frame_count);
 
         // Assuming workgroup size of 8x8. Do ceiling division to cover the
         // entire texture.
@@ -151,24 +272,32 @@ namespace godot {
             static_cast<uint32_t>(ceil(get_render_width() / 8.0));
         uint32_t y_groups =
             static_cast<uint32_t>(ceil(get_render_height() / 8.0));
+        {
+            // Settings
+            PackedByteArray settings_bytes =
+                _renderer_settings->get_byte_array();
+            rm->update_storage_buffer("settings", settings_bytes);
 
-        _update_settings_storage_buffer();
-        _update_camera_storage_buffer(camera);
+            // Camera
+            PackedByteArray camera_bytes = PTUtils::get_camera_byte_array(
+                camera, get_render_width(), get_render_height());
+            rm->update_storage_buffer("camera", camera_bytes);
+        }
 
         // Updates resource manager
-        _resource_manager.flush_pending_updates();
+        rm->flush_pending_updates();
 
         int64_t compute_list = _rd->compute_list_begin();
-        _rd->compute_list_bind_compute_pipeline(
-            compute_list, _resource_manager.get_pipeline());
-        _rd->compute_list_bind_uniform_set(
-            compute_list, _resource_manager.get_image_uniform_set(), 0);
-        _rd->compute_list_bind_uniform_set(
-            compute_list, _resource_manager.get_settings_uniform_set(), 1);
-        _rd->compute_list_bind_uniform_set(
-            compute_list, _resource_manager.get_camera_uniform_set(), 2);
-        _rd->compute_list_bind_uniform_set(
-            compute_list, _resource_manager.get_scene_uniform_set(), 3);
+        _rd->compute_list_bind_compute_pipeline(compute_list,
+                                                rm->get_pipeline());
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_image_uniform_set(), 0);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_settings_uniform_set(), 1);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_camera_uniform_set(), 2);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_scene_uniform_set(), 3);
         _rd->compute_list_set_push_constant(compute_list, push_constant_bytes,
                                             push_constant_bytes.size());
         _rd->compute_list_dispatch(compute_list, x_groups, y_groups, 1);
@@ -179,37 +308,111 @@ namespace godot {
                             _renderer_settings->get_samples_per_pixel());
     }
 
-    void PTRenderer::_initialize_compute() {
-        _rd = RenderingServer::get_singleton()->get_rendering_device();
-        _resource_manager.initialize(
-            _rd, PTUtils::get_project_relative_path("shaders/pathtracer.glsl"),
-            get_render_width(), get_render_height());
-
-        _scene_data_manager.initialize(_rd, &_resource_manager);
-    }
-
-    PackedByteArray PTRenderer::_get_push_constant_bytes() {
+    PackedByteArray PTRenderer::_get_push_constant_bytes(uint32_t w, uint32_t h,
+                                                         uint32_t frames) {
         auto push_constant = PackedFloat32Array();
-        push_constant.push_back(float(get_render_width()));
-        push_constant.push_back(float(get_render_height()));
+        push_constant.push_back(float(w));
+        push_constant.push_back(float(h));
 
         // Frame number
-        push_constant.push_back(float(_frame_count));
+        push_constant.push_back(float(frames));
 
         // Frame-based random seed
-        push_constant.push_back(float(_frame_count * 1664525 + 1013904223));
+        push_constant.push_back(float(frames * 1664525 + 1013904223));
         return push_constant.to_byte_array();
     }
 
-    void PTRenderer::_update_settings_storage_buffer() {
-        PackedByteArray settings_bytes = _renderer_settings->get_byte_array();
-        _resource_manager.update_storage_buffer("settings", settings_bytes);
+    void PTRenderer::_render_task(Ref<PTRenderTask> task) {
+        Camera3D* camera = task->camera;
+        Ref<PTScene> scene = task->scene;
+        Ref<PTRendererSettings> settings = task->settings;
+        Ref<PTRendererStats> stats = task->stats;
+        PTResourceManager* rm = scene->get_resource_manager();
+
+        Rect2 rect = camera->get_viewport()->get_visible_rect();
+
+        int viewport_width = rect.size.x;
+        int viewport_height = rect.size.y;
+
+        uint32_t current_width = rm->get_textures_width();
+        uint32_t current_height = rm->get_textures_height();
+
+        // Delays resize to avoid issues when called during rendering
+        if (current_width != viewport_width ||
+            current_height != viewport_height) {
+            _resize_task(task, viewport_width, viewport_height);
+
+            current_width = viewport_width;
+            current_height = viewport_height;
+        }
+
+        if (task->should_clear_textures) {
+            // This clears the buffer
+            task->frame_count = 1;
+            stats->set_samples(0);
+
+            task->should_clear_textures = false;
+        }
+
+        if (task->should_update_scene) {
+            stats->reset();
+            Node* root = Node::cast_to<Node>(camera->get_viewport());
+            scene->update(root, settings);
+            task->should_update_scene = false;
+        }
+
+        rm->load_skybox_from_camera(camera);
+
+        PackedByteArray push_constant_bytes = _get_push_constant_bytes(
+            current_width, current_height, task->frame_count);
+
+        // Do ceiling division to cover the entire texture.
+        uint32_t x_groups = static_cast<uint32_t>(ceil(current_width / 8.0));
+        uint32_t y_groups = static_cast<uint32_t>(ceil(current_height / 8.0));
+
+        // Buffer updates
+        {
+            // Settings
+            PackedByteArray settings_bytes = settings->get_byte_array();
+            rm->update_storage_buffer("settings", settings_bytes);
+
+            // Camera
+            PackedByteArray camera_bytes = PTUtils::get_camera_byte_array(
+                camera, current_width, current_height);
+            rm->update_storage_buffer("camera", camera_bytes);
+        }
+
+        // Updates resource manager
+        rm->flush_pending_updates();
+
+        int64_t compute_list = _rd->compute_list_begin();
+        _rd->compute_list_bind_compute_pipeline(compute_list,
+                                                rm->get_pipeline());
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_image_uniform_set(), 0);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_settings_uniform_set(), 1);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_camera_uniform_set(), 2);
+        _rd->compute_list_bind_uniform_set(compute_list,
+                                           rm->get_scene_uniform_set(), 3);
+        _rd->compute_list_set_push_constant(compute_list, push_constant_bytes,
+                                            push_constant_bytes.size());
+        _rd->compute_list_dispatch(compute_list, x_groups, y_groups, 1);
+        _rd->compute_list_end();
+
+        task->frame_count++;
+
+        stats->set_samples(stats->get_samples() +
+                           settings->get_samples_per_pixel());
     }
 
-    void PTRenderer::_update_camera_storage_buffer(Camera3D* camera) {
-        PackedByteArray camera_bytes = PTUtils::get_camera_bytes(
-            camera, get_render_width(), get_render_height());
-        _resource_manager.update_storage_buffer("camera", camera_bytes);
+    void PTRenderer::_resize_task(Ref<PTRenderTask> task, uint32_t width,
+                                  uint32_t height) {
+        PTResourceManager* rm = task->scene->get_resource_manager();
+        rm->resize(width, height);
+        // Todo: Emit texture changed to notify the task consumer
+        queue_clear();
     }
 
 }  // namespace godot

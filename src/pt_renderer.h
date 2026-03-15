@@ -15,8 +15,36 @@
 #include "pt_renderer_settings.h"
 #include "pt_scene_data_manager.h"
 #include "pt_renderer_stats.h"
-
+#include "pt_scene.h"
 namespace godot {
+    enum RenderTaskType { ONE_SHOT, CONTINUOUS };
+
+    enum RenderTaskStatus {
+        STATUS_CREATED,
+        STATUS_RENDERING,
+        STATUS_PAUSED,
+        STATUS_COMPLETED
+    };
+
+    class PTRenderTask : public RefCounted {
+    public:
+        RenderTaskType type;
+        RenderTaskStatus status;
+        Ref<PTScene> scene;
+        Camera3D* camera;
+        Ref<PTRendererSettings> settings;
+        Ref<PTRendererStats> stats;
+        uint32_t frame_count;
+        bool should_update_scene;
+        bool should_clear_textures;
+
+        /**
+         * The scene and it's resources will be cleaned up when the task is
+         * destroyed. Note that it also includes the output texture, so the
+         * user must keep this reference alive if wants to keep the output
+         */
+        ~PTRenderTask() { scene->cleanup(); }
+    };
 
     class PTRenderer : public Node {
         GDCLASS(PTRenderer, Node)
@@ -24,8 +52,8 @@ namespace godot {
         Ref<PTRendererSettings> _renderer_settings;
         RenderingDevice* _rd;
 
-        PTResourceManager _resource_manager;
-        PTSceneDataManager _scene_data_manager;
+        Ref<PTScene> _scene;
+        std::vector<Ref<PTRenderTask>> _tasks;
 
         uint32_t _frame_count = 1;
         bool _clear_buffer = false;
@@ -49,6 +77,17 @@ namespace godot {
         void init();
         void destroy();
 
+        Ref<PTRenderTask> submit_one_shot_task(
+            Camera3D* camera, Ref<PTRendererSettings> settings);
+
+        Ref<PTRenderTask> submit_continuous_task(
+            Camera3D* camera, Ref<PTRendererSettings> settings);
+
+        void pause_task(Ref<PTRenderTask> task);
+        void resume_task(Ref<PTRenderTask> task);
+        void kill_task(Ref<PTRenderTask> task);
+        RID get_task_output(Ref<PTRenderTask> task);
+
         RID get_texture_rid() const;
         uint32_t get_render_width() const;
         uint32_t get_render_height() const;
@@ -61,13 +100,20 @@ namespace godot {
         Ref<PTRendererStats> get_stats() const { return _stats; }
 
     private:
-        void _initialize_compute();
-        void _clear_accumulated_buffer();
-        PackedByteArray _get_push_constant_bytes();
-        void _update_settings_storage_buffer();
-        void _update_camera_storage_buffer(Camera3D* camera);
+        Ref<PTRenderTask> _create_render_task(Camera3D* camera,
+                                              Ref<PTRendererSettings> settings,
+                                              RenderTaskType type);
+        PackedByteArray _get_push_constant_bytes(uint32_t w, uint32_t h,
+                                                 uint32_t frames);
         void _resize(uint32_t width, uint32_t height);
         void _cleanup();
+
+        void _render_task(Ref<PTRenderTask> task);
+
+        void _resize_task(Ref<PTRenderTask> task, uint32_t width,
+                          uint32_t height);
+
+        void _process_tasks();
     };
 
 }  // namespace godot

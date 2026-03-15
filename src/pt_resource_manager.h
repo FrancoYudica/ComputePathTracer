@@ -42,6 +42,9 @@ namespace godot {
         uint32_t _texture_array_resolution = 1024;
         uint32_t _texture_array_layers = 256;
 
+        uint32_t _current_textures_width;
+        uint32_t _current_textures_height;
+
         std::unordered_map<std::string, uint64_t> _storage_buffer_sizes;
         std::unordered_map<std::string, RID> _storage_buffers;
 
@@ -61,6 +64,13 @@ namespace godot {
         void load_skybox_from_camera(Camera3D* camera);
 
         void flush_pending_updates();
+
+        /**
+         * Extracts the output texture from the resource manager.
+         * This means that it's internal reference gets nullified and
+         * the caller becomes responsible for managing the texture.
+         */
+        RID extract_output_texture();
 
         RID get_output_texture() const { return _output_texture; };
         RID get_accumulation_texture() const { return _accumulation_texture; };
@@ -94,6 +104,11 @@ namespace godot {
         uint32_t get_texture_array_resolution() {
             return _texture_array_resolution;
         };
+
+        uint32_t get_textures_width() const { return _current_textures_width; }
+        uint32_t get_textures_height() const {
+            return _current_textures_height;
+        }
 
         void update_storage_buffer(const std::string& name,
                                    const PackedByteArray& data,
