@@ -33,6 +33,8 @@ namespace godot {
                              &PTRenderer::resume_task);
         ClassDB::bind_method(D_METHOD("kill_task", "task"),
                              &PTRenderer::kill_task);
+        ClassDB::bind_method(D_METHOD("task_clear_progress", "task"),
+                             &PTRenderer::task_clear_progress);
         ClassDB::bind_method(D_METHOD("get_task_output", "task"),
                              &PTRenderer::get_task_output);
 
@@ -112,6 +114,10 @@ namespace godot {
                 break;
             }
         }
+    }
+
+    void PTRenderer::task_clear_progress(Ref<PTRenderTask> task) {
+        task->should_clear_textures = true;
     }
 
     RID PTRenderer::get_task_output(Ref<PTRenderTask> task) {

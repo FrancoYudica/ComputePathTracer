@@ -177,3 +177,5 @@ mouse_filter = 2
 texture = SubResource("Texture2DRD_m7sii")
 expand_mode = 3
 stretch_mode = 5
+
+[connection signal="moved" from="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport/CameraController" to="." method="_on_camera_controller_moved"]

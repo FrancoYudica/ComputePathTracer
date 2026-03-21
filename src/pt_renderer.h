@@ -86,6 +86,8 @@ namespace godot {
         void pause_task(Ref<PTRenderTask> task);
         void resume_task(Ref<PTRenderTask> task);
         void kill_task(Ref<PTRenderTask> task);
+        void task_clear_progress(Ref<PTRenderTask> task);
+
         RID get_task_output(Ref<PTRenderTask> task);
 
         RID get_texture_rid() const;

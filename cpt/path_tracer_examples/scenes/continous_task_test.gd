@@ -46,3 +46,8 @@ func _on_texture_changed(task):
 		
 	# Sets new texture rid
 	texture.texture_rd_rid = texture_rd_rid
+
+
+func _on_camera_controller_moved() -> void:
+	if task_handle != null:
+		PTRenderer.task_clear_progress(task_handle)
