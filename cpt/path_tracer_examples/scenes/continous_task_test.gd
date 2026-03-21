@@ -19,7 +19,6 @@ func _ready():
 	
 	settings_panel.set_renderer_settings(renderer_settings)
 	bvh_settings_panel.set_renderer_settings(renderer_settings)
-	stats_panel.set_stats(PTRenderer.get_stats())
 	
 	_submit_render_task()
 	
@@ -30,7 +29,7 @@ func _submit_render_task():
 		return
 	
 	task_handle = PTRenderer.submit_continuous_task(render_camera, renderer_settings)
-
+	stats_panel.set_stats(PTRenderer.task_get_stats(task_handle))
 
 func _on_texture_changed(task):
 	if task != task_handle:

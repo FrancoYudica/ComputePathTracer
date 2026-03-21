@@ -33,13 +33,13 @@ namespace godot {
         uint32_t get_bvh_node_count() const { return bvh_node_count; }
         uint32_t get_samples() const { return samples; }
 
-        void set_sphere_count(uint32_t count) { sphere_count = count; }
-        void set_triangle_count(uint32_t count) { triangle_count = count; }
-        void set_vertex_count(uint32_t count) { vertex_count = count; }
-        void set_texture_count(uint32_t count) { texture_count = count; }
-        void set_material_count(uint32_t count) { material_count = count; }
-        void set_bvh_node_count(uint32_t count) { bvh_node_count = count; }
-        void set_samples(uint32_t count) { samples = count; }
+        void set_sphere_count(uint32_t count) { sphere_count = count; emit_changed(); }
+        void set_triangle_count(uint32_t count) { triangle_count = count; emit_changed(); }
+        void set_vertex_count(uint32_t count) { vertex_count = count; emit_changed(); }
+        void set_texture_count(uint32_t count) { texture_count = count; emit_changed(); }
+        void set_material_count(uint32_t count) { material_count = count; emit_changed(); }
+        void set_bvh_node_count(uint32_t count) { bvh_node_count = count; emit_changed(); }
+        void set_samples(uint32_t count) { samples = count; emit_changed(); }
 
         void reset();
     };

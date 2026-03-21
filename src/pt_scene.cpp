@@ -11,9 +11,8 @@ namespace godot {
         _scene_data_manager.initialize(rd, &_rm);
     }
 
-    void PTScene::update(Node* root, const Ref<PTRendererSettings>& settings) {
-        Ref<PTRendererStats> stats;
-        stats.instantiate();
+    void PTScene::update(Node* root, const Ref<PTRendererSettings>& settings,
+                         Ref<PTRendererStats> stats) {
         _scene_data_manager.update_buffers(stats, root, settings);
     }
 

@@ -35,6 +35,8 @@ namespace godot {
                              &PTRenderer::kill_task);
         ClassDB::bind_method(D_METHOD("task_clear_progress", "task"),
                              &PTRenderer::task_clear_progress);
+        ClassDB::bind_method(D_METHOD("task_get_stats", "task"),
+                             &PTRenderer::task_get_stats);
         ClassDB::bind_method(D_METHOD("get_task_output", "task"),
                              &PTRenderer::get_task_output);
 
@@ -117,7 +119,14 @@ namespace godot {
     }
 
     void PTRenderer::task_clear_progress(Ref<PTRenderTask> task) {
-        task->should_clear_textures = true;
+        if (task.is_valid()) {
+            task->should_clear_textures = true;
+        }
+    }
+
+    Ref<PTRendererStats> PTRenderer::task_get_stats(Ref<PTRenderTask> task) {
+        if (task.is_null()) return Ref<PTRendererStats>();
+        return task->stats;
     }
 
     RID PTRenderer::get_task_output(Ref<PTRenderTask> task) {
@@ -281,7 +290,7 @@ namespace godot {
         if (_update_scene) {
             _stats->reset();
             Node* root = Node::cast_to<Node>(camera->get_viewport());
-            _scene->update(root, _renderer_settings);
+            _scene->update(root, _renderer_settings, _stats);
             _update_scene = false;
         }
 
@@ -383,7 +392,7 @@ namespace godot {
         if (task->should_update_scene) {
             stats->reset();
             Node* root = Node::cast_to<Node>(camera->get_viewport());
-            scene->update(root, settings);
+            scene->update(root, settings, stats);
             task->should_update_scene = false;
         }
 

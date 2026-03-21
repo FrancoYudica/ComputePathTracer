@@ -10,7 +10,8 @@ namespace godot {
 
     public:
         void initialize(RenderingDevice* rd);
-        void update(Node* root, const Ref<PTRendererSettings>& settings);
+        void update(Node* root, const Ref<PTRendererSettings>& settings,
+                    Ref<PTRendererStats> stats);
         PTResourceManager* get_resource_manager() { return &_rm; }
 
         void cleanup();
