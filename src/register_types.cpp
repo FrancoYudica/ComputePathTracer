@@ -23,7 +23,6 @@ void initialize_module(ModuleInitializationLevel p_level) {
     GDREGISTER_RUNTIME_CLASS(PTRendererSettings);
     GDREGISTER_RUNTIME_CLASS(PTRendererStats);
     GDREGISTER_RUNTIME_CLASS(PTRenderer);
-    GDREGISTER_RUNTIME_CLASS(PTCamera);
 
     // Register PTRenderer as a singleton
     PTRenderer* singleton = memnew(PTRenderer);

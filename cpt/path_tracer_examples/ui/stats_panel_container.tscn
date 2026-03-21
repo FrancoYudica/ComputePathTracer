@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b7hlrqap88fuv"]
 
 [ext_resource type="Script" uid="uid://d4fbxfitmlhk5" path="res://path_tracer_examples/ui/stats_panel_container.gd" id="1_r85l1"]
-[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://path_tracer_examples/ui/themes/title_label_theme.tres" id="2_xo5n4"]
+[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://themes/title_label_theme.tres" id="2_xo5n4"]
 
 [node name="StatsPanelContainer" type="PanelContainer" node_paths=PackedStringArray("fps_label", "samples_label", "sphere_count_label", "triangle_count_label", "vertex_count_label", "material_count_label", "texture_count_label", "bvh_node_count_label")]
 script = ExtResource("1_r85l1")

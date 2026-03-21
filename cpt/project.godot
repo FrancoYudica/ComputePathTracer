@@ -11,9 +11,8 @@ config_version=5
 [application]
 
 config/name="cpt"
-run/main_scene="uid://cnli58scmym3d"
+run/main_scene="uid://cuyiwbyuvrrfp"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
 
 [display]
 

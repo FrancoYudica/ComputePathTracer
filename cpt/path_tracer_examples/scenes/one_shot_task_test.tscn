@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=3 uid="uid://sy701ddf6das"]
 
-[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://path_tracer_examples/sky/qwantani_dusk_2_puresky_4k.exr" id="1_lc430"]
+[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://textures/sky/qwantani_dusk_2_puresky_4k.exr" id="1_lc430"]
 [ext_resource type="Script" uid="uid://c0txaq14n0vf4" path="res://path_tracer_examples/scenes/one_shot_task_test.gd" id="1_m7sii"]
 [ext_resource type="PackedScene" uid="uid://cy36aygvs66pn" path="res://addons/gdquest_gobot/gobot_skin.tscn" id="2_ummgj"]
 [ext_resource type="PackedScene" uid="uid://dn3ffpdorfi1h" path="res://path_tracer_examples/ui/settings_panel_container.tscn" id="5_ursss"]

@@ -1,11 +1,11 @@
 [gd_scene load_steps=16 format=3 uid="uid://xpfm7su0rbtr"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://path_tracer_examples/scenes/base_scene.tscn" id="1_nyy6r"]
-[ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://path_tracer_examples/models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
-[ext_resource type="PackedScene" uid="uid://dre5rg7eu6uk1" path="res://path_tracer_examples/models/police/mech_robotic_police_3d_model_w_scifi_gun.glb" id="3_so2qy"]
-[ext_resource type="PackedScene" uid="uid://cfubdyvkrkefg" path="res://path_tracer_examples/models/car/cyberpunk_car.glb" id="4_ngss8"]
-[ext_resource type="Texture2D" uid="uid://dpfuuafwakhyp" path="res://path_tracer_examples/models/bricks/bricks_normal.png" id="6_i384k"]
-[ext_resource type="PackedScene" uid="uid://hok5ejf3bxy3" path="res://path_tracer_examples/models/ganesh/the_hindu_god_ganesh.glb" id="7_lni0r"]
+[ext_resource type="PackedScene" uid="uid://c5sig8pt3a6ko" path="res://models/city/diorama_of_cyberpunk_city..glb" id="3_ngss8"]
+[ext_resource type="PackedScene" uid="uid://dre5rg7eu6uk1" path="res://models/police/mech_robotic_police_3d_model_w_scifi_gun.glb" id="3_so2qy"]
+[ext_resource type="PackedScene" uid="uid://cfubdyvkrkefg" path="res://models/car/cyberpunk_car.glb" id="4_ngss8"]
+[ext_resource type="Texture2D" uid="uid://dpfuuafwakhyp" path="res://models/bricks/bricks_normal.png" id="6_i384k"]
+[ext_resource type="PackedScene" uid="uid://hok5ejf3bxy3" path="res://models/ganesh/the_hindu_god_ganesh.glb" id="7_lni0r"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nyy6r"]
 albedo_color = Color(0.92514396, 0.98948544, 0.8904318, 1)

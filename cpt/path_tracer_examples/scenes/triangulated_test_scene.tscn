@@ -1,7 +1,7 @@
 [gd_scene load_steps=15 format=4 uid="uid://j4h1pyrgc37a"]
 
 [ext_resource type="PackedScene" uid="uid://jcpevkroeckp" path="res://path_tracer_examples/scenes/base_scene.tscn" id="1_218p2"]
-[ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://path_tracer_examples/models/lowpoly-rook/scene.obj" id="4_ajtdg"]
+[ext_resource type="ArrayMesh" uid="uid://djviacbry1fgv" path="res://models/lowpoly-rook/scene.obj" id="4_ajtdg"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_6atvq"]
 radial_segments = 10

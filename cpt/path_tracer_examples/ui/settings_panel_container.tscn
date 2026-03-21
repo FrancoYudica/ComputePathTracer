@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dn3ffpdorfi1h"]
 
 [ext_resource type="Script" uid="uid://bp4nu0w2cip1a" path="res://path_tracer_examples/ui/renderer_settings_panel_container.gd" id="1_xj8qw"]
-[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://path_tracer_examples/ui/themes/title_label_theme.tres" id="2_lp3hw"]
+[ext_resource type="Theme" uid="uid://c7e0vu31wgbjj" path="res://themes/title_label_theme.tres" id="2_lp3hw"]
 [ext_resource type="Script" uid="uid://b1emdg4fh3kpg" path="res://path_tracer_examples/ui/slider_value_label.gd" id="3_x4qka"]
 
 [node name="SettingsPanelContainer" type="PanelContainer" node_paths=PackedStringArray("samples_spin", "bounces_spin", "render_scale", "fov", "aperture_spin", "focal_distance_spin", "vsync_check_box", "mode_option")]

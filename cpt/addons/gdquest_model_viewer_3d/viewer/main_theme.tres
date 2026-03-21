@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://dioqrbukc6tl0"]
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://dioqrbukc6tl0"]
 
 [ext_resource type="Texture2D" uid="uid://b3hg20sllwpo" path="res://addons/gdquest_model_viewer_3d/viewer/assets/textures/down_arrow_icon.png" id="1_8g03f"]
 
@@ -62,6 +62,9 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ffu8"]
+bg_color = Color(0.24115604, 0.24115607, 0.24115595, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvg6q"]
 content_margin_left = 4.0
 content_margin_top = 4.0
@@ -88,4 +91,5 @@ OptionButton/styles/normal = SubResource("StyleBoxFlat_xvkoa")
 OptionButton/styles/pressed = SubResource("StyleBoxFlat_txpvc")
 PopupMenu/styles/panel = SubResource("StyleBoxFlat_cdvkf")
 VBoxContainer/constants/separation = 8
+VScrollBar/styles/grabber = SubResource("StyleBoxFlat_7ffu8")
 VScrollBar/styles/scroll = SubResource("StyleBoxFlat_yvg6q")

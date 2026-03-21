@@ -75,6 +75,3 @@ func _set_vsync_mode(toggled_on: bool):
 	else:
 		vsync_check_box.text = "Disabled"
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-
-func _on_update_scene_button_pressed() -> void:
-	PTRenderer.update_scene()

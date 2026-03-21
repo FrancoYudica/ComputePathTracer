@@ -49,23 +49,8 @@ namespace godot {
     class PTRenderer : public Node {
         GDCLASS(PTRenderer, Node)
     private:
-        Ref<PTRendererSettings> _renderer_settings;
         RenderingDevice* _rd;
-
-        Ref<PTScene> _scene;
         std::vector<Ref<PTRenderTask>> _tasks;
-
-        uint32_t _frame_count = 1;
-        bool _clear_buffer = false;
-        bool _update_scene = false;
-
-        uint32_t _last_render_width = 800;
-        uint32_t _last_render_height = 600;
-        uint32_t _viewport_width = 800;
-        uint32_t _viewport_height = 600;
-
-        Ref<PTRendererStats> _stats;
-
         bool _initialized = false;
 
     protected:
@@ -87,21 +72,9 @@ namespace godot {
         void task_resume(Ref<PTRenderTask> task);
         void task_kill(Ref<PTRenderTask> task);
         void task_clear_progress(Ref<PTRenderTask> task);
+        void task_reload_scene(Ref<PTRenderTask> task);
         Ref<PTRendererStats> task_get_stats(Ref<PTRenderTask> task);
         RID task_get_output(Ref<PTRenderTask> task);
-
-        RID get_texture_rid() const;
-        uint32_t get_render_width() const;
-        uint32_t get_render_height() const;
-        Ref<PTRendererSettings> get_renderer_settings() const;
-
-        void set_renderer_settings(const Ref<PTRendererSettings>& settings);
-        void queue_clear();
-        void queue_clear_task(Ref<PTRenderTask> task);
-
-        void update_scene();
-        void draw(Camera3D* camera, uint32_t width, uint32_t height);
-        Ref<PTRendererStats> get_stats() const { return _stats; }
 
     private:
         Ref<PTRenderTask> _create_render_task(Camera3D* camera,
@@ -109,8 +82,8 @@ namespace godot {
                                               RenderTaskType type);
         PackedByteArray _get_push_constant_bytes(uint32_t w, uint32_t h,
                                                  uint32_t frames);
-        void _resize(uint32_t width, uint32_t height);
-        void _cleanup();
+
+        void _queue_clear_task(Ref<PTRenderTask> task);
 
         void _render_task(Ref<PTRenderTask> task);
 
