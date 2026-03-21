@@ -141,6 +141,7 @@ size_flags_vertical = 3
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer"]
+handle_input_locally = false
 size = Vector2i(877, 648)
 render_target_update_mode = 4
 
@@ -167,6 +168,7 @@ mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="TextureRect" type="TextureRect" parent="HBoxContainer/RightSide/VBoxContainer/Scene"]
+texture_filter = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

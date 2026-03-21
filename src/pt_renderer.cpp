@@ -366,8 +366,8 @@ namespace godot {
 
         Rect2 rect = camera->get_viewport()->get_visible_rect();
 
-        int viewport_width = rect.size.x;
-        int viewport_height = rect.size.y;
+        int viewport_width = rect.size.x * settings->get_render_scale();
+        int viewport_height = rect.size.y * settings->get_render_scale();
 
         uint32_t current_width = rm->get_textures_width();
         uint32_t current_height = rm->get_textures_height();
