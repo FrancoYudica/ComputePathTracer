@@ -35,7 +35,7 @@ func _on_texture_changed(task):
 	if task != task_handle:
 		return
 		
-	var texture_rd_rid = PTRenderer.get_task_output(task_handle)
+	var texture_rd_rid = PTRenderer.task_get_output(task_handle)
 	
 	# Gets texture 2d rd
 	var texture: Texture2DRD = output_texture_rect.texture as Texture2D

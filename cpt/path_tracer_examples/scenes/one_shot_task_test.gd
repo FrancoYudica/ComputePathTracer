@@ -36,7 +36,7 @@ func _on_task_completed(task):
 	if task != task_handle:
 		return
 	
-	var texture_rd_rid = PTRenderer.get_task_output(task_handle)
+	var texture_rd_rid = PTRenderer.task_get_output(task_handle)
 	task_handle = null
 	
 	# Gets texture 2d rd

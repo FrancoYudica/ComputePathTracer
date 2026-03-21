@@ -27,18 +27,18 @@ namespace godot {
             D_METHOD("_resize_task", "task", "width", "height"),
             &PTRenderer::_resize_task);
 
-        ClassDB::bind_method(D_METHOD("pause_task", "task"),
-                             &PTRenderer::pause_task);
-        ClassDB::bind_method(D_METHOD("resume_task", "task"),
-                             &PTRenderer::resume_task);
-        ClassDB::bind_method(D_METHOD("kill_task", "task"),
-                             &PTRenderer::kill_task);
+        ClassDB::bind_method(D_METHOD("task_pause", "task"),
+                             &PTRenderer::task_pause);
+        ClassDB::bind_method(D_METHOD("task_resume", "task"),
+                             &PTRenderer::task_resume);
+        ClassDB::bind_method(D_METHOD("task_kill", "task"),
+                             &PTRenderer::task_kill);
         ClassDB::bind_method(D_METHOD("task_clear_progress", "task"),
                              &PTRenderer::task_clear_progress);
         ClassDB::bind_method(D_METHOD("task_get_stats", "task"),
                              &PTRenderer::task_get_stats);
-        ClassDB::bind_method(D_METHOD("get_task_output", "task"),
-                             &PTRenderer::get_task_output);
+        ClassDB::bind_method(D_METHOD("task_get_output", "task"),
+                             &PTRenderer::task_get_output);
 
         ClassDB::bind_method(
             D_METHOD("submit_one_shot_task", "camera", "settings"),
@@ -99,15 +99,15 @@ namespace godot {
 
     void PTRenderer::destroy() { _cleanup(); }
 
-    void PTRenderer::pause_task(Ref<PTRenderTask> task) {
+    void PTRenderer::task_pause(Ref<PTRenderTask> task) {
         if (task.is_valid()) task->status = STATUS_PAUSED;
     }
 
-    void PTRenderer::resume_task(Ref<PTRenderTask> task) {
+    void PTRenderer::task_resume(Ref<PTRenderTask> task) {
         if (task.is_valid()) task->status = STATUS_RENDERING;
     }
 
-    void PTRenderer::kill_task(Ref<PTRenderTask> task) {
+    void PTRenderer::task_kill(Ref<PTRenderTask> task) {
         if (task.is_null()) return;
 
         for (int i = 0; i < _tasks.size(); ++i) {
@@ -129,7 +129,7 @@ namespace godot {
         return task->stats;
     }
 
-    RID PTRenderer::get_task_output(Ref<PTRenderTask> task) {
+    RID PTRenderer::task_get_output(Ref<PTRenderTask> task) {
         if (task.is_null()) return RID();
 
         if (task->type == RenderTaskType::ONE_SHOT) {
@@ -139,7 +139,7 @@ namespace godot {
                 RID output_rid = task->scene->get_resource_manager()
                                      ->extract_output_texture();
 
-                kill_task(task);
+                task_kill(task);
                 return output_rid;
             }
 
