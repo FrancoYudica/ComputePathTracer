@@ -1,0 +1,179 @@
+[gd_scene load_steps=14 format=3 uid="uid://cuyiwbyuvrrfp"]
+
+[ext_resource type="Script" uid="uid://c8jmgosy3p638" path="res://path_tracer_examples/scenes/continous_task_test.gd" id="1_wu2h8"]
+[ext_resource type="PackedScene" uid="uid://dn3ffpdorfi1h" path="res://path_tracer_examples/ui/settings_panel_container.tscn" id="2_3ko02"]
+[ext_resource type="PackedScene" uid="uid://d186ysmmc0hnj" path="res://path_tracer_examples/ui/bvh_settings_panel_container.tscn" id="3_tokcr"]
+[ext_resource type="PackedScene" uid="uid://b7hlrqap88fuv" path="res://path_tracer_examples/ui/stats_panel_container.tscn" id="4_8lnb2"]
+[ext_resource type="Texture2D" uid="uid://dv67jbuj8igct" path="res://path_tracer_examples/sky/qwantani_dusk_2_puresky_4k.exr" id="5_bvdwh"]
+[ext_resource type="PackedScene" uid="uid://cy36aygvs66pn" path="res://addons/gdquest_gobot/gobot_skin.tscn" id="6_l0vr6"]
+[ext_resource type="Script" uid="uid://bvn3mb2r5hsrn" path="res://path_tracer_examples/scenes/camera_controller.gd" id="7_3ko02"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c3jlx"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sljrv"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 0, 1, 0.7490196)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.75)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_ummgj"]
+panorama = ExtResource("5_bvdwh")
+
+[sub_resource type="Sky" id="Sky_m7sii"]
+sky_material = SubResource("PanoramaSkyMaterial_ummgj")
+
+[sub_resource type="Environment" id="Environment_yytnm"]
+background_mode = 2
+sky = SubResource("Sky_m7sii")
+
+[sub_resource type="Texture2DRD" id="Texture2DRD_m7sii"]
+
+[node name="ContinousTaskTest" type="Control" node_paths=PackedStringArray("render_camera", "output_texture_rect", "settings_panel", "bvh_settings_panel", "stats_panel")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wu2h8")
+render_camera = NodePath("HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport/Camera3D")
+output_texture_rect = NodePath("HBoxContainer/RightSide/VBoxContainer/Scene/TextureRect")
+settings_panel = NodePath("HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/SettingsPanelContainer")
+bvh_settings_panel = NodePath("HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/BVHSettingsPanelContainer")
+stats_panel = NodePath("HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer/StatsPanelContainer")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="SplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 4
+theme_override_constants/minimum_grab_thickness = 2
+dragger_visibility = 2
+
+[node name="MainPanelContainer" type="PanelContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(275, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_c3jlx")
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_styles/focus = SubResource("StyleBoxFlat_sljrv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SettingsPanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" node_paths=PackedStringArray("camera") instance=ExtResource("2_3ko02")]
+layout_mode = 2
+camera = NodePath("../../../../../RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport/Camera3D")
+
+[node name="BVHSettingsPanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" instance=ExtResource("3_tokcr")]
+layout_mode = 2
+
+[node name="StatsPanelContainer" parent="HBoxContainer/MainPanelContainer/MarginContainer/ScrollContainer/VBoxContainer" instance=ExtResource("4_8lnb2")]
+layout_mode = 2
+
+[node name="RightSide" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/RightSide"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Scene" type="Control" parent="HBoxContainer/RightSide/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer/RightSide/VBoxContainer/Scene"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer"]
+size = Vector2i(877, 648)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6877736, 0.50626856)
+environment = SubResource("Environment_yytnm")
+
+[node name="GobotSkin" parent="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport" instance=ExtResource("6_l0vr6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+
+[node name="CameraController" type="Node" parent="HBoxContainer/RightSide/VBoxContainer/Scene/SubViewportContainer/SubViewport" node_paths=PackedStringArray("camera")]
+script = ExtResource("7_3ko02")
+camera = NodePath("../Camera3D")
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/RightSide/VBoxContainer/Scene"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/RightSide/VBoxContainer/Scene"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Texture2DRD_m7sii")
+expand_mode = 3
+stretch_mode = 5

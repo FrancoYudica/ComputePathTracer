@@ -47,6 +47,9 @@ namespace godot {
         ClassDB::bind_method(D_METHOD("_process_tasks"),
                              &PTRenderer::_process_tasks);
 
+        ClassDB::bind_method(D_METHOD("queue_clear_task", "task"),
+                             &PTRenderer::queue_clear_task);
+
         ADD_SIGNAL(MethodInfo("task_completed",
                               PropertyInfo(Variant::OBJECT, "task")));
 
@@ -57,7 +60,7 @@ namespace godot {
             "set_renderer_settings", "get_renderer_settings");
 
         ADD_SIGNAL(MethodInfo("texture_changed",
-                              PropertyInfo(Variant::RID, "texture_rid")));
+                              PropertyInfo(Variant::OBJECT, "task")));
     }
 
     void PTRenderer::init() {
@@ -128,8 +131,17 @@ namespace godot {
             return RID();
         }
 
-        // TODO: See how to manage this for continuous tasks
+        else if (task->type == RenderTaskType::CONTINUOUS) {
+            return task->scene->get_resource_manager()->get_output_texture();
+        }
+
         return RID();
+    }
+
+    void clear_task(Ref<PTRenderTask> task) {
+        if (task.is_valid()) {
+            task->should_clear_textures = true;
+        }
     }
 
     Ref<PTRenderTask> PTRenderer::_create_render_task(
@@ -147,6 +159,9 @@ namespace godot {
         task->frame_count = 1;
         task->should_update_scene = true;
         task->should_clear_textures = true;
+        emit_signal("texture_changed", task);
+        task->settings->connect("changed",
+                                Callable(this, "queue_clear_task").bind(task));
         return task;
     }
 
@@ -196,6 +211,9 @@ namespace godot {
     }
 
     void PTRenderer::queue_clear() { _clear_buffer = true; }
+    void PTRenderer::queue_clear_task(Ref<PTRenderTask> task) {
+        task->should_clear_textures = true;
+    }
 
     void PTRenderer::update_scene() {
         _update_scene = true;
@@ -209,6 +227,8 @@ namespace godot {
             if (task.is_null() || task->status == STATUS_PAUSED ||
                 task->status == STATUS_COMPLETED)
                 continue;
+
+            task->scene->get_resource_manager()->begin_frame();
 
             // Start rendering if it's new
             if (task->status == STATUS_CREATED) task->status = STATUS_RENDERING;
@@ -341,9 +361,9 @@ namespace godot {
         if (current_width != viewport_width ||
             current_height != viewport_height) {
             _resize_task(task, viewport_width, viewport_height);
-
             current_width = viewport_width;
             current_height = viewport_height;
+            task->should_clear_textures = true;
         }
 
         if (task->should_clear_textures) {
@@ -411,8 +431,7 @@ namespace godot {
                                   uint32_t height) {
         PTResourceManager* rm = task->scene->get_resource_manager();
         rm->resize(width, height);
-        // Todo: Emit texture changed to notify the task consumer
-        queue_clear();
+        emit_signal("texture_changed", task);
     }
 
 }  // namespace godot

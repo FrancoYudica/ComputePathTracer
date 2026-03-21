@@ -72,7 +72,7 @@ namespace godot {
         if (_texture_array.is_valid()) {
             _rd->free_rid(_texture_array);
         }
-        // _rd->free_rid(_skybox_texture); // TODO: Only free if it's the one
+        // _defer_delete(_skybox_texture); // TODO: Only free if it's the one
         // created here
         _rd->free_rid(_default_sampler);
 
@@ -91,10 +91,10 @@ namespace godot {
 
     void PTResourceManager::resize(uint32_t width, uint32_t height) {
         if (_output_texture.is_valid()) {
-            _rd->free_rid(_output_texture);
+            _defer_delete(_output_texture);
         }
         if (_accumulation_texture.is_valid()) {
-            _rd->free_rid(_accumulation_texture);
+            _defer_delete(_accumulation_texture);
         }
 
         // Destroys _frees textures
@@ -107,13 +107,17 @@ namespace godot {
         _accumulation_image_uniform->add_id(_accumulation_texture);
 
         if (_image_uniform_set.is_valid()) {
-            _rd->free_rid(_image_uniform_set);
+            _defer_delete(_image_uniform_set);
         }
 
         _image_uniform_set = _rd->uniform_set_create(
             {_output_image_uniform, _accumulation_image_uniform,
              _skybox_image_uniform},
             _shader, 0);
+
+        if (!_image_uniform_set.is_valid()) {
+            print_error("ResourceManager: Failed to create image uniform set.");
+        }
     }
     void PTResourceManager::load_skybox_from_camera(Camera3D* camera) {
         // Early return if camera hasn't changed
@@ -126,7 +130,7 @@ namespace godot {
 
         // Clean up previous skybox texture if we own it
         if (_skybox_texture.is_valid() && _owns_skybox_texture) {
-            _rd->free_rid(_skybox_texture);
+            _defer_delete(_skybox_texture);
             _skybox_texture = RID();
             _owns_skybox_texture = false;
         }
@@ -150,13 +154,24 @@ namespace godot {
         _skybox_image_uniform->add_id(_skybox_texture);
 
         if (_image_uniform_set.is_valid()) {
-            _rd->free_rid(_image_uniform_set);
+            _defer_delete(_image_uniform_set);
         }
 
         _image_uniform_set = _rd->uniform_set_create(
             {_output_image_uniform, _accumulation_image_uniform,
              _skybox_image_uniform},
             _shader, 0);
+    }
+
+    void PTResourceManager::begin_frame() {
+        for (const RID& rid : _deletion_queue) {
+            if (_rd->texture_is_valid(rid) || _rd->uniform_set_is_valid(rid) ||
+                _rd->framebuffer_is_valid(rid) ||
+                _rd->compute_pipeline_is_valid(rid)) {
+                _rd->free_rid(rid);
+            }
+            _deletion_queue.clear();
+        }
     }
 
     void PTResourceManager::flush_pending_updates() {
@@ -191,7 +206,7 @@ namespace godot {
             RID rid = _rd->storage_buffer_create(data.size(), data);
 
             // Frees previous buffer
-            _rd->free_rid(_storage_buffers[name]);
+            _defer_delete(_storage_buffers[name]);
 
             // Update maps
             _storage_buffers[name] = rid;
@@ -408,7 +423,7 @@ namespace godot {
     }
     void PTResourceManager::_build_scene_uniform_set() {
         if (_scene_uniform_set.is_valid()) {
-            _rd->free_rid(_scene_uniform_set);
+            _defer_delete(_scene_uniform_set);
         }
 
         TypedArray<Ref<RDUniform>> scene_uniforms;
@@ -438,5 +453,8 @@ namespace godot {
         // Finally, create uniform set
         _scene_uniform_set =
             _rd->uniform_set_create(scene_uniforms, _shader, 3);
+    }
+    void PTResourceManager::_defer_delete(RID rid) {
+        _deletion_queue.push_back(rid);
     }
 }  // namespace godot

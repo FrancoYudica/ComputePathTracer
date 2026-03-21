@@ -95,6 +95,8 @@ namespace godot {
 
         void set_renderer_settings(const Ref<PTRendererSettings>& settings);
         void queue_clear();
+        void queue_clear_task(Ref<PTRenderTask> task);
+
         void update_scene();
         void draw(Camera3D* camera, uint32_t width, uint32_t height);
         Ref<PTRendererStats> get_stats() const { return _stats; }

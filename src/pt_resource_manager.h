@@ -7,6 +7,7 @@
 #include <godot_cpp/classes/rendering_device.hpp>
 #include <string>
 #include <unordered_map>
+#include <vector>
 namespace godot {
 
     class PTResourceManager {
@@ -51,6 +52,8 @@ namespace godot {
         bool _owns_skybox_texture = false;
         bool _should_update_scene_uniform_set = true;
 
+        std::vector<RID> _deletion_queue;
+
     public:
         PTResourceManager();
         ~PTResourceManager();
@@ -62,7 +65,7 @@ namespace godot {
 
         void resize(uint32_t width, uint32_t height);
         void load_skybox_from_camera(Camera3D* camera);
-
+        void begin_frame();
         void flush_pending_updates();
 
         /**
@@ -135,6 +138,8 @@ namespace godot {
         void _create_storage_buffer(const std::string& name, uint64_t size);
 
         void _build_scene_uniform_set();
+
+        void _defer_delete(RID rid);
     };
 }  // namespace godot
 
