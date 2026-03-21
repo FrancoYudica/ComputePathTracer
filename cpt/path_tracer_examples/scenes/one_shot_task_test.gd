@@ -21,7 +21,6 @@ func _ready():
 	
 	settings_panel.set_renderer_settings(renderer_settings)
 	bvh_settings_panel.set_renderer_settings(renderer_settings)
-	stats_panel.set_stats(PTRenderer.get_stats())
 	
 func _submit_render_task():
 	
@@ -30,6 +29,7 @@ func _submit_render_task():
 		return
 	
 	task_handle = PTRenderer.submit_one_shot_task(render_camera, renderer_settings)
+	stats_panel.set_stats(PTRenderer.task_get_stats(task_handle))
 
 
 func _on_task_completed(task):
@@ -45,14 +45,5 @@ func _on_task_completed(task):
 		texture = Texture2DRD.new()
 		output_texture_rect.texture = texture
 		
-	# Stores old texture rid
-	var old_texture_rid = RID()
-	if texture.texture_rd_rid.is_valid():
-		old_texture_rid = texture.texture_rd_rid
-	
 	# Sets new texture rid
 	texture.texture_rd_rid = texture_rd_rid
-	
-	# Erases old texture
-	if old_texture_rid.is_valid():
-		RenderingServer.get_rendering_device().free_rid(old_texture_rid)

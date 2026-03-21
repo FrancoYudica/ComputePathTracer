@@ -175,6 +175,12 @@ namespace godot {
         task->should_update_scene = true;
         task->should_clear_textures = true;
         emit_signal("texture_changed", task);
+
+        if (settings->is_connected("changed",
+                                   Callable(this, "queue_clear_task"))) {
+            settings->disconnect("changed", Callable(this, "queue_clear_task"));
+        }
+
         task->settings->connect("changed",
                                 Callable(this, "queue_clear_task").bind(task));
         return task;
