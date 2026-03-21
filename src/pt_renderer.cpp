@@ -96,6 +96,7 @@ namespace godot {
 
     void PTRenderer::task_reload_scene(Ref<PTRenderTask> task) {
         if (task.is_valid()) {
+            task->should_clear_textures = true;
             task->should_update_scene = true;
         }
     }
