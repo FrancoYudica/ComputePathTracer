@@ -10,7 +10,6 @@
 #include "pt_renderer_settings.h"
 #include "pt_renderer.h"
 #include "pt_renderer_stats.h"
-#include "pt_camera.h"
 
 using namespace godot;
 
